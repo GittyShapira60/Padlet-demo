@@ -1,0 +1,125 @@
+/* הגרדיאנט על כל המסך והמרכזת */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #f06292 0%, #ff8a65 100%);
+  direction: rtl; /* יישור לימין */
+  margin: 0;
+}
+
+/* הכרטיס הלבן */
+.auth-card {
+  background: white;
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 380px;
+  text-align: center;
+}
+
+/* כותרות */
+.auth-header h2 {
+  margin: 10px 0;
+  color: #2c3e50;
+}
+
+/* הטאבים למעלה */
+.tabs {
+  display: flex;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 5px;
+  margin-bottom: 25px;
+}
+
+.tab {
+  flex: 1;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  background: transparent;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.tab.active {
+  background: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* הטופס - כאן הקסם של הסידור */
+.auth-form {
+  display: flex;
+  flex-direction: column; /* מסדר הכל בטור */
+  gap: 20px; /* רווח קבוע בין השדות */
+}
+
+.input-field {
+  display: flex;
+  flex-direction: column; /* הלייבל יהיה מעל האינפוט */
+  text-align: right;
+  gap: 5px;
+}
+
+.input-field label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #555;
+}
+
+.input-field input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 16px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box; /* חשוב! מונע מהאינפוט לצאת מהגבולות */
+}
+
+.input-field input:focus {
+  border-color: #ff8a65;
+}
+
+/* כפתור כניסה/הרשמה */
+.btn-submit {
+  background: linear-gradient(to right, #ff9933, #ff3399);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.2s;
+}
+
+.btn-submit:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+/* תוסיפי את זה ממש בשורה הראשונה של הקובץ */
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* למניעת גלילה לצדדים */
+}
+
+/* ותשני את ה-width של הקונטיינר שלך מ-100% ל-100vw */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100vw; /* vw = Viewport Width, כלומר 100% מרוחב המסך האמיתי */
+  background: linear-gradient(135deg, #f06292 0%, #ff8a65 100%);
+  direction: rtl;
+  margin: 0;
+}

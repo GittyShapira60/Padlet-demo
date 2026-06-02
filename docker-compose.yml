@@ -14,11 +14,11 @@ services:
       - db_data:/var/lib/postgresql/data
 
   backend:
-    build: ./backend
+    build: ./server
     ports:
       - "3001:3000"
     volumes:
-      - ./backend:/app
+      - ./server:/app
       - /app/node_modules
     environment:
       DATABASE_URL: postgresql://user:password@db:5432/padlet_db
@@ -26,11 +26,11 @@ services:
       - db
 
   frontend:
-    build: ./frontend
+    build: ./client
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend:/app
+      - ./client:/app
       - /app/node_modules
     depends_on:
       - backend
