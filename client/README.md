@@ -1,50 +1,74 @@
-# React + TypeScript + Vite
+# Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite + TypeScript SPA.
 
-Currently, two official plugins are available:
+## Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+cp .env.example .env
+npm install
+npm run dev
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+http://localhost:5173
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+| Variable | Local (npm + npm) | Docker compose |
+|----------|-------------------|----------------|
+| `VITE_API_URL` | `/api` (via Vite proxy) | `http://localhost:3001/api` (set in compose) |
+| `VITE_DEV_API_TARGET` | `http://127.0.0.1:3000` | not used |
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+Using `/api` avoids CORS: the browser talks only to Vite (`5173`), and Vite forwards to the server.
+
+## Structure (`src/`)
+
+```text
+src/
+├── assets/           # Images, icons (imported in code)
+├── auth/             # Sign-in / sign-out UI and helpers
+├── components/       # Reusable UI (buttons, cards, …)
+├── enums/            # Shared enumerations
+├── interfaces/       # TypeScript types (API models, props)
+├── providers/        # React context providers
+├── services/         # HTTP client, env — no UI
+├── store/            # Client state
+├── styles/           # CSS (global.css, app.css, …)
+├── App.tsx           # Root layout shell
+├── main.tsx          # Entry: mounts router to #root
+├── router.tsx        # Routes (currently renders App)
+└── vite-env.d.ts     # Types for import.meta.env
+```
+
+### Root files
+
+| File | Role |
+|------|------|
+| **main.tsx** | Loads `styles/global.css`, renders `AppRouter` in `StrictMode`. |
+| **App.tsx** | App shell (header, layout). |
+| **router.tsx** | Navigation; add `react-router-dom` here when needed. |
+| **vite-env.d.ts** | Typings for `VITE_*` env vars. |
+
+### Folders
+
+| Folder | Role | Examples |
+|--------|------|----------|
+| **assets/** | Static files | `.svg`, `.png` |
+| **auth/** | Auth-only UI/logic | login form, token helpers |
+| **components/** | Shared UI | `Button`, `Card` |
+| **enums/** | Constants | board types, roles |
+| **interfaces/** | Types only | `Padlet`, `User` |
+| **providers/** | Context wrappers | `AuthProvider` |
+| **services/** | API + config | see below |
+| **store/** | Global state | session, UI state |
+| **styles/** | Stylesheets | `global.css`, `app.css` |
+
+### `services/`
+
+| File | Role |
+|------|------|
+| `env.ts` | `VITE_API_URL` |
+| `http-client.ts` | Typed `fetch`, `ApiError` |
+| `index.ts` | Re-exports |
+
+```ts
+import { httpClient } from './services';
 ```

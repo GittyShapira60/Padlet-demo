@@ -1,19 +1,24 @@
 version: '3.8'
 
 services:
-  db:
+  postgres:
     image: postgres:15-alpine
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: padlet_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5433:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-  backend:
+  server:
     build: ./server
     ports:
       - "3001:3000"
@@ -21,19 +26,39 @@ services:
       - ./server:/app
       - /app/node_modules
     environment:
-      DATABASE_URL: postgresql://user:password@db:5432/padlet_db
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      CORS_ORIGIN: http://localhost:5173
+      API_PREFIX: api
+      SWAGGER_ENABLED: "true"
     depends_on:
-      - db
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'wget -qO- http://127.0.0.1:3000/api/health >/dev/null 2>&1 || exit 1',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    command: sh -c "npx prisma db push && npm run start:dev"
 
-  frontend:
+  client:
     build: ./client
     ports:
       - "5173:5173"
     volumes:
-      - ./client:/app
       - /app/node_modules
+      - ./client:/app
+    environment:
+      VITE_API_URL: http://localhost:3001/api
     depends_on:
-      - backend
+      server:
+        condition: service_healthy
 
 volumes:
   db_data:
