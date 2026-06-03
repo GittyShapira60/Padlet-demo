@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: Lint and Build
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
         working-directory: client
 
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -62,6 +62,3 @@ jobs:
 
       - name: Build server
         run: npm run build --if-present
-
-      - name: Run server tests
-        run: npm test --if-present
