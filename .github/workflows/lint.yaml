@@ -24,18 +24,18 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install client dependencies
+      - name: 📦 Install client dependencies
         run: npm ci
 
-      - name: Run client linter
+      - name: 🔍 Run client linter
         run: npm run lint --if-present
 
-      - name: Build client
+      - name: 🏗️ Build client
         run: npm run build --if-present
 
   server:
@@ -46,19 +46,19 @@ jobs:
         working-directory: server
 
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install server dependencies
+      - name: 📦 Install server dependencies
         run: npm ci
 
-      - name: Run server linter
+      - name: 🔍 Run server linter
         run: npm run lint --if-present
 
-      - name: Build server
+      - name: 🏗️ Build server
         run: npm run build --if-present
