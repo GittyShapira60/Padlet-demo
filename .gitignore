@@ -1,0 +1,13 @@
+# --- Secrets & Environment ---
+.env
+*.local
+
+# --- Build outputs (חשוב מאוד!) ---
+dist/
+client/dist/
+server/dist/
+build/
+
+# --- Logs & OS (בונוס למניעת הצקות) ---
+*.log
+.DS_Store

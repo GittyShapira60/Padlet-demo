@@ -1,19 +1,20 @@
 version: '3.8'
 
 services:
-  db:
+  postgres:
     image: postgres:15-alpine
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: padlet_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5433:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
 
-  backend:
+  # שינוי שם מ-backend ל-server
+  server:
     build: ./server
     ports:
       - "3001:3000"
@@ -21,9 +22,9 @@ services:
       - ./server:/app
       - /app/node_modules
     environment:
-      DATABASE_URL: postgresql://user:password@db:5432/padlet_db
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     depends_on:
-      - db
+      - postgres
 
   frontend:
     build: ./client
@@ -31,9 +32,8 @@ services:
       - "5173:5173"
     volumes:
       - ./client:/app
-      - /app/node_modules
     depends_on:
-      - backend
+      - server
 
 volumes:
   db_data:
