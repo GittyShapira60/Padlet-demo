@@ -1,0 +1,13 @@
+.page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--gradient-brand);
+  background-attachment: fixed;
+  direction: rtl;
+  margin: 0;
+  font-family: var(--font-family);
+  color: #213547;
+}

@@ -1,13 +1,15 @@
-import './styles/app.css';
+import { Outlet } from 'react-router-dom';
+import AppHeader from './components/layout/AppHeader/AppHeader';
+import styles from './App.module.css';
 
 function App() {
   return (
-    <main className="app">
-      <header className="app__header">
-        <h1>Padlet-demo</h1>
-        <p className="app__subtitle">React + Vite client</p>
-      </header>
-    </main>
+    <div className={styles.app}>
+      <AppHeader />
+      <main className={styles.main}>
+        <Outlet />
+      </main>
+    </div>
   );
 }
 

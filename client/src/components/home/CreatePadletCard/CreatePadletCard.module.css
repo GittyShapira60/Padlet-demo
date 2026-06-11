@@ -1,0 +1,40 @@
+.card {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  width: 180px;
+  min-height: 150px;
+  background: #ffffff;
+  color: #9ca3af;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+}
+
+.plus {
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 300;
+  color: #9ca3af;
+}
+
+.text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .card {
+    width: 100%;
+    max-width: 200px;
+  }
+}

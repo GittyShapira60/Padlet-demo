@@ -1,0 +1,74 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tabs {
+  display: flex;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.tab {
+  flex: 1;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  background: transparent;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: 8px;
+  color: #475569;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+
+.tabActive {
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  color: #1e293b;
+}
+
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+}
+
+.swatch {
+  aspect-ratio: 1;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.swatch:hover {
+  transform: scale(1.06);
+}
+
+.swatchSelected {
+  border-color: #ffffff;
+  box-shadow:
+    0 0 0 2px var(--color-brand-pink),
+    0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.empty {
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+@media (max-width: 480px) {
+  .colorGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

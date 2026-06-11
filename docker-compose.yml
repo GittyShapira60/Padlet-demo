@@ -32,6 +32,8 @@ services:
       CORS_ORIGIN: http://localhost:5173
       API_PREFIX: api
       SWAGGER_ENABLED: "true"
+      JWT_SECRET: dev-padlet-secret
+      JWT_EXPIRES_IN: 7d
     depends_on:
       postgres:
         condition: service_healthy
@@ -45,7 +47,7 @@ services:
       timeout: 5s
       retries: 12
       start_period: 60s
-    command: sh -c "npx prisma db push && npm run start:dev"
+    command: sh -c "npm install && npx prisma db push && npm run start:dev"
 
   client:
     build: ./client
@@ -59,6 +61,7 @@ services:
     depends_on:
       server:
         condition: service_healthy
+    command: sh -c "npm install && npm run dev -- --host"
 
 volumes:
   db_data:

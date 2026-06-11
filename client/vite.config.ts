@@ -13,6 +13,15 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true,
       port: 5173,
+      // Docker on Windows: bind mounts don't emit file events — poll so HMR picks up edits.
+      watch: {
+        usePolling: true,
+        interval: 1000,
+      },
+      hmr: {
+        host: 'localhost',
+        clientPort: 5173,
+      },
       proxy: {
         '/api': {
           target: apiProxyTarget,

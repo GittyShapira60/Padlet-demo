@@ -1,0 +1,38 @@
+.card {
+  border: none;
+  border-radius: 12px;
+  padding: 0.85rem 0.9rem;
+  min-width: 160px;
+  max-width: 220px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+  text-align: right;
+  color: #1e293b;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+.title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.subject {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #475569;
+}
+
+.author {
+  margin: 0.6rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+}

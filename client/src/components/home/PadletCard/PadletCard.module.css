@@ -1,0 +1,106 @@
+.card {
+  position: relative;
+  border: none;
+  text-align: right;
+  font: inherit;
+  border-radius: 12px;
+  width: 180px;
+  min-height: 150px;
+  padding: 0.75rem;
+  color: #ffffff;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+}
+
+.shared {
+  background-color: #1e5a9e;
+}
+
+.top {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.cardIcon {
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline-start: auto;
+  color: #ffffff;
+}
+
+.utilityIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.sharedBadge {
+  background: rgba(255, 255, 255, 0.92);
+  color: #1565c0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0.2rem 0.4rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.footer {
+  position: relative;
+  z-index: 1;
+  text-align: right;
+}
+
+.title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.description {
+  margin: 0.1rem 0 0;
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+.posts {
+  margin: 0.2rem 0 0;
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+
+@media (max-width: 768px) {
+  .card {
+    width: 100%;
+    max-width: 200px;
+  }
+}

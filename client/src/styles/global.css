@@ -1,5 +1,34 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --color-brand-orange: #ff8c42;
+  --color-brand-pink: #f04e98;
+  --color-brand-purple: #9b30ff;
+
+  --gradient-brand: linear-gradient(
+    90deg,
+    var(--color-brand-purple) 0%,
+    var(--color-brand-pink) 30%,
+    var(--color-brand-orange) 100%
+  );
+
+  --gradient-brand-cta: linear-gradient(
+    90deg,
+    var(--color-brand-orange) 0%,
+    var(--color-brand-pink) 100%
+  );
+
+  --color-accent: var(--color-brand-orange);
+  --color-accent-shadow: rgba(255, 140, 66, 0.35);
+  --color-accent-border: var(--color-brand-orange);
+  --color-logo: var(--color-brand-orange);
+  --color-badge-blue: #42a5f5;
+  --color-surface: #ffffff;
+  --color-text-primary: #1e293b;
+  --color-text-muted: #64748b;
+  --color-border: #e5e7eb;
+
+  --font-family: system-ui, -apple-system, Arial, sans-serif;
+
+  font-family: var(--font-family);
   line-height: 1.5;
   font-weight: 400;
 
@@ -24,10 +53,15 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  padding: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
 }
 
 h1 {
