@@ -2,7 +2,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
+  const env = loadEnv(mode, '.', '');
 
   // Local npm: server on 3000. Docker maps API to host 3001 — set VITE_DEV_API_TARGET in .env
   const apiProxyTarget =

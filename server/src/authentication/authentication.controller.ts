@@ -1,7 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { AuthUserDto } from './authentication.service';
 import { AuthenticationService } from './authentication.service';
+import { CurrentUser } from './decorators/current-user.decorator';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -18,5 +21,13 @@ export class AuthenticationController {
   @ApiOperation({ summary: 'Login with username and password' })
   login(@Body() dto: AuthCredentialsDto) {
     return this.authenticationService.login(dto);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get the currently authenticated user' })
+  getMe(@CurrentUser() user: AuthUserDto): AuthUserDto {
+    return user;
   }
 }

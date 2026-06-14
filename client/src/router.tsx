@@ -1,10 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import App from './App';
-import ProtectedRoute from './components/routing/ProtectedRoute/ProtectedRoute';
-import AuthPage from './pages/auth/AuthPage';
-import HomePage from './pages/home/HomePage';
-import PadletPage from './pages/padlet/PadletPage';
-import { AuthProvider } from './providers/AuthProvider';
+import ProtectedRoute from './shared/routing/ProtectedRoute/ProtectedRoute';
+import AuthPage from './features/auth/pages/AuthPage';
+import HomePage from './features/home/pages/HomePage';
+import PadletPage from './features/padlet/pages/PadletPage';
+import { AuthProvider } from './features/auth/context/AuthProvider';
 
 export default function AppRouter() {
   return (

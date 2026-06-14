@@ -23,7 +23,6 @@ async function bootstrap() {
       corsOrigin === '*'
         ? true
         : corsOrigin.split(',').map((o) => o.trim()),
-    credentials: true,
   });
 
   app.useGlobalPipes(
