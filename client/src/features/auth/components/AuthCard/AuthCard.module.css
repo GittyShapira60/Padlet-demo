@@ -1,0 +1,15 @@
+.card {
+  background: #ffffff;
+  padding: 2.5rem;
+  border-radius: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.hint {
+  margin: 1.25rem 0 0;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}

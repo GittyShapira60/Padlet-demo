@@ -1,0 +1,168 @@
+// Prisma Schema
+// Converted from DBML (padlet-like system)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum PadletBoardType {
+  free_wall
+  brainstorming
+  grid
+  timeline
+}
+
+enum PadletPermission {
+  owner
+  admin
+  editor
+  commenter
+  viewer
+}
+
+enum PostAttachmentType {
+  picture
+  file
+  link
+}
+
+enum PostContentKind {
+  none
+  attachment
+  poll
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model User {
+  id            BigInt         @id @default(autoincrement())
+  username      String         @unique @db.VarChar(64)
+  password_hash String
+
+  padlets       Padlet[]
+  posts         Post[]
+  comments      Comment[]
+  poll_votes    PollVote[]
+  post_reactions PostReaction[]
+  participants  Participant[]
+}
+
+model Padlet {
+  padlet_id          BigInt           @id @default(autoincrement())
+  user_id            BigInt
+  board_type         PadletBoardType
+  default_permission PadletPermission @default(viewer)
+  title              String           @db.VarChar(255)
+  description        String?
+  background         String?          @db.VarChar(255)
+  created_at         DateTime         @db.Timestamptz()
+  updated_at         DateTime         @db.Timestamptz()
+
+  user         User          @relation(fields: [user_id], references: [id])
+  posts        Post[]
+  participants Participant[]
+}
+
+model Post {
+  post_id      BigInt          @id @default(autoincrement())
+  padlet_id    BigInt
+  user_id      BigInt
+  content_kind PostContentKind @default(none)
+  title        String?         @db.VarChar(255)
+  subject      String?
+  color        String?         @db.VarChar(32)
+  data_layout  Json?
+  created_at   DateTime        @db.Timestamptz()
+  updated_at   DateTime        @db.Timestamptz()
+
+  padlet         Padlet          @relation(fields: [padlet_id], references: [padlet_id])
+  user           User            @relation(fields: [user_id], references: [id])
+  attachment     PostAttachment?
+  poll           Poll?
+  comments       Comment[]
+  post_reactions PostReaction[]
+}
+
+model PostAttachment {
+  post_id         BigInt             @id
+  attachment_type PostAttachmentType
+  /// picture/file: base64 encoded; link: url+title; see SCHEMA.md
+  attachment_data String
+
+  post Post @relation(fields: [post_id], references: [post_id])
+}
+
+model Poll {
+  poll_id BigInt @id @default(autoincrement())
+  post_id BigInt @unique
+  question String
+
+  post         Post         @relation(fields: [post_id], references: [post_id])
+  poll_options PollOption[]
+  poll_votes   PollVote[]
+}
+
+model PollOption {
+  option_id  BigInt   @id @default(autoincrement())
+  poll_id    BigInt
+  label      String
+  sort_order Int      @db.SmallInt
+
+  poll       Poll       @relation(fields: [poll_id], references: [poll_id])
+  poll_votes PollVote[]
+
+  @@unique([poll_id, sort_order])
+}
+
+model PollVote {
+  poll_id   BigInt
+  user_id   BigInt
+  option_id BigInt
+
+  poll   Poll       @relation(fields: [poll_id], references: [poll_id])
+  user   User       @relation(fields: [user_id], references: [id])
+  option PollOption @relation(fields: [option_id], references: [option_id])
+
+  @@id([poll_id, user_id])
+}
+
+model Participant {
+  padlet_id  BigInt
+  user_id    BigInt
+  permission PadletPermission
+
+  padlet Padlet @relation(fields: [padlet_id], references: [padlet_id])
+  user   User   @relation(fields: [user_id], references: [id])
+
+  @@id([padlet_id, user_id])
+}
+
+model Comment {
+  comment_id BigInt   @id @default(autoincrement())
+  post_id    BigInt
+  user_id    BigInt
+  body       String
+  created_at DateTime @db.Timestamptz()
+  updated_at DateTime? @db.Timestamptz()
+
+  post Post @relation(fields: [post_id], references: [post_id])
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model PostReaction {
+  post_id       BigInt
+  user_id       BigInt
+  reaction_code String @db.VarChar(32)
+
+  post Post @relation(fields: [post_id], references: [post_id])
+  user User @relation(fields: [user_id], references: [id])
+
+  @@id([post_id, user_id, reaction_code])
+}

@@ -1,0 +1,29 @@
+import styles from './CreatePadletModalHeader.module.css';
+
+interface CreatePadletModalHeaderProps {
+  title: string;
+  background: string;
+  onClose: () => void;
+}
+
+export default function CreatePadletModalHeader({
+  title,
+  background,
+  onClose,
+}: CreatePadletModalHeaderProps) {
+  return (
+    <header className={styles.header} style={{ background }}>
+      <button
+        type="button"
+        className={styles.closeBtn}
+        onClick={onClose}
+        aria-label="סגור"
+      >
+        ✕
+      </button>
+      <h2 id="create-padlet-title" className={styles.title}>
+        {title.trim() || 'שם הלוח...'}
+      </h2>
+    </header>
+  );
+}

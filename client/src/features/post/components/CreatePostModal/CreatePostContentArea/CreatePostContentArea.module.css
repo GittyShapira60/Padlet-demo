@@ -1,0 +1,110 @@
+.area {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1.25rem;
+}
+
+.emojiBtn {
+  position: absolute;
+  top: 0.875rem;
+  left: 0.875rem;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  opacity: 0.6;
+  z-index: 1;
+  transition: opacity 0.2s ease;
+}
+
+.emojiBtn:hover {
+  opacity: 1;
+}
+
+.textarea {
+  width: 100%;
+  height: 150px;
+  padding: 1rem;
+  padding-left: 3rem;
+  border-radius: 18px;
+  border: 2px solid var(--color-accent-border);
+  font-size: 1.0625rem;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  box-sizing: border-box;
+  color: #334155;
+  transition: background-color 0.2s ease;
+}
+
+.textarea::placeholder {
+  color: #94a3b8;
+}
+
+.fileDrop {
+  width: 100%;
+  height: 150px;
+  border-radius: 18px;
+  border: 2px dashed var(--color-accent-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  color: #64748b;
+  cursor: pointer;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: background-color 0.15s ease;
+}
+
+.fileDrop:hover {
+  background: #fff8f3;
+}
+
+.input {
+  width: 100%;
+  height: 60px;
+  padding: 1rem;
+  border-radius: 16px;
+  border: 2px solid var(--color-accent-border);
+  font-size: 1rem;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: #334155;
+}
+
+.input::placeholder {
+  color: #94a3b8;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.fileIcon {
+  font-size: 1.75rem;
+}
+
+.fileLabel {
+  text-align: center;
+}
+
+.fileSelected {
+  text-align: center;
+}
+
+.fileName {
+  margin: 0.35rem 0 0;
+  font-weight: 600;
+  color: #334155;
+}
+
+.fileReplace {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
