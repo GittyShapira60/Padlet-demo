@@ -9,6 +9,7 @@ export {
   LogOut,
   Pencil,
   Plus,
+  Share2,
   Trash2,
   Users,
 } from './ui-icons';

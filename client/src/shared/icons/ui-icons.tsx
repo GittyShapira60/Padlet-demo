@@ -9,6 +9,7 @@ import {
   LogOut as LucideLogOut,
   Pencil as LucidePencil,
   Plus as LucidePlus,
+  Share2 as LucideShare2,
   Trash2 as LucideTrash2,
   Users as LucideUsers,
   type LucideProps,
@@ -30,6 +31,7 @@ export const LogOut = createUiIcon(LucideLogOut);
 export const Bell = createUiIcon(LucideBell);
 export const BarChart3 = createUiIcon(LucideBarChart3);
 export const Plus = createUiIcon(LucidePlus);
+export const Share2 = createUiIcon(LucideShare2);
 export const Pencil = createUiIcon(LucidePencil);
 export const Trash2 = createUiIcon(LucideTrash2);
 export const Users = createUiIcon(LucideUsers);

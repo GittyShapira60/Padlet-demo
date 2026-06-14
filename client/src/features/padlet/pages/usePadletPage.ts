@@ -15,6 +15,7 @@ export function usePadletPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
   const [postToEdit, setPostToEdit] = useState<Post | null>(null);
 
   const currentUsername = user?.username;
@@ -81,6 +82,14 @@ export function usePadletPage() {
     setPostToEdit(null);
   }, []);
 
+  const handleOpenShare = useCallback(() => {
+    setIsShareOpen(true);
+  }, []);
+
+  const handleCloseShare = useCallback(() => {
+    setIsShareOpen(false);
+  }, []);
+
   const handlePostSaved = useCallback((post: Post) => {
     setPosts((current) => {
       const existingIndex = current.findIndex((item) => item.id === post.id);
@@ -136,11 +145,14 @@ export function usePadletPage() {
     isLoading,
     error,
     isCreatePostOpen,
+    isShareOpen,
     postToEdit,
     currentUsername,
     handleBack,
     handleCreatePost,
     handleClosePostModal,
+    handleOpenShare,
+    handleCloseShare,
     handlePostSaved,
     handleEditPost,
     handleDeletePost,
