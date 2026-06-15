@@ -1,4 +1,5 @@
 export const PadletPermission = {
+  None: 'none',
   Owner: 'owner',
   Admin: 'admin',
   Editor: 'editor',
@@ -10,6 +11,7 @@ export type PadletPermission =
   (typeof PadletPermission)[keyof typeof PadletPermission];
 
 export const PADLET_PERMISSION_LABELS: Record<PadletPermission, string> = {
+  [PadletPermission.None]: 'אין גישה',
   [PadletPermission.Owner]: 'בעלים',
   [PadletPermission.Admin]: 'מנהל',
   [PadletPermission.Editor]: 'כותב',
@@ -25,7 +27,13 @@ export const ASSIGNABLE_PADLET_PERMISSIONS: PadletPermission[] = [
   PadletPermission.Admin,
 ];
 
+export const LINK_PADLET_PERMISSIONS: PadletPermission[] = [
+  PadletPermission.None,
+  ...ASSIGNABLE_PADLET_PERMISSIONS,
+];
+
 const PERMISSION_RANK: Record<PadletPermission, number> = {
+  [PadletPermission.None]: 0,
   [PadletPermission.Viewer]: 1,
   [PadletPermission.Commenter]: 2,
   [PadletPermission.Editor]: 3,
@@ -59,4 +67,18 @@ export function clampPermission(
   minimum: PadletPermission,
 ): PadletPermission {
   return isPermissionAtLeast(permission, minimum) ? permission : minimum;
+}
+
+export function getCollaboratorMinimum(
+  linkPermission: PadletPermission,
+): PadletPermission {
+  return linkPermission === PadletPermission.None
+    ? PadletPermission.Viewer
+    : linkPermission;
+}
+
+export function getEffectiveInvitePermission(
+  linkPermission: PadletPermission,
+): PadletPermission {
+  return getCollaboratorMinimum(linkPermission);
 }

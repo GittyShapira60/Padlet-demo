@@ -4,6 +4,7 @@ import {
   BarChart3 as LucideBarChart3,
   Bell as LucideBell,
   Calendar as LucideCalendar,
+  Copy as LucideCopy,
   LayoutDashboard as LucideLayoutDashboard,
   Lock as LucideLock,
   LogOut as LucideLogOut,
@@ -32,6 +33,7 @@ export const Bell = createUiIcon(LucideBell);
 export const BarChart3 = createUiIcon(LucideBarChart3);
 export const Plus = createUiIcon(LucidePlus);
 export const Share2 = createUiIcon(LucideShare2);
+export const Copy = createUiIcon(LucideCopy);
 export const Pencil = createUiIcon(LucidePencil);
 export const Trash2 = createUiIcon(LucideTrash2);
 export const Users = createUiIcon(LucideUsers);

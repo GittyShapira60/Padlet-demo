@@ -1,215 +1,91 @@
-import { useEffect, useState, type KeyboardEvent } from 'react';
 import Modal from '../../../../shared/components/Modal/Modal';
-import {
-  clampPermission,
-  getPermissionsAtOrAbove,
-  PADLET_PERMISSION_LABELS,
-  PadletPermission,
-  type PadletPermission as PadletPermissionType,
-} from '../../enums/padlet-permission';
+import CollaboratorsList from './CollaboratorsList/CollaboratorsList';
+import CollaboratorUserPicker from './CollaboratorUserPicker/CollaboratorUserPicker';
+import LinkPermissionRow from './LinkPermissionRow/LinkPermissionRow';
+import ShareLinkField from './ShareLinkField/ShareLinkField';
+import SharePadletModalHeader from './SharePadletModalHeader/SharePadletModalHeader';
+import common from './shareModalCommon.module.css';
 import styles from './SharePadletModal.module.css';
-
-interface Collaborator {
-  id: string;
-  username: string;
-  permission: PadletPermissionType;
-}
+import { useSharePadletModal } from '../../hooks/useSharePadletModal';
 
 interface SharePadletModalProps {
+  padletId: string;
   onClose: () => void;
   currentUsername?: string;
 }
 
-function PermissionSelect({
-  value,
-  minimum,
-  onChange,
-  id,
-}: {
-  value: PadletPermissionType;
-  minimum: PadletPermissionType;
-  onChange: (permission: PadletPermissionType) => void;
-  id?: string;
-}) {
-  const options = getPermissionsAtOrAbove(minimum);
-
-  return (
-    <select
-      id={id}
-      className={styles.select}
-      value={value}
-      onChange={(event) =>
-        onChange(event.target.value as PadletPermissionType)
-      }
-    >
-      {options.map((permission) => (
-        <option key={permission} value={permission}>
-          {PADLET_PERMISSION_LABELS[permission]}
-        </option>
-      ))}
-    </select>
-  );
-}
+const TITLE_ID = 'share-padlet-title';
 
 export default function SharePadletModal({
+  padletId,
   onClose,
   currentUsername,
 }: SharePadletModalProps) {
-  const [linkPermission, setLinkPermission] = useState<PadletPermissionType>(
-    PadletPermission.Viewer,
-  );
-  const [usernameInput, setUsernameInput] = useState('');
-  const [inviteError, setInviteError] = useState('');
-  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
-
-  useEffect(() => {
-    setCollaborators((current) =>
-      current.map((collaborator) => ({
-        ...collaborator,
-        permission: clampPermission(collaborator.permission, linkPermission),
-      })),
-    );
-  }, [linkPermission]);
-
-  function handleLinkPermissionChange(next: PadletPermissionType) {
-    setLinkPermission(next);
-  }
-
-  function handleInvite() {
-    const username = usernameInput.trim();
-    setInviteError('');
-
-    if (!username) {
-      return;
-    }
-
-    if (username.toLowerCase() === currentUsername?.toLowerCase()) {
-      setInviteError('אי אפשר להזמין את עצמך');
-      return;
-    }
-
-    const exists = collaborators.some(
-      (collaborator) =>
-        collaborator.username.toLowerCase() === username.toLowerCase(),
-    );
-
-    if (exists) {
-      setInviteError('משתמש זה כבר ברשימה');
-      return;
-    }
-
-    setCollaborators((current) => [
-      ...current,
-      {
-        id: username.toLowerCase(),
-        username,
-        permission: linkPermission,
-      },
-    ]);
-    setUsernameInput('');
-  }
-
-  function handleInputKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      handleInvite();
-    }
-  }
-
-  function handleCollaboratorPermissionChange(
-    collaboratorId: string,
-    permission: PadletPermissionType,
-  ) {
-    setCollaborators((current) =>
-      current.map((collaborator) =>
-        collaborator.id === collaboratorId
-          ? {
-              ...collaborator,
-              permission: clampPermission(permission, linkPermission),
-            }
-          : collaborator,
-      ),
-    );
-  }
+  const {
+    shareUrl,
+    linkPermission,
+    setLinkPermission,
+    collaboratorMinimum,
+    permissionHint,
+    searchQuery,
+    setSearchQuery,
+    inviteError,
+    usersLoading,
+    usersError,
+    filteredUsers,
+    pickerSelections,
+    selectedCount,
+    collaborators,
+    toggleUserSelection,
+    handlePickerPermissionChange,
+    handleInvite,
+    handleCollaboratorPermissionChange,
+    clearInviteError,
+    reportCopyError,
+  } = useSharePadletModal({ padletId, currentUsername });
 
   return (
-    <Modal onClose={onClose} ariaLabelledBy="share-padlet-title">
+    <Modal onClose={onClose} ariaLabelledBy={TITLE_ID}>
       <div className={styles.panel}>
-        <div className={styles.header}>
-          <h2 id="share-padlet-title" className={styles.title}>
-            הרשאות
-          </h2>
-          <button
-            type="button"
-            className={styles.closeBtn}
-            onClick={onClose}
-            aria-label="סגור"
-          >
-            ×
-          </button>
-        </div>
+        <SharePadletModalHeader
+          title="הרשאות"
+          titleId={TITLE_ID}
+          onClose={onClose}
+        />
 
-        <div className={styles.row}>
-          <span className={styles.rowLabel}>מבקרים עם קישור</span>
-          <PermissionSelect
-            id="link-permission"
-            value={linkPermission}
-            minimum={PadletPermission.Viewer}
-            onChange={handleLinkPermissionChange}
-          />
-        </div>
+        <ShareLinkField shareUrl={shareUrl} onCopyError={reportCopyError} />
 
-        <p className={styles.hint}>
-          רמת ההרשאה של משתף פעולה לא יכולה להיות נמוכה מרמת הקישור הכללי.
-        </p>
+        <LinkPermissionRow
+          linkPermission={linkPermission}
+          onChange={setLinkPermission}
+        />
 
-        <div className={styles.inviteRow}>
-          <input
-            className={styles.input}
-            type="text"
-            value={usernameInput}
-            placeholder="הוסף משתף פעולה"
-            onChange={(event) => {
-              setUsernameInput(event.target.value);
-              setInviteError('');
-            }}
-            onKeyDown={handleInputKeyDown}
-            autoComplete="off"
-          />
-          <button
-            type="button"
-            className={styles.inviteBtn}
-            onClick={handleInvite}
-            disabled={!usernameInput.trim()}
-          >
-            הזמן
-          </button>
-        </div>
+        <p className={common.hint}>{permissionHint}</p>
 
-        {inviteError ? <p className={styles.error}>{inviteError}</p> : null}
+        <CollaboratorUserPicker
+          searchQuery={searchQuery}
+          usersLoading={usersLoading}
+          usersError={usersError}
+          filteredUsers={filteredUsers}
+          pickerSelections={pickerSelections}
+          collaboratorMinimum={collaboratorMinimum}
+          selectedCount={selectedCount}
+          onSearchChange={(value) => {
+            setSearchQuery(value);
+            clearInviteError();
+          }}
+          onToggleUser={toggleUserSelection}
+          onPermissionChange={handlePickerPermissionChange}
+          onInvite={handleInvite}
+        />
 
-        <div className={styles.collaborators}>
-          <p className={styles.sectionLabel}>משתפי פעולה</p>
-          {collaborators.length === 0 ? (
-            <p className={styles.empty}>עדיין לא הוזמנו משתפי פעולה</p>
-          ) : (
-            collaborators.map((collaborator) => (
-              <div key={collaborator.id} className={styles.collaboratorRow}>
-                <span className={styles.username}>{collaborator.username}</span>
-                <PermissionSelect
-                  value={collaborator.permission}
-                  minimum={linkPermission}
-                  onChange={(permission) =>
-                    handleCollaboratorPermissionChange(
-                      collaborator.id,
-                      permission,
-                    )
-                  }
-                />
-              </div>
-            ))
-          )}
-        </div>
+        {inviteError ? <p className={common.error}>{inviteError}</p> : null}
+
+        <CollaboratorsList
+          collaborators={collaborators}
+          collaboratorMinimum={collaboratorMinimum}
+          onPermissionChange={handleCollaboratorPermissionChange}
+        />
       </div>
     </Modal>
   );

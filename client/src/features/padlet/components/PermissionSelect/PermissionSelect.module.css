@@ -1,0 +1,20 @@
+.select {
+  min-width: 6.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: #334155;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #cbd5e1;
+}
+
+.noShrink {
+  flex-shrink: 0;
+}

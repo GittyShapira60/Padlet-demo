@@ -62,6 +62,7 @@ export default function PadletPage() {
 
       {isShareOpen ? (
         <SharePadletModal
+          padletId={padlet.id}
           currentUsername={currentUsername}
           onClose={handleCloseShare}
         />
