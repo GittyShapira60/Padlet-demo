@@ -32,13 +32,13 @@ export default function SharePadletModal({
     inviteError,
     usersLoading,
     usersError,
+    participantsLoading,
     filteredUsers,
-    pickerSelections,
-    selectedCount,
+    invitingUserId,
     collaborators,
-    toggleUserSelection,
-    handlePickerPermissionChange,
-    handleInvite,
+    getRowPermission,
+    handleRowPermissionChange,
+    handleInviteUser,
     handleCollaboratorPermissionChange,
     clearInviteError,
     reportCopyError,
@@ -67,25 +67,30 @@ export default function SharePadletModal({
           usersLoading={usersLoading}
           usersError={usersError}
           filteredUsers={filteredUsers}
-          pickerSelections={pickerSelections}
           collaboratorMinimum={collaboratorMinimum}
-          selectedCount={selectedCount}
+          invitingUserId={invitingUserId}
+          getRowPermission={getRowPermission}
           onSearchChange={(value) => {
             setSearchQuery(value);
             clearInviteError();
           }}
-          onToggleUser={toggleUserSelection}
-          onPermissionChange={handlePickerPermissionChange}
-          onInvite={handleInvite}
+          onPermissionChange={handleRowPermissionChange}
+          onInviteUser={(user) => void handleInviteUser(user)}
         />
 
         {inviteError ? <p className={common.error}>{inviteError}</p> : null}
 
-        <CollaboratorsList
-          collaborators={collaborators}
-          collaboratorMinimum={collaboratorMinimum}
-          onPermissionChange={handleCollaboratorPermissionChange}
-        />
+        {participantsLoading ? (
+          <p className={common.hint}>טוען שותפים...</p>
+        ) : (
+          <CollaboratorsList
+            collaborators={collaborators}
+            collaboratorMinimum={collaboratorMinimum}
+            onPermissionChange={(collaboratorId, permission) =>
+              void handleCollaboratorPermissionChange(collaboratorId, permission)
+            }
+          />
+        )}
       </div>
     </Modal>
   );
