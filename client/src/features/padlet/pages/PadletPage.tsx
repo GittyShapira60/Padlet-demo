@@ -24,6 +24,7 @@ export default function PadletPage() {
     handlePostSaved,
     handleEditPost,
     handleDeletePost,
+    handleLayoutChange,
   } = usePadletPage();
 
   if (isLoading) {
@@ -57,6 +58,9 @@ export default function PadletPage() {
         currentUsername={currentUsername}
         onEditPost={handleEditPost}
         onDeletePost={(post) => void handleDeletePost(post)}
+        onLayoutChange={(postId, layout) =>
+          void handleLayoutChange(postId, layout)
+        }
       />
       <CreatePostFab onClick={handleCreatePost} />
 

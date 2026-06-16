@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthProvider';
-import type { Post } from '../../post/interfaces/post';
-import { deletePost } from '../../post/services/post-service';
+import type { Post, PostLayout } from '../../post/interfaces/post';
+import {
+  deletePost,
+  updatePostLayout,
+} from '../../post/services/post-service';
 import type { Padlet } from '../interfaces/padlet';
 import { getPadletDetail } from '../services/padlet-service';
 
@@ -114,7 +117,7 @@ export function usePadletPage() {
 
   const handleDeletePost = useCallback(
     async (post: Post) => {
-      if (!padletId) {
+      if (!padletId || !padlet) {
         return;
       }
 
@@ -125,15 +128,33 @@ export function usePadletPage() {
       }
 
       try {
-        await deletePost(padletId, post.id);
-        setPosts((current) => current.filter((item) => item.id !== post.id));
+        const remainingPosts = await deletePost(padletId, post.id);
+        setPosts(remainingPosts);
         setPadlet((current) =>
           current
-            ? { ...current, postCount: Math.max(0, current.postCount - 1) }
+            ? { ...current, postCount: remainingPosts.length }
             : current,
         );
       } catch {
         setError('מחיקת הפוסט נכשלה, נסי שוב');
+      }
+    },
+    [padlet, padletId],
+  );
+
+  const handleLayoutChange = useCallback(
+    async (postId: string, layout: PostLayout) => {
+      if (!padletId) {
+        return;
+      }
+
+      try {
+        const updatedPost = await updatePostLayout(padletId, postId, layout);
+        setPosts((current) =>
+          current.map((item) => (item.id === postId ? updatedPost : item)),
+        );
+      } catch {
+        setError('עדכון מיקום הפוסט נכשל');
       }
     },
     [padletId],
@@ -156,5 +177,6 @@ export function usePadletPage() {
     handlePostSaved,
     handleEditPost,
     handleDeletePost,
+    handleLayoutChange,
   };
 }

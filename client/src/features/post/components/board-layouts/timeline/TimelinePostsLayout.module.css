@@ -1,0 +1,50 @@
+.track {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  overflow-x: auto;
+  padding: 3.5rem 0.5rem 2rem;
+  min-height: 280px;
+}
+
+.line {
+  position: absolute;
+  top: 2.75rem;
+  left: 0.5rem;
+  right: 0.5rem;
+  height: 3px;
+  background: rgba(148, 163, 184, 0.55);
+  border-radius: 999px;
+}
+
+.post {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-inline: 0.85rem;
+  padding-top: 0.25rem;
+}
+
+.post::before {
+  content: '';
+  position: absolute;
+  top: -1.05rem;
+  left: 50%;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--color-brand-pink, #f04e98);
+  transform: translateX(-50%);
+  box-shadow: 0 0 0 3px rgba(240, 78, 152, 0.2);
+}
+
+.date {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}

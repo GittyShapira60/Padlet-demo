@@ -1,0 +1,9 @@
+.canvas {
+  position: relative;
+  min-height: calc(100vh - 11rem);
+}
+
+.post {
+  position: absolute;
+  max-width: min(340px, 92vw);
+}
