@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PadletBoardType, type Padlet } from '@prisma/client';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { PadletBoardType, PadletPermission, type Padlet } from '@prisma/client';
 import { PostsService, type PostResponseDto } from '../posts/posts.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreatePadletDto } from './dto/create-padlet.dto';
+import { CopyPadletDto, CreatePadletDto } from './dto/create-padlet.dto';
 
 export interface PadletResponseDto {
   id: string;
@@ -26,6 +26,8 @@ export interface PadletDetailResponseDto {
 }
 
 type PadletWithCount = Padlet & { _count: { posts: number } };
+
+const POSTS_PER_ROW = 3;
 
 @Injectable()
 export class PadletsService {
@@ -56,10 +58,7 @@ export class PadletsService {
     };
   }
 
-  async createPadlet(
-    userId: string,
-    dto: CreatePadletDto,
-  ): Promise<PadletResponseDto> {
+  async createPadlet(userId: string, dto: CreatePadletDto): Promise<PadletResponseDto> {
     const ownerId = this.parseId(userId, 'משתמש לא נמצא');
     const now = new Date();
 
@@ -79,10 +78,7 @@ export class PadletsService {
     return this.toPadletResponse(padlet, false);
   }
 
-  async getPadletDetail(
-    userId: string,
-    padletIdRaw: string,
-  ): Promise<PadletDetailResponseDto> {
+  async getPadletDetail(userId: string, padletIdRaw: string): Promise<PadletDetailResponseDto> {
     const requesterId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
 
@@ -103,9 +99,7 @@ export class PadletsService {
       },
     });
 
-    if (!padlet) {
-      throw new NotFoundException('הלוח לא נמצא');
-    }
+    if (!padlet) throw new NotFoundException('הלוח לא נמצא');
 
     return {
       padlet: this.toPadletResponse(padlet, padlet.user_id !== requesterId),
@@ -113,10 +107,86 @@ export class PadletsService {
     };
   }
 
-  private toPadletResponse(
-    padlet: PadletWithCount,
-    isShared: boolean,
-  ): PadletResponseDto {
+  async deletePadlet(userId: string, padletIdRaw: string): Promise<void> {
+    const ownerId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+
+    const padlet = await this.prisma.padlet.findUnique({
+      where: { padlet_id: padletId },
+    });
+
+    if (!padlet) throw new NotFoundException('הלוח לא נמצא');
+    if (padlet.user_id !== ownerId) throw new ForbiddenException('רק הבעלים יכול למחוק את הלוח');
+
+    await this.prisma.padlet.delete({ where: { padlet_id: padletId } });
+  }
+
+  async copyPadlet(userId: string, padletIdRaw: string, dto: CopyPadletDto): Promise<PadletResponseDto> {
+    const ownerId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+
+    const original = await this.prisma.padlet.findUnique({
+      where: { padlet_id: padletId },
+      include: {
+        posts: dto.includePosts ? { where: { user_id: ownerId } } : false,
+        participants: dto.includeParticipants ? true : false,
+      },
+    });
+
+    if (!original) throw new NotFoundException('הלוח לא נמצא');
+
+    const now = new Date();
+
+    const copy = await this.prisma.padlet.create({
+      data: {
+        user_id: ownerId,
+        board_type: original.board_type,
+        title: `${original.title} (עותק)`,
+        description: original.description,
+        background: original.background,
+        created_at: now,
+        updated_at: now,
+        ...(dto.includePosts && original.posts?.length
+          ? {
+              posts: {
+                create: original.posts.map((p, i) => ({
+                  user_id: ownerId,
+                  content_kind: p.content_kind,
+                  title: p.title,
+                  subject: p.subject,
+                  color: p.color,
+                  data_layout: this.buildLayout(i),
+                  created_at: now,
+                  updated_at: now,
+                })),
+              },
+            }
+          : {}),
+        ...(dto.includeParticipants && original.participants?.length
+          ? {
+              participants: {
+                create: original.participants.map((p) => ({
+                  user_id: p.user_id,
+                  permission: p.permission as PadletPermission,
+                })),
+              },
+            }
+          : {}),
+      },
+      include: { _count: { select: { posts: true } } },
+    });
+
+    return this.toPadletResponse(copy, false);
+  }
+
+  private buildLayout(index: number) {
+    return {
+      x: 8 + (index % POSTS_PER_ROW) * 26,
+      y: 12 + Math.floor(index / POSTS_PER_ROW) * 20,
+    };
+  }
+
+  private toPadletResponse(padlet: PadletWithCount, isShared: boolean): PadletResponseDto {
     return {
       id: padlet.padlet_id.toString(),
       title: padlet.title,

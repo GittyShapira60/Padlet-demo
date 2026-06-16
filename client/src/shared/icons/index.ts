@@ -4,6 +4,7 @@ export {
   BarChart3,
   Bell,
   Calendar,
+  Copy,
   LayoutDashboard,
   Lock,
   LogOut,

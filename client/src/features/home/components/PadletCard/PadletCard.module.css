@@ -104,3 +104,128 @@
     max-width: 200px;
   }
 }
+
+.wrapper {
+  position: relative;
+  display: inline-block;
+  width: 180px;
+}
+
+.actions {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  display: flex;
+  gap: 0.35rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 3;
+}
+
+.card:hover .actions {
+  opacity: 1;
+}
+
+.deleteBtn {
+  height: 1.6rem;
+  padding: 0 0.5rem;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.deleteBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.copyBtn {
+  height: 1.6rem;
+  padding: 0 0.5rem;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.copyBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  color: #111;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  z-index: 10;
+  width: 160px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modalTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.modalOption {
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.modalConfirm {
+  flex: 1;
+  background: #6a3de8;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.modalConfirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modalCancel {
+  flex: 1;
+  background: #eee;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  padding: 0.3rem 0;
+  font-size: 0.78rem;
+  cursor: pointer;
+}

@@ -26,7 +26,6 @@ function createUiIcon(IconComponent: ComponentType<LucideProps>) {
   };
 }
 
-/** Minimal line icons — header, buttons, board cards */
 export const ArrowRight = createUiIcon(LucideArrowRight);
 export const LogOut = createUiIcon(LucideLogOut);
 export const Bell = createUiIcon(LucideBell);
