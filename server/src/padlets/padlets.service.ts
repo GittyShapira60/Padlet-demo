@@ -105,21 +105,37 @@ export class PadletsService {
       padlet: this.toPadletResponse(padlet, padlet.user_id !== requesterId),
       posts: padlet.posts.map((post) => this.postsService.toPostResponse(post)),
     };
-  }
 
+  }
   async deletePadlet(userId: string, padletIdRaw: string): Promise<void> {
-    const ownerId = this.parseId(userId, 'משתמש לא נמצא');
-    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+  const ownerId = this.parseId(userId, 'משתמש לא נמצא');
+  const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
 
-    const padlet = await this.prisma.padlet.findUnique({
-      where: { padlet_id: padletId },
-    });
+  const padlet = await this.prisma.padlet.findUnique({
+    where: { padlet_id: padletId },
+  });
 
-    if (!padlet) throw new NotFoundException('הלוח לא נמצא');
-    if (padlet.user_id !== ownerId) throw new ForbiddenException('רק הבעלים יכול למחוק את הלוח');
+  if (!padlet) throw new NotFoundException('הלוח לא נמצא');
+  if (padlet.user_id !== ownerId) throw new ForbiddenException('רק הבעלים יכול למחוק את הלוח');
 
-    await this.prisma.padlet.delete({ where: { padlet_id: padletId } });
-  }
+  await this.prisma.post.deleteMany({ where: { padlet_id: padletId } });
+  await this.prisma.participant.deleteMany({ where: { padlet_id: padletId } });
+  await this.prisma.padlet.delete({ where: { padlet_id: padletId } });
+}
+
+  // async deletePadlet(userId: string, padletIdRaw: string): Promise<void> {
+  //   const ownerId = this.parseId(userId, 'משתמש לא נמצא');
+  //   const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+
+  //   const padlet = await this.prisma.padlet.findUnique({
+  //     where: { padlet_id: padletId },
+  //   });
+
+  //   if (!padlet) throw new NotFoundException('הלוח לא נמצא');
+  //   if (padlet.user_id !== ownerId) throw new ForbiddenException('רק הבעלים יכול למחוק את הלוח');
+
+  //   await this.prisma.padlet.delete({ where: { padlet_id: padletId } });
+  // }
 
   async copyPadlet(userId: string, padletIdRaw: string, dto: CopyPadletDto): Promise<PadletResponseDto> {
     const ownerId = this.parseId(userId, 'משתמש לא נמצא');
