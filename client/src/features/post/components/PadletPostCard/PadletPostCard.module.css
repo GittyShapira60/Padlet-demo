@@ -1,0 +1,230 @@
+.card {
+  position: relative;
+  border: none;
+  border-radius: 12px;
+  padding: 0.85rem 0.9rem;
+  min-width: 160px;
+  max-width: 220px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+  text-align: right;
+  color: #1e293b;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.actions {
+  position: absolute;
+  top: 0.45rem;
+  left: 0.45rem;
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.card:hover .actions,
+.card:focus-within .actions {
+  opacity: 1;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #334155;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+}
+
+.actionBtn:hover {
+  background: #ffffff;
+}
+
+.deleteBtn {
+  color: #dc2626;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+.title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.subject {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #475569;
+}
+
+.author {
+  margin: 0.6rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* ── Poll ─────────────────────────────────────────── */
+.pollQuestion {
+  margin: 0 0 0.55rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #1e293b;
+}
+
+.pollOptionsList {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pollOptionItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.55);
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.pollOptionItem:hover {
+  border-color: #7c3aed;
+  background: rgba(124, 58, 237, 0.06);
+}
+
+.pollOptionSelected {
+  border-color: #7c3aed;
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.pollRadio {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #94a3b8;
+  background: #fff;
+  display: inline-block;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.pollRadioChecked {
+  border-color: #7c3aed;
+  background: #7c3aed;
+  box-shadow: inset 0 0 0 3px #fff;
+}
+
+.pollOptionLabel {
+  font-size: 0.8rem;
+  color: #334155;
+  line-height: 1.3;
+}
+
+.voteBtn {
+  display: block;
+  width: 100%;
+  margin: 0.4rem 0 0.2rem;
+  padding: 0.42rem 0;
+  border: none;
+  border-radius: 8px;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.voteBtn:hover:not(:disabled) {
+  background: #6d28d9;
+}
+
+.voteBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pollVoteCount {
+  margin: 0.3rem 0 0;
+  font-size: 0.7rem;
+  color: #64748b;
+  text-align: center;
+}
+
+/* ── Poll Results ─────────────────────────────────── */
+.pollResultsList {
+  list-style: none;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.pollResultItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.pollResultLabelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.pollResultLabel {
+  font-size: 0.78rem;
+  color: #334155;
+}
+
+.pollResultLabelChosen {
+  font-size: 0.78rem;
+  color: #7c3aed;
+  font-weight: 700;
+}
+
+.pollResultPct {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.pollResultBar {
+  height: 5px;
+  border-radius: 99px;
+  background: rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.pollResultFill {
+  height: 100%;
+  border-radius: 99px;
+  background: #94a3b8;
+  transition: width 0.4s ease;
+}
+
+.pollResultFillChosen {
+  height: 100%;
+  border-radius: 99px;
+  background: #7c3aed;
+  transition: width 0.4s ease;
+}

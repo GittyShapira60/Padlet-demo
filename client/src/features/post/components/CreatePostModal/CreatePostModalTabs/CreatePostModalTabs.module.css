@@ -1,0 +1,54 @@
+.tabs {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  border-bottom: 2px solid #f1f5f9;
+  margin-bottom: 1.25rem;
+  padding: 0 0.25rem;
+  box-sizing: border-box;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 0.125rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #64748b;
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+  font-family: inherit;
+  transition: color 0.15s ease;
+}
+
+.tabActive {
+  color: var(--color-accent);
+}
+
+.tabIconText {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.tabIconTextActive {
+  color: var(--color-accent);
+}
+
+.tabEmoji {
+  font-size: 1rem;
+}
+
+.underline {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-accent);
+  border-radius: 2px;
+}
