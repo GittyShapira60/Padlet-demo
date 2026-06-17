@@ -2,21 +2,23 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Padlet } from '../../../padlet/interfaces/padlet';
 import type { CopyPadletOptions } from '../../../padlet/services/padlet-service';
-import { Calendar, Copy, LayoutDashboard, Lock, Trash2, Users } from '../../../../shared/icons';
+import { Calendar, Copy, LayoutDashboard, Lock, LogOut, Trash2, Users } from '../../../../shared/icons';
 import styles from './PadletCard.module.css';
 
 interface PadletCardProps {
   padlet: Padlet;
   onDelete?: (padletId: string) => Promise<void>;
   onCopy?: (padletId: string, options: CopyPadletOptions) => Promise<void>;
+  onLeave?: (padletId: string) => Promise<void>;
 }
 
-export default function PadletCard({ padlet, onDelete, onCopy }: PadletCardProps) {
+export default function PadletCard({ padlet, onDelete, onCopy, onLeave }: PadletCardProps) {
   const navigate = useNavigate();
   const [showCopyModal, setShowCopyModal] = useState(false);
   const [includePosts, setIncludePosts] = useState(true);
   const [includeParticipants, setIncludeParticipants] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
 
   const postLabel = padlet.postCount === 1 ? 'פוסט' : 'פוסטים';
   const cardClassName = padlet.isShared ? `${styles.card} ${styles.shared}` : styles.card;
@@ -28,6 +30,16 @@ export default function PadletCard({ padlet, onDelete, onCopy }: PadletCardProps
   async function handleDelete(e: React.MouseEvent) {
     e.stopPropagation();
     await onDelete?.(padlet.id);
+  }
+
+  async function handleLeave(e: React.MouseEvent) {
+    e.stopPropagation();
+    setIsLeaving(true);
+    try {
+      await onLeave?.(padlet.id);
+    } finally {
+      setIsLeaving(false);
+    }
   }
 
   function handleCopyClick(e: React.MouseEvent) {
@@ -65,6 +77,18 @@ export default function PadletCard({ padlet, onDelete, onCopy }: PadletCardProps
               <span className={styles.utilityIcon} aria-hidden="true">
                 <Calendar size={12} strokeWidth={1.5} />
               </span>
+              {onLeave && (
+                <button
+                  type="button"
+                  className={styles.leaveBtn}
+                  onClick={handleLeave}
+                  disabled={isLeaving}
+                  aria-label={`עזיבת לוח ${padlet.title}`}
+                  title="עזוב לוח"
+                >
+                  <LogOut size={12} strokeWidth={1.5} />
+                </button>
+              )}
             </div>
           ) : (
             <span className={styles.cardIcon} aria-hidden="true">

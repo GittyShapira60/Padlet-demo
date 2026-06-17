@@ -10,6 +10,8 @@ interface PadletGridProps {
   onCreateClick?: () => void;
   onDelete?: (padletId: string) => Promise<void>;
   onCopy?: (padletId: string, options: CopyPadletOptions) => Promise<void>;
+  onLeave?: (padletId: string) => Promise<void>;
+
 }
 
 export default function PadletGrid({
@@ -18,6 +20,7 @@ export default function PadletGrid({
   onCreateClick,
   onDelete,
   onCopy,
+  onLeave,
 }: PadletGridProps) {
   return (
     <div className={styles.grid}>
@@ -25,7 +28,7 @@ export default function PadletGrid({
         <CreatePadletCard onClick={onCreateClick} />
       ) : null}
       {padlets.map((padlet) => (
-        <PadletCard key={padlet.id} padlet={padlet} onDelete={onDelete} onCopy={onCopy} />
+        <PadletCard key={padlet.id} padlet={padlet} onDelete={onDelete} onCopy={onCopy} onLeave={onLeave}/>
       ))}
     </div>
   );

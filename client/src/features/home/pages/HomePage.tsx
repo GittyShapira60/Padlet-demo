@@ -55,8 +55,7 @@ export default function HomePage() {
                   count={boards.shared.length}
                   badgeColor="blue"
                 >
-                  <PadletGrid padlets={boards.shared} />
-                </PadletSection>
+<PadletGrid padlets={boards.shared}/>                </PadletSection>
               ) : null}
             </div>
 

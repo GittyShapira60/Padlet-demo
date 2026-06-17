@@ -4,14 +4,13 @@
   "description": "Padlet-demo NestJS API",
   "private": true,
   "license": "UNLICENSED",
-  "scripts": {
+"scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"{src}/**/*.ts\"",
-    "prisma:generate": "prisma generate",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint 'src/**/*.ts'",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "postinstall": "prisma generate"

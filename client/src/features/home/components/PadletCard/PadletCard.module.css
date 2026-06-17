@@ -229,3 +229,20 @@
   font-size: 0.78rem;
   cursor: pointer;
 }
+.leaveBtn {
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.leaveBtn:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
