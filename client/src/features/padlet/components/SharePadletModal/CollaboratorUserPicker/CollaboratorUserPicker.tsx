@@ -2,7 +2,6 @@ import PermissionSelect from '../../PermissionSelect/PermissionSelect';
 import selectStyles from '../../PermissionSelect/PermissionSelect.module.css';
 import type { User } from '../../../../../shared/interfaces/user';
 import type { PadletPermission as PadletPermissionType } from '../../../enums/padlet-permission';
-import type { Collaborator } from '../../../interfaces/share-padlet.types';
 import common from '../shareModalCommon.module.css';
 import styles from './CollaboratorUserPicker.module.css';
 
@@ -11,13 +10,12 @@ interface CollaboratorUserPickerProps {
   usersLoading: boolean;
   usersError: string;
   filteredUsers: User[];
-  pickerSelections: Record<string, Collaborator>;
   collaboratorMinimum: PadletPermissionType;
-  selectedCount: number;
+  invitingUserId: string | null;
+  getRowPermission: (userId: string) => PadletPermissionType;
   onSearchChange: (value: string) => void;
-  onToggleUser: (user: User) => void;
   onPermissionChange: (userId: string, permission: PadletPermissionType) => void;
-  onInvite: () => void;
+  onInviteUser: (user: User) => void;
 }
 
 export default function CollaboratorUserPicker({
@@ -25,13 +23,12 @@ export default function CollaboratorUserPicker({
   usersLoading,
   usersError,
   filteredUsers,
-  pickerSelections,
   collaboratorMinimum,
-  selectedCount,
+  invitingUserId,
+  getRowPermission,
   onSearchChange,
-  onToggleUser,
   onPermissionChange,
-  onInvite,
+  onInviteUser,
 }: CollaboratorUserPickerProps) {
   const showDropdown = searchQuery.trim().length > 0;
 
@@ -46,14 +43,6 @@ export default function CollaboratorUserPicker({
           onChange={(event) => onSearchChange(event.target.value)}
           autoComplete="off"
         />
-        <button
-          type="button"
-          className={common.actionButton}
-          onClick={onInvite}
-          disabled={selectedCount === 0}
-        >
-          הזמן
-        </button>
       </div>
 
       {usersError ? <p className={common.error}>{usersError}</p> : null}
@@ -66,39 +55,34 @@ export default function CollaboratorUserPicker({
             <li className={styles.emptyOption}>לא נמצאו משתמשים</li>
           ) : (
             filteredUsers.map((user) => {
-              const selection = pickerSelections[user.id];
-              const isSelected = Boolean(selection);
+              const isInviting = invitingUserId === user.id;
 
               return (
                 <li key={user.id} className={styles.option}>
-                  <label className={styles.optionLabel}>
-                    <input
-                      type="checkbox"
-                      className={styles.checkbox}
-                      checked={isSelected}
-                      onChange={() => onToggleUser(user)}
-                    />
-                    <span className={styles.optionName}>{user.username}</span>
-                  </label>
-                  {isSelected ? (
+                  <span className={styles.optionName}>{user.username}</span>
+                  <div className={styles.rowActions}>
                     <PermissionSelect
-                      value={selection.permission}
+                      value={getRowPermission(user.id)}
                       minimum={collaboratorMinimum}
                       onChange={(permission) =>
                         onPermissionChange(user.id, permission)
                       }
                       className={selectStyles.noShrink}
                     />
-                  ) : null}
+                    <button
+                      type="button"
+                      className={common.actionButton}
+                      onClick={() => onInviteUser(user)}
+                      disabled={isInviting}
+                    >
+                      {isInviting ? 'מזמין...' : 'הזמן'}
+                    </button>
+                  </div>
                 </li>
               );
             })
           )}
         </ul>
-      ) : null}
-
-      {selectedCount > 0 ? (
-        <p className={styles.status}>נבחרו {selectedCount} משתמשים</p>
       ) : null}
     </div>
   );

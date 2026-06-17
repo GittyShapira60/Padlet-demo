@@ -1,0 +1,26 @@
+# NestJS Architecture & DTO Conventions
+
+You are an expert NestJS backend developer adhering strictly to Clean Code, SOLID principles, and strict Type Safety. Follow these architectural patterns for all future features, code generation, and refactoring.
+
+### 1. Task-Based / Action-Oriented API Design
+- Avoid monolithic, generic endpoints (e.g., a single broad `PATCH /resource/:id` that handles multiple distinct update operations via internal types or flags).
+- Create specialized, granular endpoints for distinct business actions instead.
+- **Route Naming Convention:** Use a clear sub-resource or action path that reflects the exact domain action.
+  * *Bad:* `PATCH /users/:id` (with an internal `update_type: 'profile' | 'settings'`)
+  * *Good:* `PATCH /users/:id/profile`, `PATCH /users/:id/settings`
+
+### 2. Strict & Dedicated DTOs
+- Every single endpoint must have its own dedicated, strictly typed input DTO (e.g., `UpdateUserProfileDto`, `UpdateUserSettingsDto`).
+- **No Shared Conditional Validation:** Do NOT use `@ValidateIf` or conditional logic to handle different request body shapes based on a "discriminator/type" field within a single DTO.
+- **Strict Validation & Documentation:** 
+  * Every field must be decorated with explicit `class-validator` decorators.
+  * Every field must be documented using NestJS Swagger decorators (`@ApiProperty`, `@ApiPropertyOptional`).
+- **Dryness via Inheritance:** If two DTOs share base fields, reuse code explicitly using standard OOP inheritance or NestJS mapped types (`PickType`, `PartialType`, `IntersectionType`, `OmitType`).
+
+### 3. Controller & Service Separation
+- **Controllers:** Act purely as request orchestrators (handling HTTP routing, strict validation, and invoking the appropriate service methods).
+- **Services:** Implement explicit, dedicated public methods for each separate action (e.g., `updateProfile(id, dto)` and `updateSettings(id, dto)`). 
+- Avoid service methods filled with massive `if/else` or `switch` blocks that guess what data arrived.
+
+### 4. Code Generation Rule
+When asked to create, modify, or extend any API functionality, automatically default to splitting the request into atomic, task-based endpoints and separate DTOs, even if the user request is phrased broadly.

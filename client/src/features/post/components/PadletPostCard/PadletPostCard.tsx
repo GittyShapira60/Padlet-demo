@@ -9,40 +9,54 @@ interface PadletPostCardProps {
   onDelete?: (post: Post) => void;
 }
 
+function PostActions({
+  post,
+  onEdit,
+  onDelete,
+}: {
+  post: Post;
+  onEdit?: (post: Post) => void;
+  onDelete?: (post: Post) => void;
+}) {
+  return (
+    <div className={`${styles.actions} padlet-post-actions`}>
+      <button
+        type="button"
+        className={styles.actionBtn}
+        aria-label="עריכת פוסט"
+        onClick={() => onEdit?.(post)}
+      >
+        <Pencil size={14} />
+      </button>
+      <button
+        type="button"
+        className={`${styles.actionBtn} ${styles.deleteBtn}`}
+        aria-label="מחיקת פוסט"
+        onClick={() => onDelete?.(post)}
+      >
+        <Trash2 size={14} />
+      </button>
+    </div>
+  );
+}
+
 export default function PadletPostCard({
   post,
   canManage = false,
   onEdit,
   onDelete,
 }: PadletPostCardProps) {
-  return (
-    <article
-      className={styles.card}
-      style={{ background: post.color ?? '#ffffff' }}
-    >
-      {canManage ? (
-        <div className={styles.actions}>
-          <button
-            type="button"
-            className={styles.actionBtn}
-            aria-label="עריכת פוסט"
-            onClick={() => onEdit?.(post)}
-          >
-            <Pencil size={14} />
-          </button>
-          <button
-            type="button"
-            className={`${styles.actionBtn} ${styles.deleteBtn}`}
-            aria-label="מחיקת פוסט"
-            onClick={() => onDelete?.(post)}
-          >
-            <Trash2 size={14} />
-          </button>
-        </div>
-      ) : null}
+  const background = post.color ?? '#ffffff';
 
-      {post.title ? <h3 className={styles.title}>{post.title}</h3> : null}
-      {post.subject ? <p className={styles.subject}>{post.subject}</p> : null}
+  return (
+    <article className={styles.card} style={{ background }}>
+      {canManage ? (
+        <PostActions post={post} onEdit={onEdit} onDelete={onDelete} />
+      ) : null}
+      <div className={styles.content}>
+        {post.title ? <h3 className={styles.title}>{post.title}</h3> : null}
+        {post.subject ? <p className={styles.subject}>{post.subject}</p> : null}
+      </div>
       <p className={styles.author}>{post.authorUsername}</p>
     </article>
   );

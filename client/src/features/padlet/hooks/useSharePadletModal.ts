@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   clampPermission,
   getCollaboratorMinimum,
@@ -8,13 +8,17 @@ import {
 } from '../enums/padlet-permission';
 import type { Collaborator } from '../interfaces/share-padlet.types';
 import {
+  getParticipants,
+  inviteParticipant,
+  updateParticipantPermission,
+} from '../services/participant-service';
+import {
   buildShareUrl,
   filterUsersForPicker,
-  getInviteCandidates,
   getPermissionHint,
 } from '../utils/share-padlet.utils';
-import { useCollaboratorPicker } from './useCollaboratorPicker';
 import { useUsers } from './useUsers';
+import type { User } from '../../../shared/interfaces/user';
 
 interface UseSharePadletModalOptions {
   padletId: string;
@@ -31,6 +35,11 @@ export function useSharePadletModal({
   const [searchQuery, setSearchQuery] = useState('');
   const [inviteError, setInviteError] = useState('');
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [rowPermissions, setRowPermissions] = useState<
+    Record<string, PadletPermissionType>
+  >({});
+  const [invitingUserId, setInvitingUserId] = useState<string | null>(null);
+  const [participantsLoading, setParticipantsLoading] = useState(true);
   const { allUsers, usersLoading, usersError } = useUsers();
 
   const shareUrl = useMemo(() => buildShareUrl(padletId), [padletId]);
@@ -49,21 +58,35 @@ export function useSharePadletModal({
     [allUsers, collaborators, currentUsername, searchQuery],
   );
 
-  function clearInviteError() {
-    setInviteError('');
-  }
+  useEffect(() => {
+    let isMounted = true;
 
-  const {
-    pickerSelections,
-    selectedCount,
-    toggleUserSelection,
-    handlePickerPermissionChange,
-    setPickerSelections,
-  } = useCollaboratorPicker({
-    collaboratorMinimum,
-    defaultInvitePermission,
-    onSelectionChange: clearInviteError,
-  });
+    async function loadParticipants() {
+      setParticipantsLoading(true);
+
+      try {
+        const participants = await getParticipants(padletId);
+
+        if (isMounted) {
+          setCollaborators(participants);
+        }
+      } catch {
+        if (isMounted) {
+          setInviteError('לא הצלחנו לטעון את רשימת השותפים');
+        }
+      } finally {
+        if (isMounted) {
+          setParticipantsLoading(false);
+        }
+      }
+    }
+
+    void loadParticipants();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [padletId]);
 
   useEffect(() => {
     setCollaborators((current) =>
@@ -77,41 +100,82 @@ export function useSharePadletModal({
     );
   }, [collaboratorMinimum]);
 
-  function handleInvite() {
-    const selections = Object.values(pickerSelections);
+  function clearInviteError() {
     setInviteError('');
-
-    if (selections.length === 0) {
-      return;
-    }
-
-    const newCollaborators = getInviteCandidates(selections, collaborators);
-
-    if (newCollaborators.length === 0) {
-      setInviteError('כל המשתמשים שבחרת כבר ברשימה');
-      return;
-    }
-
-    setCollaborators((current) => [...current, ...newCollaborators]);
-    setPickerSelections({});
-    setSearchQuery('');
   }
 
-  function handleCollaboratorPermissionChange(
-    collaboratorId: string,
+  function getRowPermission(userId: string): PadletPermissionType {
+    return rowPermissions[userId] ?? defaultInvitePermission;
+  }
+
+  function handleRowPermissionChange(
+    userId: string,
     permission: PadletPermissionType,
   ) {
-    setCollaborators((current) =>
-      current.map((collaborator) =>
-        collaborator.id === collaboratorId
-          ? {
-              ...collaborator,
-              permission: clampPermission(permission, collaboratorMinimum),
-            }
-          : collaborator,
-      ),
-    );
+    setRowPermissions((current) => ({
+      ...current,
+      [userId]: clampPermission(permission, collaboratorMinimum),
+    }));
+    clearInviteError();
   }
+
+  const handleInviteUser = useCallback(
+    async (user: User) => {
+      const permission = clampPermission(
+        rowPermissions[user.id] ?? defaultInvitePermission,
+        collaboratorMinimum,
+      );
+      setInviteError('');
+      setInvitingUserId(user.id);
+
+      try {
+        const participant = await inviteParticipant(
+          padletId,
+          user.id,
+          permission,
+        );
+
+        setCollaborators((current) => [...current, participant]);
+        setRowPermissions((current) => {
+          const next = { ...current };
+          delete next[user.id];
+          return next;
+        });
+        setSearchQuery('');
+      } catch {
+        setInviteError(`הזמנת ${user.username} נכשלה`);
+      } finally {
+        setInvitingUserId(null);
+      }
+    },
+    [collaboratorMinimum, defaultInvitePermission, padletId, rowPermissions],
+  );
+
+  const handleCollaboratorPermissionChange = useCallback(
+    async (collaboratorId: string, permission: PadletPermissionType) => {
+      const nextPermission = clampPermission(permission, collaboratorMinimum);
+      setInviteError('');
+
+      try {
+        const updatedParticipant = await updateParticipantPermission(
+          padletId,
+          collaboratorId,
+          nextPermission,
+        );
+
+        setCollaborators((current) =>
+          current.map((collaborator) =>
+            collaborator.id === collaboratorId
+              ? updatedParticipant
+              : collaborator,
+          ),
+        );
+      } catch {
+        setInviteError('עדכון ההרשאה נכשל');
+      }
+    },
+    [collaboratorMinimum, padletId],
+  );
 
   function reportCopyError() {
     setInviteError('לא הצלחנו להעתיק את הקישור');
@@ -128,13 +192,13 @@ export function useSharePadletModal({
     inviteError,
     usersLoading,
     usersError,
+    participantsLoading,
     filteredUsers,
-    pickerSelections,
-    selectedCount,
+    invitingUserId,
     collaborators,
-    toggleUserSelection,
-    handlePickerPermissionChange,
-    handleInvite,
+    getRowPermission,
+    handleRowPermissionChange,
+    handleInviteUser,
     handleCollaboratorPermissionChange,
     clearInviteError,
     reportCopyError,

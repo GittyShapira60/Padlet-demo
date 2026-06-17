@@ -1,6 +1,9 @@
 import { PadletBoardType } from '../../../padlet/enums/padlet-board-type';
-import type { Post } from '../../interfaces/post';
-import PadletPostCard from '../PadletPostCard/PadletPostCard';
+import type { Post, PostLayout } from '../../interfaces/post';
+import BrainstormingPostsLayout from '../board-layouts/brainstorming/BrainstormingPostsLayout';
+import FreeWallPostsLayout from '../board-layouts/free_wall/FreeWallPostsLayout';
+import GridPostsLayout from '../board-layouts/grid/GridPostsLayout';
+import TimelinePostsLayout from '../board-layouts/timeline/TimelinePostsLayout';
 import styles from './PadletPostsLayer.module.css';
 
 interface PadletPostsLayerProps {
@@ -9,34 +12,7 @@ interface PadletPostsLayerProps {
   currentUsername?: string;
   onEditPost?: (post: Post) => void;
   onDeletePost?: (post: Post) => void;
-}
-
-function getDefaultLayout(index: number): { x: number; y: number } {
-  const column = index % 3;
-  const row = Math.floor(index / 3);
-
-  return {
-    x: 6 + column * 28,
-    y: 8 + row * 22,
-  };
-}
-
-function renderPostCard(
-  post: Post,
-  currentUsername: string | undefined,
-  onEditPost?: (post: Post) => void,
-  onDeletePost?: (post: Post) => void,
-) {
-  const canManage = currentUsername === post.authorUsername;
-
-  return (
-    <PadletPostCard
-      post={post}
-      canManage={canManage}
-      onEdit={onEditPost}
-      onDelete={onDeletePost}
-    />
-  );
+  onLayoutChange?: (postId: string, layout: PostLayout) => void;
 }
 
 export default function PadletPostsLayer({
@@ -45,6 +21,7 @@ export default function PadletPostsLayer({
   currentUsername,
   onEditPost,
   onDeletePost,
+  onLayoutChange,
 }: PadletPostsLayerProps) {
   if (posts.length === 0) {
     return (
@@ -56,68 +33,33 @@ export default function PadletPostsLayer({
     );
   }
 
-  const isFreeLayout =
-    boardType === PadletBoardType.FreeWall ||
-    boardType === PadletBoardType.Brainstorming;
+  const layoutProps = {
+    posts,
+    currentUsername,
+    onEditPost,
+    onDeletePost,
+    onLayoutChange,
+  };
 
-  if (isFreeLayout) {
-    return (
-      <div className={styles.layer}>
-        <div className={styles.freeWall}>
-          {posts.map((post, index) => {
-            const layout = post.layout ?? getDefaultLayout(index);
+  let content;
 
-            return (
-              <div
-                key={post.id}
-                className={styles.freeWallPost}
-                style={{
-                  top: `${layout.y}%`,
-                  right: `${layout.x}%`,
-                }}
-              >
-                {renderPostCard(
-                  post,
-                  currentUsername,
-                  onEditPost,
-                  onDeletePost,
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
+  switch (boardType) {
+    case PadletBoardType.FreeWall:
+      content = <FreeWallPostsLayout {...layoutProps} />;
+      break;
+    case PadletBoardType.Brainstorming:
+      content = <BrainstormingPostsLayout {...layoutProps} />;
+      break;
+    case PadletBoardType.Grid:
+      content = <GridPostsLayout {...layoutProps} />;
+      break;
+    case PadletBoardType.Timeline:
+      content = <TimelinePostsLayout {...layoutProps} />;
+      break;
+    default:
+      content = <TimelinePostsLayout {...layoutProps} />;
+      break;
   }
 
-  if (boardType === PadletBoardType.Grid) {
-    return (
-      <div className={styles.layer}>
-        <div className={styles.grid}>
-          {posts.map((post) => (
-            <div key={post.id}>
-              {renderPostCard(
-                post,
-                currentUsername,
-                onEditPost,
-                onDeletePost,
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className={styles.layer}>
-      <div className={styles.timeline}>
-        {posts.map((post) => (
-          <div key={post.id}>
-            {renderPostCard(post, currentUsername, onEditPost, onDeletePost)}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  return <div className={styles.layer}>{content}</div>;
 }
