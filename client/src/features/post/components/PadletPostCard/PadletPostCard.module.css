@@ -4,26 +4,42 @@
   border-radius: 12px;
   padding: 0.85rem 0.9rem;
   min-width: 160px;
+  width: 100%;
   max-width: 220px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
   text-align: right;
   color: #1e293b;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .actions {
   position: absolute;
-  top: 0.45rem;
-  left: 0.45rem;
+  top: 0.55em;
+  left: 0.55em;
   display: flex;
   gap: 0.25rem;
   opacity: 0;
   transition: opacity 0.2s ease;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Bubble footer uses actions inline (not absolute) */
+.actionsInline {
+  position: static;
+  inset: auto;
+  opacity: 1;
+  pointer-events: auto;
+  transition: none;
 }
 
 .card:hover .actions,
 .card:focus-within .actions {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .actionBtn {
@@ -53,6 +69,26 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 }
 
+.content {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 7.5rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  padding-inline-end: 0.15rem;
+}
+
+.content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.45);
+  border-radius: 999px;
+}
+
 .title {
   margin: 0;
   font-size: 0.95rem;
@@ -68,8 +104,26 @@
 }
 
 .author {
-  margin: 0.6rem 0 0;
+  margin: 0.5rem 0 0;
   font-size: 0.72rem;
   font-weight: 600;
   color: #64748b;
+  flex-shrink: 0;
+}
+
+.bubbleContent {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.bubbleAuthor {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }

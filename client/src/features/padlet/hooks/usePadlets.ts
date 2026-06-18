@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Padlet, PadletBoards } from '../interfaces/padlet';
-import { getPadletBoards } from '../services/padlet-service';
+import { copyPadlet, deletePadlet, getPadletBoards } from '../services/padlet-service';
+import type { CopyPadletOptions } from '../services/padlet-service';
 
 const EMPTY_BOARDS: PadletBoards = { mine: [], shared: [] };
 
@@ -12,7 +13,6 @@ export function usePadlets() {
   const loadPadlets = useCallback(async () => {
     setIsLoading(true);
     setError('');
-
     try {
       const data = await getPadletBoards();
       setBoards(data);
@@ -34,7 +34,23 @@ export function usePadlets() {
     }));
   }, []);
 
+  const removePadlet = useCallback(async (padletId: string) => {
+    await deletePadlet(padletId);
+    setBoards((current) => ({
+      mine: current.mine.filter((p) => p.id !== padletId),
+      shared: current.shared.filter((p) => p.id !== padletId),
+    }));
+  }, []);
+
+  const duplicatePadlet = useCallback(async (padletId: string, options: CopyPadletOptions) => {
+    const newPadlet = await copyPadlet(padletId, options);
+    setBoards((current) => ({
+      ...current,
+      mine: [newPadlet, ...current.mine],
+    }));
+  }, []);
+
   const hasBoards = boards.mine.length > 0 || boards.shared.length > 0;
 
-  return { boards, hasBoards, isLoading, error, addPadlet, reloadPadlets: loadPadlets };
+  return { boards, hasBoards, isLoading, error, addPadlet, removePadlet, duplicatePadlet, reloadPadlets: loadPadlets };
 }

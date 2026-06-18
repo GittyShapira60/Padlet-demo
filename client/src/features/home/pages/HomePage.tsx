@@ -20,6 +20,8 @@ export default function HomePage() {
     handleCreatePadlet,
     handleCloseCreateModal,
     handlePadletCreated,
+    handleDeletePadlet,
+    handleCopyPadlet,
   } = useHomePage();
 
   return (
@@ -42,6 +44,8 @@ export default function HomePage() {
                   padlets={boards.mine}
                   showCreateCard
                   onCreateClick={handleCreatePadlet}
+                  onDelete={handleDeletePadlet}
+                  onCopy={handleCopyPadlet}
                 />
               </PadletSection>
 
