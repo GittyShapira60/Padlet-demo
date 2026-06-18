@@ -3,15 +3,20 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PostContentKind, type Post, type User } from '@prisma/client';
+import {
+  PadletBoardType,
+  PostContentKind,
+  Prisma,
+  type Post,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
+import { PostContentInputDto } from './dto/post-content-input.dto';
+import { PostLayoutDto } from './dto/post-layout.dto';
+import { UpdatePostLayoutDto } from './dto/update-post-layout.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 
-export type PostLayoutDto = {
-  x: number;
-  y: number;
-};
+export type { PostLayoutDto };
 
 export interface PostResponseDto {
   id: string;
@@ -24,9 +29,10 @@ export interface PostResponseDto {
   createdAt: string;
 }
 
-type PostWithAuthor = Post & { user: User };
+type PostWithAuthor = Prisma.PostGetPayload<{ include: { user: true } }>;
 
-const POSTS_PER_ROW = 3;
+const FREE_WALL_COLUMNS = 3;
+const GRID_COLUMNS = 4;
 
 @Injectable()
 export class PostsService {
@@ -40,7 +46,7 @@ export class PostsService {
     const authorId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
 
-    await this.assertPadletAccess(authorId, padletId);
+    const padlet = await this.getAccessiblePadlet(authorId, padletId);
 
     const existingCount = await this.prisma.post.count({
       where: { padlet_id: padletId },
@@ -57,7 +63,9 @@ export class PostsService {
         title,
         subject,
         color: dto.color ?? null,
-        data_layout: this.buildLayout(existingCount),
+        data_layout: this.toJsonLayout(
+          this.buildLayout(padlet.board_type, existingCount),
+        ),
         created_at: now,
         updated_at: now,
       },
@@ -107,11 +115,12 @@ export class PostsService {
     return this.toPostResponse(post);
   }
 
-  async deletePost(
+  async updatePostLayout(
     userId: string,
     padletIdRaw: string,
     postIdRaw: string,
-  ): Promise<void> {
+    dto: UpdatePostLayoutDto,
+  ): Promise<PostResponseDto> {
     const requesterId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
     const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
@@ -126,11 +135,51 @@ export class PostsService {
 
     const now = new Date();
 
+    const post = await this.prisma.post.update({
+      where: { post_id: postId },
+      data: {
+        data_layout: this.toJsonLayout(dto),
+        updated_at: now,
+      },
+      include: { user: true },
+    });
+
+    await this.touchPadlet(padletId, now);
+
+    return this.toPostResponse(post);
+  }
+
+  async deletePost(
+    userId: string,
+    padletIdRaw: string,
+    postIdRaw: string,
+  ): Promise<PostResponseDto[]> {
+    const requesterId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+    const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
+
+    const existingPost = await this.findPostForUser(
+      requesterId,
+      padletId,
+      postId,
+    );
+
+    this.assertPostAuthor(existingPost, requesterId);
+
+    const padlet = await this.getAccessiblePadlet(requesterId, padletId);
+    const now = new Date();
+
     await this.prisma.post.delete({
       where: { post_id: postId },
     });
 
+    if (padlet.board_type !== PadletBoardType.free_wall) {
+      await this.reindexPostLayouts(padletId, padlet.board_type);
+    }
+
     await this.touchPadlet(padletId, now);
+
+    return this.getPadletPosts(padletId);
   }
 
   toPostResponse(post: PostWithAuthor): PostResponseDto {
@@ -148,10 +197,7 @@ export class PostsService {
     };
   }
 
-  private async assertPadletAccess(
-    userId: bigint,
-    padletId: bigint,
-  ): Promise<void> {
+  private async getAccessiblePadlet(userId: bigint, padletId: bigint) {
     const padlet = await this.prisma.padlet.findFirst({
       where: {
         padlet_id: padletId,
@@ -160,12 +206,14 @@ export class PostsService {
           { participants: { some: { user_id: userId } } },
         ],
       },
-      select: { padlet_id: true },
+      select: { padlet_id: true, board_type: true },
     });
 
     if (!padlet) {
       throw new NotFoundException('הלוח לא נמצא');
     }
+
+    return padlet;
   }
 
   private async findPostForUser(
@@ -173,7 +221,7 @@ export class PostsService {
     padletId: bigint,
     postId: bigint,
   ): Promise<PostWithAuthor> {
-    await this.assertPadletAccess(userId, padletId);
+    await this.getAccessiblePadlet(userId, padletId);
 
     const post = await this.prisma.post.findFirst({
       where: {
@@ -190,6 +238,16 @@ export class PostsService {
     return post;
   }
 
+  private async getPadletPosts(padletId: bigint): Promise<PostResponseDto[]> {
+    const posts = await this.prisma.post.findMany({
+      where: { padlet_id: padletId },
+      include: { user: true },
+      orderBy: { created_at: 'asc' },
+    });
+
+    return posts.map((post) => this.toPostResponse(post));
+  }
+
   private assertPostAuthor(post: Post, requesterId: bigint): void {
     if (post.user_id !== requesterId) {
       throw new ForbiddenException('אין הרשאה לערוך או למחוק פוסט זה');
@@ -203,14 +261,61 @@ export class PostsService {
     });
   }
 
-  private buildLayout(existingCount: number): PostLayoutDto {
-    return {
-      x: 8 + (existingCount % POSTS_PER_ROW) * 26,
-      y: 12 + Math.floor(existingCount / POSTS_PER_ROW) * 20,
-    };
+  private async reindexPostLayouts(
+    padletId: bigint,
+    boardType: PadletBoardType,
+  ): Promise<void> {
+    const posts = await this.prisma.post.findMany({
+      where: { padlet_id: padletId },
+      orderBy: { created_at: 'asc' },
+      select: { post_id: true },
+    });
+
+    await Promise.all(
+      posts.map((post, index) =>
+        this.prisma.post.update({
+          where: { post_id: post.post_id },
+          data: {
+            data_layout: this.toJsonLayout(
+              this.buildLayout(boardType, index),
+            ),
+          },
+        }),
+      ),
+    );
   }
 
-  private mapPostContent(dto: CreatePostDto | UpdatePostDto): {
+  buildLayout(boardType: PadletBoardType, index: number): PostLayoutDto {
+    switch (boardType) {
+      case PadletBoardType.brainstorming:
+        return {
+          x: 6 + (index % 3) * 30,
+          y: 8 + index * 14,
+        };
+      case PadletBoardType.grid:
+        return {
+          x: index % GRID_COLUMNS,
+          y: Math.floor(index / GRID_COLUMNS),
+        };
+      case PadletBoardType.timeline:
+        return {
+          x: index,
+          y: 0,
+        };
+      case PadletBoardType.free_wall:
+      default:
+        return {
+          x: 8 + (index % FREE_WALL_COLUMNS) * 26,
+          y: 12 + Math.floor(index / FREE_WALL_COLUMNS) * 20,
+        };
+    }
+  }
+
+  private toJsonLayout(layout: PostLayoutDto): Prisma.InputJsonValue {
+    return { x: layout.x, y: layout.y };
+  }
+
+  private mapPostContent(dto: PostContentInputDto): {
     contentKind: PostContentKind;
     title: string | null;
     subject: string | null;

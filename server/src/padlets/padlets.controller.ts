@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   UseGuards,
@@ -10,7 +13,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { AuthUserDto } from '../authentication/authentication.service';
 import { CurrentUser } from '../authentication/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
-import { CreatePadletDto } from './dto/create-padlet.dto';
+import { CopyPadletDto, CreatePadletDto } from './dto/create-padlet.dto';
 import { PadletsService } from './padlets.service';
 
 @ApiTags('padlets')
@@ -34,10 +37,24 @@ export class PadletsController {
 
   @Get(':padletId')
   @ApiOperation({ summary: 'Get a single padlet with its posts' })
-  getPadletDetail(
+  getPadletDetail(@CurrentUser() user: AuthUserDto, @Param('padletId') padletId: string) {
+    return this.padletsService.getPadletDetail(user.id, padletId);
+  }
+
+  @Delete(':padletId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a padlet (owner only)' })
+  deletePadlet(@CurrentUser() user: AuthUserDto, @Param('padletId') padletId: string) {
+    return this.padletsService.deletePadlet(user.id, padletId);
+  }
+
+  @Post(':padletId/copy')
+  @ApiOperation({ summary: 'Copy a padlet' })
+  copyPadlet(
     @CurrentUser() user: AuthUserDto,
     @Param('padletId') padletId: string,
+    @Body() dto: CopyPadletDto,
   ) {
-    return this.padletsService.getPadletDetail(user.id, padletId);
+    return this.padletsService.copyPadlet(user.id, padletId, dto);
   }
 }

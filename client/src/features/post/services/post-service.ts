@@ -1,4 +1,4 @@
-import type { Post } from '../interfaces/post';
+import type { Post, PostLayout } from '../interfaces/post';
 import type { PostContentTab } from '../enums/post-content-tab';
 import { httpClient } from '../../../shared/services';
 
@@ -18,12 +18,12 @@ export function createPost(
 ): Promise<Post> {
   return httpClient<Post>(`padlets/${padletId}/posts`, {
     method: 'POST',
-    body: toRequestBody(input),
+    body: toContentBody(input),
   });
 }
 
 /**
- * Updates an existing post on a padlet board.
+ * Updates an existing post's content on a padlet board.
  */
 export function updatePost(
   padletId: string,
@@ -32,20 +32,34 @@ export function updatePost(
 ): Promise<Post> {
   return httpClient<Post>(`padlets/${padletId}/posts/${postId}`, {
     method: 'PATCH',
-    body: toRequestBody(input),
+    body: toContentBody(input),
   });
 }
 
 /**
- * Deletes a post from a padlet board.
+ * Updates a post's position on a padlet board.
  */
-export function deletePost(padletId: string, postId: string): Promise<void> {
-  return httpClient<void>(`padlets/${padletId}/posts/${postId}`, {
+export function updatePostLayout(
+  padletId: string,
+  postId: string,
+  layout: PostLayout,
+): Promise<Post> {
+  return httpClient<Post>(`padlets/${padletId}/posts/${postId}/layout`, {
+    method: 'PATCH',
+    body: layout,
+  });
+}
+
+/**
+ * Deletes a post and returns the remaining posts (with refreshed layouts).
+ */
+export function deletePost(padletId: string, postId: string): Promise<Post[]> {
+  return httpClient<Post[]>(`padlets/${padletId}/posts/${postId}`, {
     method: 'DELETE',
   });
 }
 
-function toRequestBody(input: PostInput) {
+function toContentBody(input: PostInput) {
   return {
     color: input.color,
     content_kind: input.contentTab,

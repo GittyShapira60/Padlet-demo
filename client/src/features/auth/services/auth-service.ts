@@ -1,4 +1,4 @@
-import type { User } from '../interfaces/user';
+import type { User } from '../../../shared/interfaces/user';
 import { clearAuthData, setAuthData } from '../utils/auth-token-storage';
 import { httpClient } from '../../../shared/services/http-client';
 

@@ -9,16 +9,14 @@ export interface CreatePadletInput {
   boardType: PadletBoardType;
 }
 
-/**
- * Returns the current user's boards (mine + shared).
- */
+export function deletePadlet(padletId: string): Promise<void> {
+  return httpClient<void>('padlets/' + padletId, { method: 'DELETE' });
+}
+
 export function getPadletBoards(): Promise<PadletBoards> {
   return httpClient<PadletBoards>('padlets');
 }
 
-/**
- * Creates a new padlet board for the current user.
- */
 export function createPadlet(input: CreatePadletInput): Promise<Padlet> {
   return httpClient<Padlet>('padlets', {
     method: 'POST',
@@ -31,19 +29,25 @@ export function createPadlet(input: CreatePadletInput): Promise<Padlet> {
   });
 }
 
-/**
- * Returns a single padlet with its posts, or null when it does not exist.
- */
-export async function getPadletDetail(
-  padletId: string,
-): Promise<PadletDetail | null> {
+export async function getPadletDetail(padletId: string): Promise<PadletDetail | null> {
   try {
-    return await httpClient<PadletDetail>(`padlets/${padletId}`);
+    return await httpClient<PadletDetail>('padlets/' + padletId);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
       return null;
     }
-
     throw error;
   }
+}
+
+export interface CopyPadletOptions {
+  includePosts: boolean;
+  includeParticipants: boolean;
+}
+
+export function copyPadlet(padletId: string, options: CopyPadletOptions): Promise<Padlet> {
+  return httpClient<Padlet>('padlets/' + padletId + '/copy', {
+    method: 'POST',
+    body: options,
+  });
 }

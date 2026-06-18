@@ -6,7 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { User } from '../interfaces/user';
+import type { User } from '../../../shared/interfaces/user';
 import * as authService from '../services/auth-service';
 import { getAuthData } from '../utils/auth-token-storage';
 

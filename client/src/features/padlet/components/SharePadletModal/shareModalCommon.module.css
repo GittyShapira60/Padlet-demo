@@ -1,0 +1,142 @@
+.surface {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.surfaceBetween {
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
+.surfaceWhite {
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: #ffffff;
+}
+
+.fieldInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  padding: 0.35rem 0.25rem;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  color: #1e293b;
+}
+
+.fieldInput::placeholder {
+  color: #94a3b8;
+}
+
+.fieldInput:focus {
+  outline: none;
+}
+
+.fieldInputReadonly {
+  font-size: 0.875rem;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.iconButton {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 6px;
+}
+
+.iconButton:hover {
+  color: #334155;
+  background: #e2e8f0;
+}
+
+.actionButton {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-brand-pink, #f04e98);
+  cursor: pointer;
+}
+
+.actionButton:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.actionButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.rowLabel {
+  font-size: 0.9375rem;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.username {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9375rem;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sectionLabel {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.error {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #dc2626;
+}
+
+.successFeedback {
+  margin: -0.5rem 0 0;
+  font-size: 0.75rem;
+  color: #16a34a;
+}
+
+.empty {
+  margin: 0;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.875rem;
+  color: #94a3b8;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

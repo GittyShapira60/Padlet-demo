@@ -1,4 +1,4 @@
-import type { User } from '../interfaces/user';
+import type { User } from '../../../shared/interfaces/user';
 
 const STORAGE_KEY = 'padlet_auth_token';
 

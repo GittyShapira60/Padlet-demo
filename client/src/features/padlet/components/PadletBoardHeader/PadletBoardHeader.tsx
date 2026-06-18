@@ -1,14 +1,16 @@
-import { ArrowRight } from '../../../../shared/icons';
+import { ArrowRight, Share2 } from '../../../../shared/icons';
 import styles from './PadletBoardHeader.module.css';
 
 interface PadletBoardHeaderProps {
   title: string;
   onBack: () => void;
+  onShareClick: () => void;
 }
 
 export default function PadletBoardHeader({
   title,
   onBack,
+  onShareClick,
 }: PadletBoardHeaderProps) {
   return (
     <>
@@ -18,6 +20,15 @@ export default function PadletBoardHeader({
       </button>
       <header className={styles.header}>
         <h1 className={styles.title}>{title}</h1>
+        <button
+          type="button"
+          className={styles.share}
+          aria-label="שיתוף"
+          onClick={onShareClick}
+        >
+          <Share2 size={16} strokeWidth={2} aria-hidden="true" />
+          שיתוף
+        </button>
       </header>
     </>
   );
