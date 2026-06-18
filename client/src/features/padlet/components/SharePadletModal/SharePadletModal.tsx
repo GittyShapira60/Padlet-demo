@@ -42,15 +42,21 @@ export default function SharePadletModal({
     handleCollaboratorPermissionChange,
     clearInviteError,
     reportCopyError,
+    resetModalForm,
   } = useSharePadletModal({ padletId, currentUsername });
 
+  function handleClose() {
+    resetModalForm();
+    onClose();
+  }
+
   return (
-    <Modal onClose={onClose} ariaLabelledBy={TITLE_ID}>
+    <Modal onClose={handleClose} ariaLabelledBy={TITLE_ID}>
       <div className={styles.panel}>
         <SharePadletModalHeader
           title="הרשאות"
           titleId={TITLE_ID}
-          onClose={onClose}
+          onClose={handleClose}
         />
 
         <ShareLinkField shareUrl={shareUrl} onCopyError={reportCopyError} />

@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react';
 import { usePadlets } from '../../padlet/hooks/usePadlets';
 import { useAuth } from '../../auth/context/AuthProvider';
 import type { Padlet } from '../../padlet/interfaces/padlet';
-import type { CopyPadletOptions } from '../../padlet/services/padlet-service';
 
 export function useHomePage() {
   const { user } = useAuth();
@@ -31,20 +30,6 @@ export function useHomePage() {
     [addPadlet],
   );
 
-  const handleDeletePadlet = useCallback(
-    async (padletId: string) => {
-      await removePadlet(padletId);
-    },
-    [removePadlet],
-  );
-
-  const handleCopyPadlet = useCallback(
-    async (padletId: string, options: CopyPadletOptions) => {
-      await duplicatePadlet(padletId, options);
-    },
-    [duplicatePadlet],
-  );
-
   return {
     username,
     boards,
@@ -58,7 +43,7 @@ export function useHomePage() {
     handleCreatePadlet,
     handleCloseCreateModal,
     handlePadletCreated,
-    handleDeletePadlet,
-    handleCopyPadlet,
+    handleDeletePadlet: removePadlet,
+    handleCopyPadlet: duplicatePadlet,
   };
 }

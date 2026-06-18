@@ -27,6 +27,12 @@ export default function PadletCard({ padlet, onDelete, onCopy }: PadletCardProps
 
   async function handleDelete(e: React.MouseEvent) {
     e.stopPropagation();
+
+    const confirmed = window.confirm(`למחוק את הלוח "${padlet.title}"?`);
+    if (!confirmed) {
+      return;
+    }
+
     await onDelete?.(padlet.id);
   }
 
@@ -82,61 +88,61 @@ export default function PadletCard({ padlet, onDelete, onCopy }: PadletCardProps
             {padlet.postCount} {postLabel}
           </p>
         </div>
-
-        <div className={styles.actions}>
-          {onDelete && (
-            <button type="button" className={styles.deleteBtn} onClick={handleDelete}>
-              <Trash2 size={12} />
-              מחק
-            </button>
-          )}
-          {onCopy && (
-            <button type="button" className={styles.copyBtn} onClick={handleCopyClick}>
-              <Copy size={12} />
-              העתק
-            </button>
-          )}
-        </div>
-
-        {showCopyModal && (
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <p className={styles.modalTitle}>העתקת לוח</p>
-            <label className={styles.modalOption}>
-              <input
-                type="checkbox"
-                checked={includePosts}
-                onChange={(e) => setIncludePosts(e.target.checked)}
-              />
-              כלול פוסטים שלי
-            </label>
-            <label className={styles.modalOption}>
-              <input
-                type="checkbox"
-                checked={includeParticipants}
-                onChange={(e) => setIncludeParticipants(e.target.checked)}
-              />
-              כלול משתתפים
-            </label>
-            <div className={styles.modalActions}>
-              <button
-                type="button"
-                className={styles.modalConfirm}
-                onClick={handleCopyConfirm}
-                disabled={isCopying}
-              >
-                {isCopying ? 'מעתיק...' : 'העתק'}
-              </button>
-              <button
-                type="button"
-                className={styles.modalCancel}
-                onClick={(e) => { e.stopPropagation(); setShowCopyModal(false); }}
-              >
-                ביטול
-              </button>
-            </div>
-          </div>
-        )}
       </button>
+
+      <div className={styles.actions}>
+        {onDelete && (
+          <button type="button" className={styles.actionBtn} onClick={handleDelete}>
+            <Trash2 size={12} />
+            מחק
+          </button>
+        )}
+        {onCopy && (
+          <button type="button" className={styles.actionBtn} onClick={handleCopyClick}>
+            <Copy size={12} />
+            העתק
+          </button>
+        )}
+      </div>
+
+      {showCopyModal && (
+        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+          <p className={styles.modalTitle}>העתקת לוח</p>
+          <label className={styles.modalOption}>
+            <input
+              type="checkbox"
+              checked={includePosts}
+              onChange={(e) => setIncludePosts(e.target.checked)}
+            />
+            כלול פוסטים שלי
+          </label>
+          <label className={styles.modalOption}>
+            <input
+              type="checkbox"
+              checked={includeParticipants}
+              onChange={(e) => setIncludeParticipants(e.target.checked)}
+            />
+            כלול משתתפים
+          </label>
+          <div className={styles.modalActions}>
+            <button
+              type="button"
+              className={styles.modalConfirm}
+              onClick={handleCopyConfirm}
+              disabled={isCopying}
+            >
+              {isCopying ? 'מעתיק...' : 'העתק'}
+            </button>
+            <button
+              type="button"
+              className={styles.modalCancel}
+              onClick={(e) => { e.stopPropagation(); setShowCopyModal(false); }}
+            >
+              ביטול
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

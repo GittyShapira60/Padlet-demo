@@ -122,7 +122,7 @@ export function useSharePadletModal({
   const handleInviteUser = useCallback(
     async (user: User) => {
       const permission = clampPermission(
-        rowPermissions[user.id] ?? defaultInvitePermission,
+        getRowPermission(user.id),
         collaboratorMinimum,
       );
       setInviteError('');
@@ -141,7 +141,6 @@ export function useSharePadletModal({
           delete next[user.id];
           return next;
         });
-        setSearchQuery('');
       } catch {
         setInviteError(`הזמנת ${user.username} נכשלה`);
       } finally {
@@ -181,6 +180,12 @@ export function useSharePadletModal({
     setInviteError('לא הצלחנו להעתיק את הקישור');
   }
 
+  function resetModalForm() {
+    setSearchQuery('');
+    setRowPermissions({});
+    setInviteError('');
+  }
+
   return {
     shareUrl,
     linkPermission,
@@ -202,5 +207,6 @@ export function useSharePadletModal({
     handleCollaboratorPermissionChange,
     clearInviteError,
     reportCopyError,
+    resetModalForm,
   };
 }

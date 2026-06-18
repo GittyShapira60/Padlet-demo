@@ -35,11 +35,21 @@ export function usePadlets() {
   }, []);
 
   const removePadlet = useCallback(async (padletId: string) => {
-    await deletePadlet(padletId);
-    setBoards((current) => ({
-      mine: current.mine.filter((p) => p.id !== padletId),
-      shared: current.shared.filter((p) => p.id !== padletId),
-    }));
+    let snapshot: PadletBoards = EMPTY_BOARDS;
+    setBoards((current) => {
+      snapshot = current;
+      return {
+        mine: current.mine.filter((p) => p.id !== padletId),
+        shared: current.shared.filter((p) => p.id !== padletId),
+      };
+    });
+
+    try {
+      await deletePadlet(padletId);
+    } catch {
+      setBoards(snapshot);
+      window.alert('לא הצלחנו למחוק את הלוח');
+    }
   }, []);
 
   const duplicatePadlet = useCallback(async (padletId: string, options: CopyPadletOptions) => {

@@ -122,11 +122,11 @@
   z-index: 3;
 }
 
-.card:hover .actions {
+.wrapper:hover .actions {
   opacity: 1;
 }
 
-.deleteBtn {
+.actionBtn {
   height: 1.6rem;
   padding: 0 0.5rem;
   border-radius: 8px;
@@ -142,27 +142,7 @@
   transition: background 0.15s ease;
 }
 
-.deleteBtn:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.copyBtn {
-  height: 1.6rem;
-  padding: 0 0.5rem;
-  border-radius: 8px;
-  border: none;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  transition: background 0.15s ease;
-}
-
-.copyBtn:hover {
+.actionBtn:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
