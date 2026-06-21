@@ -10,13 +10,11 @@ interface BoardTypePickerProps {
 
 export default function BoardTypePicker({ value, onChange }: BoardTypePickerProps) {
   return (
-    <div className={styles.list} role="radiogroup" aria-label="סוג לוח">
+    <div className={styles.list}>
       {PADLET_BOARD_OPTIONS.map((option) => (
         <button
           key={option.id}
           type="button"
-          role="radio"
-          aria-checked={value === option.id}
           className={`${styles.item} ${value === option.id ? styles.itemActive : ''}`}
           onClick={() => onChange(option.id)}
         >

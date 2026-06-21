@@ -31,14 +31,12 @@ export default function ShareLinkField({
           type="text"
           value={shareUrl}
           readOnly
-          aria-label="קישור ללוח"
           onFocus={(event) => event.target.select()}
         />
         <button
           type="button"
           className={common.iconButton}
           onClick={() => void handleCopyLink()}
-          aria-label={copied ? 'הקישור הועתק' : 'העתק קישור'}
           title={copied ? 'הועתק!' : 'העתק קישור'}
         >
           <Copy size={18} />

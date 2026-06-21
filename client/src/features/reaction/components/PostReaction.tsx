@@ -65,11 +65,6 @@ export default function PostReaction({ postId }: PostReactionProps) {
         <button
           type="button"
           className={styles.addBtn}
-          aria-label={
-            reactions.currentUserReactionCode
-              ? 'החלפת תגובת אימוג׳י'
-              : 'הוספת תגובת אימוג׳י'
-          }
           onClick={handleOpenPicker}
         >
           <SmilePlus size={19} strokeWidth={1.5} />

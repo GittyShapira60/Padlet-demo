@@ -15,7 +15,7 @@ export default function BoardPreview({ type, active }: BoardPreviewProps) {
 
   if (type === 'freewall') {
     return (
-      <svg className="board-preview" viewBox="0 0 72 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <svg className="board-preview" viewBox="0 0 72 50" xmlns="http://www.w3.org/2000/svg">
         <rect width="72" height="50" rx="6" fill={bg} />
         <rect x="6" y="8" width="22" height="14" rx="3" fill={pink} />
         <rect x="32" y="6" width="18" height="12" rx="3" fill={yellow} />
@@ -27,7 +27,7 @@ export default function BoardPreview({ type, active }: BoardPreviewProps) {
 
   if (type === 'grid') {
     return (
-      <svg className="board-preview" viewBox="0 0 72 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <svg className="board-preview" viewBox="0 0 72 50" xmlns="http://www.w3.org/2000/svg">
         <rect width="72" height="50" rx="6" fill={bg} />
         <rect x="6" y="8" width="18" height="14" rx="3" fill={pink} />
         <rect x="28" y="8" width="18" height="14" rx="3" fill={yellow} />
@@ -41,7 +41,7 @@ export default function BoardPreview({ type, active }: BoardPreviewProps) {
 
   if (type === 'brainstorm') {
     return (
-      <svg className="board-preview" viewBox="0 0 72 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <svg className="board-preview" viewBox="0 0 72 50" xmlns="http://www.w3.org/2000/svg">
         <rect width="72" height="50" rx="6" fill={bg} />
         <ellipse cx="36" cy="25" rx="10" ry="8" fill={pink} />
         <ellipse cx="14" cy="16" rx="7" ry="6" fill={yellow} />
@@ -53,7 +53,7 @@ export default function BoardPreview({ type, active }: BoardPreviewProps) {
   }
 
   return (
-    <svg className="board-preview" viewBox="0 0 72 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <svg className="board-preview" viewBox="0 0 72 50" xmlns="http://www.w3.org/2000/svg">
       <rect width="72" height="50" rx="6" fill={bg} />
       <line x1="6" y1="32" x2="66" y2="32" stroke="#e5e7eb" strokeWidth="2" />
       <circle cx="18" cy="32" r="3.5" fill={pink} />

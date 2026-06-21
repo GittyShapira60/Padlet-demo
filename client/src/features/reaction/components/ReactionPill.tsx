@@ -15,20 +15,14 @@ export default function ReactionPill({
   const pillContent = (
     <>
       <span className={styles.count}>{summary.count}</span>
-      <span className={styles.glyph} aria-hidden>
-        {summary.glyph}
-      </span>
+      <span className={styles.glyph}>{summary.glyph}</span>
     </>
   );
-
-  const reactorsLabel = summary.reactors
-    .map((reactor) => reactor.username)
-    .join(', ');
 
   return (
     <div className={styles.pillWrap}>
       {summary.reactors.length > 0 ? (
-        <div className={styles.reactorsPopover} role="tooltip">
+        <div className={styles.reactorsPopover}>
           <ul className={styles.reactorsList}>
             {summary.reactors.map((reactor) => (
               <li key={reactor.userId} className={styles.reactorItem}>
@@ -43,7 +37,6 @@ export default function ReactionPill({
         <button
           type="button"
           className={`${styles.pill} ${styles.pillOwn}`}
-          aria-label={`${summary.count} תגובות עם ${summary.glyph}. ${reactorsLabel}. לחץ להסרת התגובה שלך`}
           onClick={(event) => {
             event.stopPropagation();
             onRemove?.();
@@ -52,12 +45,7 @@ export default function ReactionPill({
           {pillContent}
         </button>
       ) : (
-        <div
-          className={styles.pill}
-          aria-label={`${summary.count} תגובות עם ${summary.glyph}. ${reactorsLabel}`}
-        >
-          {pillContent}
-        </div>
+        <div className={styles.pill}>{pillContent}</div>
       )}
     </div>
   );

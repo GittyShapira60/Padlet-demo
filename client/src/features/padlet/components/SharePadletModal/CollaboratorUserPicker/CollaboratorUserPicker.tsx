@@ -48,7 +48,7 @@ export default function CollaboratorUserPicker({
       {usersError ? <p className={common.error}>{usersError}</p> : null}
 
       {showDropdown ? (
-        <ul className={styles.dropdown} role="listbox" aria-label="משתמשים">
+        <ul className={styles.dropdown}>
           {usersLoading ? (
             <li className={styles.emptyOption}>טוען משתמשים...</li>
           ) : filteredUsers.length === 0 ? (

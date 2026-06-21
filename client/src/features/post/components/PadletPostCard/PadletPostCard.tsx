@@ -24,7 +24,6 @@ function PostActions({
       <button
         type="button"
         className={styles.actionBtn}
-        aria-label="עריכת פוסט"
         onClick={() => onEdit?.(post)}
       >
         <Pencil size={14} />
@@ -32,7 +31,6 @@ function PostActions({
       <button
         type="button"
         className={`${styles.actionBtn} ${styles.deleteBtn}`}
-        aria-label="מחיקת פוסט"
         onClick={() => onDelete?.(post)}
       >
         <Trash2 size={14} />

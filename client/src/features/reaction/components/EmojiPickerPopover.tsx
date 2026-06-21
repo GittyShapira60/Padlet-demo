@@ -163,12 +163,10 @@ export default function EmojiPickerPopover({
         right: position.right,
         visibility: position.ready ? 'visible' : 'hidden',
       }}
-      role="dialog"
-      aria-label="בחירת אימוג'י"
       onClick={(event) => event.stopPropagation()}
     >
       <div className={styles.searchRow}>
-        <Search size={16} className={styles.searchIcon} aria-hidden />
+        <Search size={16} className={styles.searchIcon} />
         <input
           type="search"
           className={styles.searchInput}
@@ -192,7 +190,6 @@ export default function EmojiPickerPopover({
                   key={emoji.code}
                   type="button"
                   className={`${styles.emojiBtn} ${isSelected ? styles.emojiBtnSelected : ''}`}
-                  aria-label={emoji.glyph}
                   onClick={() => onSelect(emoji.code)}
                 >
                   {emoji.glyph}
@@ -206,9 +203,7 @@ export default function EmojiPickerPopover({
       </div>
 
       <div className={styles.footer}>
-        <span className={styles.scrollHint} aria-hidden>
-          &gt;&gt;
-        </span>
+        <span className={styles.scrollHint}>&gt;&gt;</span>
         {EMOJI_CATEGORIES.map((category) => {
           const isActive =
             !searchQuery.trim() && activeCategory === category.id;
@@ -218,8 +213,6 @@ export default function EmojiPickerPopover({
               key={category.id}
               type="button"
               className={`${styles.categoryBtn} ${isActive ? styles.categoryBtnActive : ''}`}
-              aria-label={category.label}
-              aria-pressed={isActive}
               onClick={() => {
                 onSearchChange('');
                 onCategoryChange(category.id);
