@@ -1,5 +1,6 @@
 import { Pencil, Trash2 } from '../../../../shared/icons';
 import type { Post } from '../../interfaces/post';
+import { PostReaction } from '../../reaction';
 import styles from './PadletPostCard.module.css';
 
 interface PadletPostCardProps {
@@ -57,6 +58,7 @@ export default function PadletPostCard({
         {post.title ? <h3 className={styles.title}>{post.title}</h3> : null}
         {post.subject ? <p className={styles.subject}>{post.subject}</p> : null}
       </div>
+      <PostReaction postId={post.id} />
       <p className={styles.author}>{post.authorUsername}</p>
     </article>
   );
