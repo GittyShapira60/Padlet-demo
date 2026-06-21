@@ -1,3 +1,4 @@
+import ConfirmDialog from '../../../shared/components/ConfirmDialog/ConfirmDialog';
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
 import PadletPostsLayer from '../../post/components/PadletPostsLayer/PadletPostsLayer';
@@ -15,6 +16,10 @@ export default function PadletPage() {
     isCreatePostOpen,
     isShareOpen,
     postToEdit,
+    postPendingDelete,
+    isDeletingPost,
+    isLeaveOpen,
+    isLeavingPadlet,
     currentUsername,
     handleBack,
     handleCreatePost,
@@ -23,8 +28,13 @@ export default function PadletPage() {
     handleCloseShare,
     handlePostSaved,
     handleEditPost,
-    handleDeletePost,
+    handleRequestDeletePost,
+    handleCancelDeletePost,
+    handleConfirmDeletePost,
     handleLayoutChange,
+    handleOpenLeave,
+    handleCancelLeave,
+    handleConfirmLeave,
   } = usePadletPage();
 
   if (isLoading) {
@@ -49,15 +59,17 @@ export default function PadletPage() {
     >
       <PadletBoardHeader
         title={padlet.title}
+        isShared={padlet.isShared}
         onBack={handleBack}
         onShareClick={handleOpenShare}
+        onLeaveClick={handleOpenLeave}
       />
       <PadletPostsLayer
         boardType={padlet.boardType}
         posts={posts}
         currentUsername={currentUsername}
         onEditPost={handleEditPost}
-        onDeletePost={(post) => void handleDeletePost(post)}
+        onDeletePost={(post) => handleRequestDeletePost(post)}
         onLayoutChange={(postId, layout) =>
           void handleLayoutChange(postId, layout)
         }
@@ -78,6 +90,32 @@ export default function PadletPage() {
           postToEdit={postToEdit}
           onClose={handleClosePostModal}
           onSubmit={handlePostSaved}
+        />
+      ) : null}
+
+      {postPendingDelete ? (
+        <ConfirmDialog
+          title="מחיקת פוסט"
+          description="האם את/ה בטוח/ה שברצונך למחוק את הפוסט?"
+          confirmLabel="מחק"
+          pendingLabel="מוחק..."
+          tone="danger"
+          isPending={isDeletingPost}
+          onConfirm={() => void handleConfirmDeletePost()}
+          onCancel={handleCancelDeletePost}
+        />
+      ) : null}
+
+      {isLeaveOpen ? (
+        <ConfirmDialog
+          title="עזיבת לוח"
+          description={`האם את/ה בטוח/ה שברצונך לעזוב את הלוח "${padlet.title}"? לא תהיה לך יותר גישה אליו.`}
+          confirmLabel="עזוב"
+          pendingLabel="עוזב/ת..."
+          tone="danger"
+          isPending={isLeavingPadlet}
+          onConfirm={() => void handleConfirmLeave()}
+          onCancel={handleCancelLeave}
         />
       ) : null}
     </div>

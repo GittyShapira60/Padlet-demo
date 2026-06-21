@@ -2,21 +2,25 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Padlet } from '../../../padlet/interfaces/padlet';
 import type { CopyPadletOptions } from '../../../padlet/services/padlet-service';
-import { Calendar, Copy, LayoutDashboard, Lock, Trash2, Users } from '../../../../shared/icons';
+import ConfirmDialog from '../../../../shared/components/ConfirmDialog/ConfirmDialog';
+import { Calendar, Copy, LayoutDashboard, Lock, LogOut, Trash2, Users } from '../../../../shared/icons';
 import styles from './PadletCard.module.css';
+
+type ActiveDialog = 'delete' | 'copy' | 'leave' | null;
 
 interface PadletCardProps {
   padlet: Padlet;
   onDelete?: (padletId: string) => Promise<void>;
   onCopy?: (padletId: string, options: CopyPadletOptions) => Promise<void>;
+  onLeave?: (padletId: string) => Promise<void>;
 }
 
-export default function PadletCard({ padlet, onDelete, onCopy }: PadletCardProps) {
+export default function PadletCard({ padlet, onDelete, onCopy, onLeave }: PadletCardProps) {
   const navigate = useNavigate();
-  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [activeDialog, setActiveDialog] = useState<ActiveDialog>(null);
   const [includePosts, setIncludePosts] = useState(true);
   const [includeParticipants, setIncludeParticipants] = useState(false);
-  const [isCopying, setIsCopying] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const postLabel = padlet.postCount === 1 ? 'פוסט' : 'פוסטים';
   const cardClassName = padlet.isShared ? `${styles.card} ${styles.shared}` : styles.card;
@@ -25,28 +29,39 @@ export default function PadletCard({ padlet, onDelete, onCopy }: PadletCardProps
     navigate(`/padlets/${padlet.id}`);
   }
 
-  async function handleDelete(e: React.MouseEvent) {
+  function openDialog(dialog: ActiveDialog, e: React.MouseEvent) {
     e.stopPropagation();
+    setActiveDialog(dialog);
+  }
 
-    const confirmed = window.confirm(`למחוק את הלוח "${padlet.title}"?`);
-    if (!confirmed) {
+  function closeDialog() {
+    if (isSubmitting) {
       return;
     }
+    setActiveDialog(null);
+    setIncludePosts(true);
+    setIncludeParticipants(false);
+  }
 
+  async function handleConfirmDelete() {
+    setIsSubmitting(true);
     await onDelete?.(padlet.id);
+    setIsSubmitting(false);
+    setActiveDialog(null);
   }
 
-  function handleCopyClick(e: React.MouseEvent) {
-    e.stopPropagation();
-    setShowCopyModal(true);
-  }
-
-  async function handleCopyConfirm(e: React.MouseEvent) {
-    e.stopPropagation();
-    setIsCopying(true);
+  async function handleConfirmCopy() {
+    setIsSubmitting(true);
     await onCopy?.(padlet.id, { includePosts, includeParticipants });
-    setIsCopying(false);
-    setShowCopyModal(false);
+    setIsSubmitting(false);
+    setActiveDialog(null);
+  }
+
+  async function handleConfirmLeave() {
+    setIsSubmitting(true);
+    await onLeave?.(padlet.id);
+    setIsSubmitting(false);
+    setActiveDialog(null);
   }
 
   return (
@@ -92,56 +107,80 @@ export default function PadletCard({ padlet, onDelete, onCopy }: PadletCardProps
 
       <div className={styles.actions}>
         {onDelete && (
-          <button type="button" className={styles.actionBtn} onClick={handleDelete}>
+          <button type="button" className={styles.actionBtn} onClick={(e) => openDialog('delete', e)}>
             <Trash2 size={12} />
-            מחק
+            
           </button>
         )}
         {onCopy && (
-          <button type="button" className={styles.actionBtn} onClick={handleCopyClick}>
+          <button type="button" className={styles.actionBtn} onClick={(e) => openDialog('copy', e)}>
             <Copy size={12} />
-            העתק
+            
+          </button>
+        )}
+        {onLeave && (
+          <button type="button" className={styles.actionBtn} onClick={(e) => openDialog('leave', e)}>
+            <LogOut size={12} />
+            
           </button>
         )}
       </div>
 
-      {showCopyModal && (
-        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-          <p className={styles.modalTitle}>העתקת לוח</p>
-          <label className={styles.modalOption}>
-            <input
-              type="checkbox"
-              checked={includePosts}
-              onChange={(e) => setIncludePosts(e.target.checked)}
-            />
-            כלול פוסטים שלי
-          </label>
-          <label className={styles.modalOption}>
-            <input
-              type="checkbox"
-              checked={includeParticipants}
-              onChange={(e) => setIncludeParticipants(e.target.checked)}
-            />
-            כלול משתתפים
-          </label>
-          <div className={styles.modalActions}>
-            <button
-              type="button"
-              className={styles.modalConfirm}
-              onClick={handleCopyConfirm}
-              disabled={isCopying}
-            >
-              {isCopying ? 'מעתיק...' : 'העתק'}
-            </button>
-            <button
-              type="button"
-              className={styles.modalCancel}
-              onClick={(e) => { e.stopPropagation(); setShowCopyModal(false); }}
-            >
-              ביטול
-            </button>
+      {activeDialog === 'delete' && (
+        <ConfirmDialog
+          title="מחיקת לוח"
+          description={`האם את/ה בטוח/ה שברצונך למחוק את הלוח "${padlet.title}"? אינה הפיכה.`}
+          confirmLabel="מחק"
+          pendingLabel="מוחק..."
+          tone="danger"
+          isPending={isSubmitting}
+          onConfirm={() => void handleConfirmDelete()}
+          onCancel={closeDialog}
+        />
+      )}
+
+      {activeDialog === 'copy' && (
+        <ConfirmDialog
+          title="העתקת לוח"
+          description={`האם ברצונך להעתיק את הלוח "${padlet.title}"?`}
+          confirmLabel="העתק"
+          pendingLabel="מעתיק..."
+          isPending={isSubmitting}
+          onConfirm={() => void handleConfirmCopy()}
+          onCancel={closeDialog}
+        >
+          <div className={styles.dialogOptions}>
+            <label className={styles.dialogOption}>
+              <input
+                type="checkbox"
+                checked={includePosts}
+                onChange={(e) => setIncludePosts(e.target.checked)}
+              />
+              כלול פוסטים שלי
+            </label>
+            <label className={styles.dialogOption}>
+              <input
+                type="checkbox"
+                checked={includeParticipants}
+                onChange={(e) => setIncludeParticipants(e.target.checked)}
+              />
+              כלול משתתפים
+            </label>
           </div>
-        </div>
+        </ConfirmDialog>
+      )}
+
+      {activeDialog === 'leave' && (
+        <ConfirmDialog
+          title="עזיבת לוח"
+          description={`האם את/ה בטוח/ה שברצונך לעזוב את הלוח "${padlet.title}"?`}
+          confirmLabel="עזוב"
+          pendingLabel="עוזב/ת..."
+          tone="danger"
+          isPending={isSubmitting}
+          onConfirm={() => void handleConfirmLeave()}
+          onCancel={closeDialog}
+        />
       )}
     </div>
   );

@@ -13,6 +13,12 @@ export function deletePadlet(padletId: string): Promise<void> {
   return httpClient<void>('padlets/' + padletId, { method: 'DELETE' });
 }
 
+export function leavePadlet(padletId: string): Promise<void> {
+  return httpClient<void>('padlets/' + padletId + '/participants/me', {
+    method: 'DELETE',
+  });
+}
+
 export function getPadletBoards(): Promise<PadletBoards> {
   return httpClient<PadletBoards>('padlets');
 }
