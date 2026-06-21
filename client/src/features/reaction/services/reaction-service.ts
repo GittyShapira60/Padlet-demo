@@ -1,4 +1,4 @@
-import { httpClient } from '../../../../shared/services';
+import { httpClient } from '../../../shared/services';
 import type {
   PadletReactionsResponse,
   PostReactionsView,

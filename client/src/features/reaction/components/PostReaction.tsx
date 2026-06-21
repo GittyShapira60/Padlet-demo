@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { SmilePlus } from '../../../../shared/icons';
+import { SmilePlus } from '../../../shared/icons';
 import EmojiPickerPopover from './EmojiPickerPopover';
 import ReactionPill from './ReactionPill';
 import { usePostReactionsContext } from '../context/post-reactions-context';

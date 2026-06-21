@@ -1,6 +1,6 @@
 import { Pencil, Trash2 } from '../../../../../shared/icons';
 import type { Post } from '../../../interfaces/post';
-import { PostReaction } from '../../../reaction';
+import { PostReaction } from '../../../../reaction';
 import cardStyles from '../../PadletPostCard/PadletPostCard.module.css';
 import ThoughtBubble from './ThoughtBubble/ThoughtBubble';
 

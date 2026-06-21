@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Search } from '../../../../shared/icons';
+import { Search } from '../../../shared/icons';
 import {
   EMOJI_CATEGORIES,
   type EmojiCategoryId,

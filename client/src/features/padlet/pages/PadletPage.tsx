@@ -1,6 +1,6 @@
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
-import { PostReactionsProvider } from '../../post/reaction';
+import { PostReactionsProvider } from '../../reaction';
 import PadletPostsLayer from '../../post/components/PadletPostsLayer/PadletPostsLayer';
 import PadletBoardHeader from '../components/PadletBoardHeader/PadletBoardHeader';
 import SharePadletModal from '../components/SharePadletModal/SharePadletModal';

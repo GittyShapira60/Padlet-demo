@@ -1,6 +1,6 @@
 import { Pencil, Trash2 } from '../../../../shared/icons';
 import type { Post } from '../../interfaces/post';
-import { PostReaction } from '../../reaction';
+import { PostReaction } from '../../../reaction';
 import styles from './PadletPostCard.module.css';
 
 interface PadletPostCardProps {
