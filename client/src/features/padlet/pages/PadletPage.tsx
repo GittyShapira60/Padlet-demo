@@ -9,7 +9,6 @@ import { PADLET_PAGE_TEXTS } from './PadletPage.consts';
 import styles from './PadletPage.module.css';
 import { usePadletPage } from './usePadletPage';
 
-
 export default function PadletPage() {
   const {
     padlet,
@@ -67,16 +66,6 @@ export default function PadletPage() {
         onShareClick={handleOpenShare}
         onLeaveClick={handleOpenLeave}
       />
-      <PadletPostsLayer
-        boardType={padlet.boardType}
-        posts={posts}
-        currentUsername={currentUsername}
-        onEditPost={handleEditPost}
-        onDeletePost={(post) => handleRequestDeletePost(post)}
-        onLayoutChange={(postId, layout) =>
-          void handleLayoutChange(postId, layout)
-        }
-      />
       <PostReactionsProvider
         padletId={padlet.id}
         postIds={posts.map((post) => post.id)}
@@ -87,7 +76,7 @@ export default function PadletPage() {
           posts={posts}
           currentUsername={currentUsername}
           onEditPost={handleEditPost}
-          onDeletePost={(post) => void handleDeletePost(post)}
+          onDeletePost={(post) => handleRequestDeletePost(post)}
           onLayoutChange={(postId, layout) =>
             void handleLayoutChange(postId, layout)
           }
