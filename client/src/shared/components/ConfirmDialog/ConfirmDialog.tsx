@@ -37,7 +37,7 @@ export default function ConfirmDialog({
       : styles.confirmBtn;
 
   return (
-    <Modal onClose={onCancel} ariaLabelledBy={TITLE_ID}>
+    <Modal onClose={onCancel}>
       <div className={styles.panel}>
         <h2 id={TITLE_ID} className={styles.title}>
           {title}
