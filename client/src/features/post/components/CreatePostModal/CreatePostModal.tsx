@@ -4,7 +4,7 @@ import CreatePostContentArea from './CreatePostContentArea/CreatePostContentArea
 import CreatePostModalTabs from './CreatePostModalTabs/CreatePostModalTabs';
 import styles from './CreatePostModal.module.css';
 import PostColorPicker from './PostColorPicker/PostColorPicker';
-import { useCreatePostModal } from './useCreatePostModal';
+import { useCreatePostModal, MAX_POLL_ANSWERS } from './useCreatePostModal';
 
 interface CreatePostModalProps {
   padletId: string;
@@ -29,24 +29,20 @@ export default function CreatePostModal({
     setSelectedFile,
     selectedColor,
     setSelectedColor,
+    pollAnswers,
+    updatePollAnswer,
+    addPollAnswer,
+    removePollAnswer,
     isLoading,
     error,
     canSubmit,
     handleSubmit,
-  } = useCreatePostModal({
-    padletId,
-    postToEdit,
-    onClose,
-    onSubmit,
-  });
+  } = useCreatePostModal({ padletId, postToEdit, onClose, onSubmit });
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        onClose();
-      }
+      if (event.key === 'Escape') onClose();
     }
-
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
@@ -54,11 +50,7 @@ export default function CreatePostModal({
   const titleId = isEditMode ? 'edit-post-title' : 'create-post-title';
 
   return (
-    <div
-      className={styles.overlay}
-      onClick={onClose}
-      role="presentation"
-    >
+    <div className={styles.overlay} onClick={onClose} role="presentation">
       <div
         className={styles.container}
         role="dialog"
@@ -70,20 +62,12 @@ export default function CreatePostModal({
           <h2 id={titleId} className={styles.title}>
             {isEditMode ? 'עריכת פוסט' : 'פוסט חדש'}
           </h2>
-          <button
-            type="button"
-            className={styles.closeBtn}
-            onClick={onClose}
-            aria-label="סגור"
-          >
+          <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="סגור">
             &times;
           </button>
         </header>
 
-        <CreatePostModalTabs
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-        />
+        <CreatePostModalTabs activeTab={activeTab} onTabChange={handleTabChange} />
 
         <CreatePostContentArea
           activeTab={activeTab}
@@ -93,12 +77,15 @@ export default function CreatePostModal({
           existingImageName={postToEdit?.subject ?? null}
           onTextChange={setTextContent}
           onFileChange={setSelectedFile}
+          pollAnswers={pollAnswers}
+          onPollQuestionChange={setTextContent}
+          onPollAnswerChange={updatePollAnswer}
+          onAddPollAnswer={addPollAnswer}
+          onRemovePollAnswer={removePollAnswer}
+          maxPollAnswers={MAX_POLL_ANSWERS}
         />
 
-        <PostColorPicker
-          selectedColor={selectedColor}
-          onColorChange={setSelectedColor}
-        />
+        <PostColorPicker selectedColor={selectedColor} onColorChange={setSelectedColor} />
 
         {error ? <p className={styles.error}>{error}</p> : null}
 
@@ -110,19 +97,10 @@ export default function CreatePostModal({
             disabled={isLoading || !canSubmit}
           >
             {isLoading
-              ? isEditMode
-                ? 'שומרת...'
-                : 'מוסיף...'
-              : isEditMode
-                ? 'שמירה'
-                : 'הוסף פוסט'}
+              ? isEditMode ? 'שומרת...' : 'מוסיף...'
+              : isEditMode ? 'שמירה' : 'הוסף פוסט'}
           </button>
-          <button
-            type="button"
-            className={styles.cancelBtn}
-            onClick={onClose}
-            disabled={isLoading}
-          >
+          <button type="button" className={styles.cancelBtn} onClick={onClose} disabled={isLoading}>
             ביטול
           </button>
         </div>

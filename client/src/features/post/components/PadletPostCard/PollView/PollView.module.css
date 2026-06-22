@@ -1,0 +1,131 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.question {
+  margin: 0 0 0.4rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #1e293b;
+}
+
+.optionsList,
+.resultsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.optionItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.38rem 0.55rem;
+  border-radius: 8px;
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.55);
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.optionItem:hover {
+  border-color: var(--poll-accent, #7c3aed);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.optionSelected {
+  border-color: var(--poll-accent, #7c3aed);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.radio {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid #94a3b8;
+  background: #fff;
+  display: inline-block;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.radioChecked {
+  border-color: var(--poll-accent, #7c3aed);
+  background: var(--poll-accent, #7c3aed);
+  box-shadow: inset 0 0 0 3px #fff;
+}
+
+.optionLabel {
+  font-size: 0.78rem;
+  color: #334155;
+}
+
+.voteBtn {
+  display: block;
+  width: 100%;
+  margin-top: 0.3rem;
+  padding: 0.4rem 0;
+  border: none;
+  border-radius: 8px;
+  background: var(--poll-accent, #7c3aed);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.voteBtn:hover:not(:disabled) { opacity: 0.85; }
+.voteBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.voteCount {
+  margin: 0.2rem 0 0;
+  font-size: 0.68rem;
+  color: #64748b;
+  text-align: center;
+}
+
+.resultItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.resultLabelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.resultLabel { font-size: 0.76rem; color: #334155; }
+.resultLabelChosen { font-size: 0.76rem; color: var(--poll-accent, #7c3aed); font-weight: 700; }
+.resultPct { font-size: 0.72rem; font-weight: 600; color: #475569; }
+
+.resultBar {
+  height: 5px;
+  border-radius: 99px;
+  background: rgba(0, 0, 0, 0.1);
+  overflow: visible;
+  margin-inline-end: 2px;
+}
+
+.resultFill {
+  height: 100%;
+  border-radius: 99px;
+  background: #94a3b8;
+  transition: width 0.4s ease;
+}
+
+.resultFillChosen {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--poll-accent, #7c3aed);
+  transition: width 0.4s ease;
+}

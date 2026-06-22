@@ -2,10 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthProvider';
 import type { Post, PostLayout } from '../../post/interfaces/post';
-import {
-  deletePost,
-  updatePostLayout,
-} from '../../post/services/post-service';
+import { deletePost, updatePostLayout } from '../../post/services/post-service';
 import type { Padlet } from '../interfaces/padlet';
 import { getPadletDetail } from '../services/padlet-service';
 
@@ -128,11 +125,11 @@ export function usePadletPage() {
       }
 
       try {
-        const remainingPosts = await deletePost(padletId, post.id);
-        setPosts(remainingPosts);
+        await deletePost(padletId, post.id);
+        setPosts((current) => current.filter((item) => item.id !== post.id));
         setPadlet((current) =>
           current
-            ? { ...current, postCount: remainingPosts.length }
+            ? { ...current, postCount: Math.max(0, current.postCount - 1) }
             : current,
         );
       } catch {
@@ -141,6 +138,14 @@ export function usePadletPage() {
     },
     [padlet, padletId],
   );
+
+  const handlePollVote = useCallback((updatedPost: Post) => {
+    setPosts((current) =>
+      current.map((item) =>
+        item.id === updatedPost.id ? updatedPost : item,
+      ),
+    );
+  }, []);
 
   const handleLayoutChange = useCallback(
     async (postId: string, layout: PostLayout) => {
@@ -177,6 +182,7 @@ export function usePadletPage() {
     handlePostSaved,
     handleEditPost,
     handleDeletePost,
+    handlePollVote,
     handleLayoutChange,
   };
 }

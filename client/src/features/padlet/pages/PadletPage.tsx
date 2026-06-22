@@ -1,6 +1,7 @@
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
 import PadletPostsLayer from '../../post/components/PadletPostsLayer/PadletPostsLayer';
+import { PollProvider } from '../../post/context/PollContext';
 import PadletBoardHeader from '../components/PadletBoardHeader/PadletBoardHeader';
 import SharePadletModal from '../components/SharePadletModal/SharePadletModal';
 import styles from './PadletPage.module.css';
@@ -43,42 +44,28 @@ export default function PadletPage() {
   }
 
   return (
-    <div
-      className={styles.page}
-      style={{ background: padlet.background ?? '#f3f4f6' }}
-    >
-      <PadletBoardHeader
-        title={padlet.title}
-        onBack={handleBack}
-        onShareClick={handleOpenShare}
-      />
-      <PadletPostsLayer
-        boardType={padlet.boardType}
-        posts={posts}
-        currentUsername={currentUsername}
-        onEditPost={handleEditPost}
-        onDeletePost={(post) => void handleDeletePost(post)}
-        onLayoutChange={(postId, layout) =>
-          void handleLayoutChange(postId, layout)
-        }
-      />
+    <div className={styles.page} style={{ background: padlet.background ?? '#f3f4f6' }}>
+      <PadletBoardHeader title={padlet.title} onBack={handleBack} onShareClick={handleOpenShare} />
+
+      <PollProvider padletId={padlet.id} onVoteSuccess={handlePostSaved}>
+        <PadletPostsLayer
+          boardType={padlet.boardType}
+          posts={posts}
+          currentUsername={currentUsername}
+          onEditPost={handleEditPost}
+          onDeletePost={(post) => void handleDeletePost(post)}
+          onLayoutChange={(postId, layout) => void handleLayoutChange(postId, layout)}
+        />
+      </PollProvider>
+
       <CreatePostFab onClick={handleCreatePost} />
 
       {isShareOpen ? (
-        <SharePadletModal
-          padletId={padlet.id}
-          currentUsername={currentUsername}
-          onClose={handleCloseShare}
-        />
+        <SharePadletModal padletId={padlet.id} currentUsername={currentUsername} onClose={handleCloseShare} />
       ) : null}
 
       {isCreatePostOpen ? (
-        <CreatePostModal
-          padletId={padlet.id}
-          postToEdit={postToEdit}
-          onClose={handleClosePostModal}
-          onSubmit={handlePostSaved}
-        />
+        <CreatePostModal padletId={padlet.id} postToEdit={postToEdit} onClose={handleClosePostModal} onSubmit={handlePostSaved} />
       ) : null}
     </div>
   );

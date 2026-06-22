@@ -46,7 +46,7 @@ export default function DraggablePost({
         return;
       }
 
-      if ((event.target as HTMLElement).closest('button')) {
+      if ((event.target as HTMLElement).closest('button, [data-no-drag]')) {
         return;
       }
 

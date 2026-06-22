@@ -4,15 +4,17 @@ import styles from './PostColorPicker.module.css';
 interface PostColorPickerProps {
   selectedColor: string;
   onColorChange: (color: string) => void;
+  label?: string;
 }
 
 export default function PostColorPicker({
   selectedColor,
   onColorChange,
+  label = 'צבע רקע:',
 }: PostColorPickerProps) {
   return (
     <div className={styles.root}>
-      <span className={styles.label}>צבע רקע:</span>
+      <span className={styles.label}>{label}</span>
       <div className={styles.swatches} role="listbox" aria-label="צבע רקע">
         {BACKGROUND_COLORS.map((color, index) => {
           const isSelected =
