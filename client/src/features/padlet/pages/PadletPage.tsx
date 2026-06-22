@@ -1,12 +1,14 @@
 import ConfirmDialog from '../../../shared/components/ConfirmDialog/ConfirmDialog';
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
+import { PostReactionsProvider } from '../../reaction';
 import PadletPostsLayer from '../../post/components/PadletPostsLayer/PadletPostsLayer';
 import PadletBoardHeader from '../components/PadletBoardHeader/PadletBoardHeader';
 import SharePadletModal from '../components/SharePadletModal/SharePadletModal';
 import { PADLET_PAGE_TEXTS } from './PadletPage.consts';
 import styles from './PadletPage.module.css';
 import { usePadletPage } from './usePadletPage';
+
 
 export default function PadletPage() {
   const {
@@ -75,6 +77,22 @@ export default function PadletPage() {
           void handleLayoutChange(postId, layout)
         }
       />
+      <PostReactionsProvider
+        padletId={padlet.id}
+        postIds={posts.map((post) => post.id)}
+        canReact={Boolean(currentUsername)}
+      >
+        <PadletPostsLayer
+          boardType={padlet.boardType}
+          posts={posts}
+          currentUsername={currentUsername}
+          onEditPost={handleEditPost}
+          onDeletePost={(post) => void handleDeletePost(post)}
+          onLayoutChange={(postId, layout) =>
+            void handleLayoutChange(postId, layout)
+          }
+        />
+      </PostReactionsProvider>
       <CreatePostFab onClick={handleCreatePost} />
 
       {isShareOpen ? (

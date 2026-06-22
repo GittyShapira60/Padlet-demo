@@ -17,11 +17,10 @@ export default function CreatePadletModalHeader({
         type="button"
         className={styles.closeBtn}
         onClick={onClose}
-        aria-label="סגור"
       >
         ✕
       </button>
-      <h2 id="create-padlet-title" className={styles.title}>
+      <h2 className={styles.title}>
         {title.trim() || 'שם הלוח...'}
       </h2>
     </header>

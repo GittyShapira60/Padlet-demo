@@ -26,13 +26,11 @@ export default function BackgroundPicker({
 }: BackgroundPickerProps) {
   return (
     <div className={styles.root}>
-      <div className={styles.tabs} role="tablist" aria-label="סוג רקע">
+      <div className={styles.tabs}>
         {TABS.map((tab) => (
           <button
             key={tab}
             type="button"
-            role="tab"
-            aria-selected={activeTab === tab}
             className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ''}`}
             onClick={() => onTabChange(tab)}
           >
@@ -42,17 +40,14 @@ export default function BackgroundPicker({
       </div>
 
       {activeTab === 'colors' ? (
-        <div className={styles.colorGrid} role="listbox" aria-label="בחירת צבע רקע">
+        <div className={styles.colorGrid}>
           {BACKGROUND_COLORS.map((color) => (
             <button
               key={color}
               type="button"
-              role="option"
-              aria-selected={selectedColor === color}
               className={`${styles.swatch} ${selectedColor === color ? styles.swatchSelected : ''}`}
               style={{ background: color }}
               onClick={() => onColorChange(color)}
-              aria-label={color}
             />
           ))}
         </div>

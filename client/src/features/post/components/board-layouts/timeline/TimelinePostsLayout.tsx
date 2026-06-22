@@ -15,7 +15,7 @@ export default function TimelinePostsLayout({
 
   return (
     <div className={styles.track}>
-      <div className={styles.line} aria-hidden />
+      <div className={styles.line} />
       {timelinePosts.map((post) => (
         <div key={post.id} className={styles.post}>
           <time className={styles.date} dateTime={post.createdAt}>

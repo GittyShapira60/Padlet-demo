@@ -17,11 +17,9 @@ export default function AuthTabs({ activeMode, onModeChange }: AuthTabsProps) {
       : styles.tab;
 
   return (
-    <div className={styles.tabs} role="tablist" aria-label="סוג התחברות">
+    <div className={styles.tabs}>
       <button
         type="button"
-        role="tab"
-        aria-selected={activeMode === AuthModeValues.Login}
         className={loginTabClass}
         onClick={() => onModeChange(AuthModeValues.Login)}
       >
@@ -29,8 +27,6 @@ export default function AuthTabs({ activeMode, onModeChange }: AuthTabsProps) {
       </button>
       <button
         type="button"
-        role="tab"
-        aria-selected={activeMode === AuthModeValues.Register}
         className={registerTabClass}
         onClick={() => onModeChange(AuthModeValues.Register)}
       >

@@ -11,6 +11,8 @@ import {
   Pencil as LucidePencil,
   Plus as LucidePlus,
   Share2 as LucideShare2,
+  Search as LucideSearch,
+  SmilePlus as LucideSmilePlus,
   Trash2 as LucideTrash2,
   Users as LucideUsers,
   type LucideProps,
@@ -32,6 +34,8 @@ export const Bell = createUiIcon(LucideBell);
 export const BarChart3 = createUiIcon(LucideBarChart3);
 export const Plus = createUiIcon(LucidePlus);
 export const Share2 = createUiIcon(LucideShare2);
+export const Search = createUiIcon(LucideSearch);
+export const SmilePlus = createUiIcon(LucideSmilePlus);
 export const Copy = createUiIcon(LucideCopy);
 export const Pencil = createUiIcon(LucidePencil);
 export const Trash2 = createUiIcon(LucideTrash2);

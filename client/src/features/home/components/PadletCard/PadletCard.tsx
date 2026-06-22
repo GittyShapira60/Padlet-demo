@@ -71,24 +71,23 @@ export default function PadletCard({ padlet, onDelete, onCopy, onLeave }: Padlet
         className={cardClassName}
         style={{ background: padlet.background ?? undefined }}
         onClick={handleOpen}
-        aria-label={`פתיחת לוח ${padlet.title}`}
       >
         <div className={styles.top}>
           {padlet.isShared ? (
             <div className={styles.meta}>
               <span className={styles.sharedBadge}>
-                <Users size={11} strokeWidth={1.5} aria-hidden="true" />
+                <Users size={11} strokeWidth={1.5} />
                 משותף איתי
               </span>
-              <span className={styles.utilityIcon} aria-hidden="true">
+              <span className={styles.utilityIcon}>
                 <Lock size={12} strokeWidth={1.5} />
               </span>
-              <span className={styles.utilityIcon} aria-hidden="true">
+              <span className={styles.utilityIcon}>
                 <Calendar size={12} strokeWidth={1.5} />
               </span>
             </div>
           ) : (
-            <span className={styles.cardIcon} aria-hidden="true">
+            <span className={styles.cardIcon}>
               <LayoutDashboard size={14} strokeWidth={1.5} />
             </span>
           )}
