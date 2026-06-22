@@ -32,7 +32,7 @@ export default function PadletPage() {
     handlePadletUpdated,
     handlePostSaved,
     handleEditPost,
-    handleDeletePost,
+    handleRequestDeletePost,
     handleLayoutChange,
   } = usePadletPage();
 
@@ -117,7 +117,7 @@ export default function PadletPage() {
         posts={posts}
         currentUsername={currentUsername}
         onEditPost={handleEditPost}
-        onDeletePost={(post) => void handleDeletePost(post)}
+        onDeletePost={(post) => void handleRequestDeletePost(post)}
         onLayoutChange={(postId, layout) =>
           void handleLayoutChange(postId, layout)
         }
