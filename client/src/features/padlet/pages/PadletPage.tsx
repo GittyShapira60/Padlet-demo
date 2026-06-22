@@ -4,6 +4,7 @@ import CreatePostModal from '../../post/components/CreatePostModal/CreatePostMod
 import PadletPostsLayer from '../../post/components/PadletPostsLayer/PadletPostsLayer';
 import PadletBoardHeader from '../components/PadletBoardHeader/PadletBoardHeader';
 import SharePadletModal from '../components/SharePadletModal/SharePadletModal';
+import { PADLET_PAGE_TEXTS } from './PadletPage.consts';
 import styles from './PadletPage.module.css';
 import { usePadletPage } from './usePadletPage';
 
@@ -38,15 +39,15 @@ export default function PadletPage() {
   } = usePadletPage();
 
   if (isLoading) {
-    return <p className={styles.status}>טוען לוח...</p>;
+    return <p className={styles.status}>{PADLET_PAGE_TEXTS.loading}</p>;
   }
 
   if (error || !padlet) {
     return (
       <div className={styles.error}>
-        <p className={styles.errorText}>{error || 'לוח לא נמצא'}</p>
+        <p className={styles.errorText}>{error || PADLET_PAGE_TEXTS.boardNotFound}</p>
         <button type="button" className={styles.backOnly} onClick={handleBack}>
-          חזרה לבית
+          {PADLET_PAGE_TEXTS.backToHome}
         </button>
       </div>
     );
@@ -95,10 +96,10 @@ export default function PadletPage() {
 
       {postPendingDelete ? (
         <ConfirmDialog
-          title="מחיקת פוסט"
-          description="האם את/ה בטוח/ה שברצונך למחוק את הפוסט?"
-          confirmLabel="מחק"
-          pendingLabel="מוחק..."
+          title={PADLET_PAGE_TEXTS.deletePost.title}
+          description={PADLET_PAGE_TEXTS.deletePost.description}
+          confirmLabel={PADLET_PAGE_TEXTS.deletePost.confirmLabel}
+          pendingLabel={PADLET_PAGE_TEXTS.deletePost.pendingLabel}
           tone="danger"
           isPending={isDeletingPost}
           onConfirm={() => void handleConfirmDeletePost()}
@@ -108,10 +109,10 @@ export default function PadletPage() {
 
       {isLeaveOpen ? (
         <ConfirmDialog
-          title="עזיבת לוח"
-          description={`האם את/ה בטוח/ה שברצונך לעזוב את הלוח "${padlet.title}"? לא תהיה לך יותר גישה אליו.`}
-          confirmLabel="עזוב"
-          pendingLabel="עוזב/ת..."
+          title={PADLET_PAGE_TEXTS.leaveBoard.title}
+          description={PADLET_PAGE_TEXTS.leaveBoard.description(padlet.title)}
+          confirmLabel={PADLET_PAGE_TEXTS.leaveBoard.confirmLabel}
+          pendingLabel={PADLET_PAGE_TEXTS.leaveBoard.pendingLabel}
           tone="danger"
           isPending={isLeavingPadlet}
           onConfirm={() => void handleConfirmLeave()}
