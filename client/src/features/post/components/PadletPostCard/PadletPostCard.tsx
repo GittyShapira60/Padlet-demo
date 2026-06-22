@@ -1,5 +1,6 @@
 import { Pencil, Trash2 } from '../../../../shared/icons';
 import type { Post } from '../../interfaces/post';
+import { PostReaction } from '../../../reaction';
 import PollView from './PollView/PollView';
 import styles from './PadletPostCard.module.css';
 
@@ -17,10 +18,18 @@ function PostActions({ post, onEdit, onDelete }: {
 }) {
   return (
     <div className={`${styles.actions} padlet-post-actions`}>
-      <button type="button" className={styles.actionBtn} aria-label="עריכת פוסט" onClick={() => onEdit?.(post)}>
+      <button
+        type="button"
+        className={styles.actionBtn}
+        onClick={() => onEdit?.(post)}
+      >
         <Pencil size={14} />
       </button>
-      <button type="button" className={`${styles.actionBtn} ${styles.deleteBtn}`} aria-label="מחיקת פוסט" onClick={() => onDelete?.(post)}>
+      <button
+        type="button"
+        className={`${styles.actionBtn} ${styles.deleteBtn}`}
+        onClick={() => onDelete?.(post)}
+      >
         <Trash2 size={14} />
       </button>
     </div>
@@ -46,6 +55,7 @@ export default function PadletPostCard({ post, canManage = false, onEdit, onDele
           {post.subject ? <p className={styles.subject}>{post.subject}</p> : null}
         </div>
       )}
+      <PostReaction postId={post.id} />
       <p className={styles.author}>{post.authorUsername}</p>
     </article>
   );

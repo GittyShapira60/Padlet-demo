@@ -14,7 +14,7 @@ interface SharePadletModalProps {
   currentUsername?: string;
 }
 
-const TITLE_ID = 'share-padlet-title';
+const TITLE = 'הרשאות';
 
 export default function SharePadletModal({
   padletId,
@@ -51,11 +51,10 @@ export default function SharePadletModal({
   }
 
   return (
-    <Modal onClose={handleClose} ariaLabelledBy={TITLE_ID}>
+    <Modal onClose={handleClose}>
       <div className={styles.panel}>
         <SharePadletModalHeader
-          title="הרשאות"
-          titleId={TITLE_ID}
+          title={TITLE}
           onClose={handleClose}
         />
 

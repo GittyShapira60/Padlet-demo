@@ -1,11 +1,13 @@
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
+import { PostReactionsProvider } from '../../reaction';
 import PadletPostsLayer from '../../post/components/PadletPostsLayer/PadletPostsLayer';
 import { PollProvider } from '../../post/context/PollContext';
 import PadletBoardHeader from '../components/PadletBoardHeader/PadletBoardHeader';
 import SharePadletModal from '../components/SharePadletModal/SharePadletModal';
 import styles from './PadletPage.module.css';
 import { usePadletPage } from './usePadletPage';
+
 
 export default function PadletPage() {
   const {
@@ -48,14 +50,20 @@ export default function PadletPage() {
       <PadletBoardHeader title={padlet.title} onBack={handleBack} onShareClick={handleOpenShare} />
 
       <PollProvider padletId={padlet.id} onVoteSuccess={handlePostSaved}>
-        <PadletPostsLayer
-          boardType={padlet.boardType}
-          posts={posts}
-          currentUsername={currentUsername}
-          onEditPost={handleEditPost}
-          onDeletePost={(post) => void handleDeletePost(post)}
-          onLayoutChange={(postId, layout) => void handleLayoutChange(postId, layout)}
-        />
+        <PostReactionsProvider
+          padletId={padlet.id}
+          postIds={posts.map((post) => post.id)}
+          canReact={Boolean(currentUsername)}
+        >
+          <PadletPostsLayer
+            boardType={padlet.boardType}
+            posts={posts}
+            currentUsername={currentUsername}
+            onEditPost={handleEditPost}
+            onDeletePost={(post) => void handleDeletePost(post)}
+            onLayoutChange={(postId, layout) => void handleLayoutChange(postId, layout)}
+          />
+        </PostReactionsProvider>
       </PollProvider>
 
       <CreatePostFab onClick={handleCreatePost} />

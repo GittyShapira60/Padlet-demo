@@ -15,7 +15,7 @@ export default function PadletBoardHeader({
   return (
     <>
       <button type="button" className={styles.back} onClick={onBack}>
-        <ArrowRight size={18} strokeWidth={2} aria-hidden="true" />
+        <ArrowRight size={18} strokeWidth={2} />
         חזרה לבית
       </button>
       <header className={styles.header}>
@@ -23,10 +23,9 @@ export default function PadletBoardHeader({
         <button
           type="button"
           className={styles.share}
-          aria-label="שיתוף"
           onClick={onShareClick}
         >
-          <Share2 size={16} strokeWidth={2} aria-hidden="true" />
+          <Share2 size={16} strokeWidth={2} />
           שיתוף
         </button>
       </header>

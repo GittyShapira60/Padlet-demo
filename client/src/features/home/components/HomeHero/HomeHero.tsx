@@ -10,7 +10,7 @@ export default function HomeHero({ username }: HomeHeroProps) {
     <section className={styles.hero}>
       <div className={styles.content}>
         <h2 className={styles.title}>
-          <Hand className={styles.icon} size={26} aria-hidden="true" />
+          <Hand className={styles.icon} size={26} />
           !שלום, {username}
         </h2>
         <p className={styles.subtitle}>הלוחות השיתופיים שלך</p>

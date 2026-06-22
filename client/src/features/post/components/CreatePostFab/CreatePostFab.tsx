@@ -8,7 +8,7 @@ interface CreatePostFabProps {
 export default function CreatePostFab({ onClick }: CreatePostFabProps) {
   return (
     <button type="button" className={styles.fab} onClick={onClick}>
-      <Plus size={20} strokeWidth={2.25} aria-hidden="true" />
+      <Plus size={20} strokeWidth={2.25} />
       פוסט חדש
     </button>
   );

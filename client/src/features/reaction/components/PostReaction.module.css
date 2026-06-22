@@ -1,0 +1,125 @@
+.bar {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: flex-end;
+  gap: 0.5rem;
+  width: 100%;
+  padding-top: 0.55rem;
+  margin-top: 0.55rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+/* RTL: first item sits on the right — pills, then add button to their left */
+.pillWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.pillWrap:hover .reactorsPopover,
+.pillWrap:focus-within .reactorsPopover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.reactorsPopover {
+  position: absolute;
+  bottom: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 5;
+  min-width: 7.5rem;
+  max-width: 12rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.16);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+}
+
+.reactorsList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reactorItem {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #334155;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pill {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.28rem;
+  direction: ltr;
+  height: 1.65rem;
+  padding: 0 0.42rem 0 0.38rem;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475569;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.pillOwn {
+  cursor: pointer;
+  font: inherit;
+}
+
+.count {
+  min-width: 0.45rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-align: center;
+  color: #64748b;
+}
+
+.glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.pillOwn .glyph {
+  background: #ffffff;
+  border-radius: 999px;
+  min-width: 1.28rem;
+  min-height: 1.28rem;
+}
+
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.65rem;
+  height: 1.65rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.addBtn:hover {
+  color: #64748b;
+}

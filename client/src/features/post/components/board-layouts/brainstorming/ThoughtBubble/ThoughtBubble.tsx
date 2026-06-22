@@ -30,7 +30,6 @@ export default function ThoughtBubble({
       <div className={styles.bubbleWrapper}>
         <div
           className={styles.bubbleBg}
-          aria-hidden
           dangerouslySetInnerHTML={{ __html: cloudMarkup }}
         />
         <div className={styles.postContentSafeZone}>

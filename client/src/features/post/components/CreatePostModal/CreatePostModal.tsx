@@ -47,22 +47,17 @@ export default function CreatePostModal({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  const titleId = isEditMode ? 'edit-post-title' : 'create-post-title';
-
   return (
-    <div className={styles.overlay} onClick={onClose} role="presentation">
+    <div className={styles.overlay} onClick={onClose}>
       <div
         className={styles.container}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
         onClick={(event) => event.stopPropagation()}
       >
         <header className={styles.header}>
-          <h2 id={titleId} className={styles.title}>
+          <h2 className={styles.title}>
             {isEditMode ? 'עריכת פוסט' : 'פוסט חדש'}
           </h2>
-          <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="סגור">
+          <button type="button" className={styles.closeBtn} onClick={onClose}>
             &times;
           </button>
         </header>
