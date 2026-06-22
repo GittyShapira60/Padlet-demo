@@ -8,6 +8,7 @@ export {
   LayoutDashboard,
   Lock,
   LogOut,
+  MoreVertical,
   Pencil,
   Plus,
   Share2,

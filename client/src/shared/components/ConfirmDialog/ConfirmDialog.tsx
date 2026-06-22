@@ -1,9 +1,7 @@
 import type { ReactNode } from 'react';
 import Modal from '../Modal/Modal';
 import styles from './ConfirmDialog.module.css';
-
 export type ConfirmDialogTone = 'danger' | 'neutral';
-
 interface ConfirmDialogProps {
   title: string;
   description?: string;

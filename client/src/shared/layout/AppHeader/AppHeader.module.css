@@ -1,16 +1,32 @@
 .header {
   background: #ffffff;
   border-bottom: 1px solid #e5e7eb;
-  padding: 0.65rem 1.5rem;
+  padding: 0.65rem 0;
+  transition: background 0.2s ease;
+}
+
+.noBorder {
+  border-bottom: none;
 }
 
 .inner {
-  max-width: 1200px;
-  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+}
+
+.rightGroup {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.leftGroup {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-left: 1.5rem;
 }
 
 .actions {
@@ -19,10 +35,45 @@
   gap: 0.75rem;
 }
 
+.centerSlot {
+  display: flex;
+  align-items: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  transition: opacity 0.15s ease;
+}
+
+.brand:hover {
+  opacity: 0.85;
+}
+
+.logoIcon {
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  display: block;
+}
+
+.logo {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--color-logo);
+  letter-spacing: -0.02em;
+}
+
 .logout,
 .stats,
-.bell,
-.menu {
+.bell {
   border: none;
   background: transparent;
   cursor: pointer;
@@ -37,8 +88,7 @@
 
 .logout:hover,
 .stats:hover,
-.bell:hover,
-.menu:hover {
+.bell:hover {
   color: #334155;
 }
 
@@ -62,16 +112,6 @@
   justify-content: center;
 }
 
-.menu {
-  color: #94a3b8;
-}
-
-.greeting {
-  color: #475569;
-  font-weight: 500;
-  font-size: 0.95rem;
-}
-
 .avatar {
   width: 2rem;
   height: 2rem;
@@ -82,24 +122,4 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.logoIcon {
-  width: 2rem;
-  height: 2rem;
-  flex-shrink: 0;
-  display: block;
-}
-
-.logo {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: var(--color-logo);
-  letter-spacing: -0.02em;
 }
