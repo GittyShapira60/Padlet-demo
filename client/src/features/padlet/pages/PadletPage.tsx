@@ -60,9 +60,11 @@ export default function PadletPage() {
         canReact={Boolean(currentUsername)}
       >
         <PadletPostsLayer
+          padletId={padlet.id}
           boardType={padlet.boardType}
           posts={posts}
           currentUsername={currentUsername}
+          canComment={Boolean(currentUsername)}
           onEditPost={handleEditPost}
           onDeletePost={(post) => void handleDeletePost(post)}
           onLayoutChange={(postId, layout) =>

@@ -1,12 +1,15 @@
 import { Pencil, Trash2 } from '../../../../../shared/icons';
 import type { Post } from '../../../interfaces/post';
+import { PostComments } from '../../../../comment';
 import { PostReaction } from '../../../../reaction';
 import cardStyles from '../../PadletPostCard/PadletPostCard.module.css';
 import ThoughtBubble from './ThoughtBubble/ThoughtBubble';
 
 interface BrainstormingPostCardProps {
   post: Post;
+  padletId: string;
   canManage?: boolean;
+  canComment?: boolean;
   onEdit?: (post: Post) => void;
   onDelete?: (post: Post) => void;
 }
@@ -44,7 +47,9 @@ function PostActions({
 
 export default function BrainstormingPostCard({
   post,
+  padletId,
   canManage = false,
+  canComment = false,
   onEdit,
   onDelete,
 }: BrainstormingPostCardProps) {
@@ -71,6 +76,13 @@ export default function BrainstormingPostCard({
         ) : null}
       </div>
       <PostReaction postId={post.id} />
+      {canComment ? (
+        <PostComments
+          padletId={padletId}
+          postId={post.id}
+          canComment={canComment}
+        />
+      ) : null}
     </ThoughtBubble>
   );
 }

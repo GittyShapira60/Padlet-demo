@@ -16,8 +16,10 @@ function getDefaultLayout(index: number): PostLayout {
 }
 
 export default function BrainstormingPostsLayout({
+  padletId,
   posts,
   currentUsername,
+  canComment,
   onEditPost,
   onDeletePost,
 }: BoardLayoutProps) {
@@ -40,6 +42,8 @@ export default function BrainstormingPostsLayout({
           >
             <BrainstormingPostCard
               post={post}
+              padletId={padletId}
+              canComment={canComment}
               canManage={canManage}
               onEdit={onEditPost}
               onDelete={onDeletePost}

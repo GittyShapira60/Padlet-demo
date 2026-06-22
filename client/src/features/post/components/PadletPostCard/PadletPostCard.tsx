@@ -1,11 +1,14 @@
 import { Pencil, Trash2 } from '../../../../shared/icons';
 import type { Post } from '../../interfaces/post';
+import { PostComments } from '../../../comment';
 import { PostReaction } from '../../../reaction';
 import styles from './PadletPostCard.module.css';
 
 interface PadletPostCardProps {
   post: Post;
+  padletId: string;
   canManage?: boolean;
+  canComment?: boolean;
   onEdit?: (post: Post) => void;
   onDelete?: (post: Post) => void;
 }
@@ -41,7 +44,9 @@ function PostActions({
 
 export default function PadletPostCard({
   post,
+  padletId,
   canManage = false,
+  canComment = false,
   onEdit,
   onDelete,
 }: PadletPostCardProps) {
@@ -57,6 +62,13 @@ export default function PadletPostCard({
         {post.subject ? <p className={styles.subject}>{post.subject}</p> : null}
       </div>
       <PostReaction postId={post.id} />
+      {canComment ? (
+        <PostComments
+          padletId={padletId}
+          postId={post.id}
+          canComment={canComment}
+        />
+      ) : null}
       <p className={styles.author}>{post.authorUsername}</p>
     </article>
   );

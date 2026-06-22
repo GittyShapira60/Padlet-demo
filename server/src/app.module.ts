@@ -6,6 +6,7 @@ import { PadletsModule } from './padlets/padlets.module';
 import { ParticipantsModule } from './participants/participants.module';
 import { PostsModule } from './posts/posts.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { CommentModule } from './comment/comment.module';
 import { ReactionModule } from './reaction/reaction.module';
 import { UsersModule } from './users/users.module';
 
@@ -21,6 +22,7 @@ import { UsersModule } from './users/users.module';
     ParticipantsModule,
     PostsModule,
     ReactionModule,
+    CommentModule,
     UsersModule,
   ],
 })

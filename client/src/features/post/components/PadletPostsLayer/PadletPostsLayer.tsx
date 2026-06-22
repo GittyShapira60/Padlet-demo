@@ -7,18 +7,22 @@ import TimelinePostsLayout from '../board-layouts/timeline/TimelinePostsLayout';
 import styles from './PadletPostsLayer.module.css';
 
 interface PadletPostsLayerProps {
+  padletId: string;
   boardType: PadletBoardType;
   posts: Post[];
   currentUsername?: string;
+  canComment?: boolean;
   onEditPost?: (post: Post) => void;
   onDeletePost?: (post: Post) => void;
   onLayoutChange?: (postId: string, layout: PostLayout) => void;
 }
 
 export default function PadletPostsLayer({
+  padletId,
   boardType,
   posts,
   currentUsername,
+  canComment,
   onEditPost,
   onDeletePost,
   onLayoutChange,
@@ -34,8 +38,10 @@ export default function PadletPostsLayer({
   }
 
   const layoutProps = {
+    padletId,
     posts,
     currentUsername,
+    canComment,
     onEditPost,
     onDeletePost,
     onLayoutChange,

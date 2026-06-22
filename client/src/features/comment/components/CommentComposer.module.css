@@ -1,0 +1,92 @@
+.inputBar {
+  direction: ltr;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 2.65rem;
+  padding: 0.28rem 0.4rem 0.28rem 0.28rem;
+  border-radius: 999px;
+  background: #eceff3;
+}
+
+.sendBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border: none;
+  border-radius: 10px;
+  background: #f0248c;
+  color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.sendBtn:hover {
+  background: #d91f7d;
+}
+
+.emojiBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.emojiBtn:hover {
+  opacity: 0.75;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 1.75rem;
+  border: none;
+  background: transparent;
+  color: #1f2937;
+  font: inherit;
+  font-size: 0.86rem;
+  direction: rtl;
+  text-align: right;
+  outline: none;
+  padding: 0;
+}
+
+.input::placeholder {
+  color: #b4bcc8;
+  opacity: 1;
+}
+
+.attachBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  border-radius: 999px;
+  background: #e2e6ec;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.attachBtn:hover {
+  background: #d8dde5;
+}
+
+.emojiBtn:disabled,
+.attachBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

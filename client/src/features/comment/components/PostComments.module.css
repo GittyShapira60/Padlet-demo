@@ -1,0 +1,127 @@
+.section {
+  direction: rtl;
+  width: 100%;
+  margin-top: 0.55rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  text-align: right;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+}
+
+/* CommentSectionHeader — visible only when comments.length > 0 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0.35rem 0.15rem 0.55rem;
+  border-bottom: 1px solid #e8ecf1;
+}
+
+.countBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.15rem 0.25rem;
+  border-radius: 8px;
+}
+
+.countBtn:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.count {
+  line-height: 1;
+}
+
+/* CommentItem — visible only when there are real comments */
+.item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.55rem;
+  align-items: start;
+  padding: 0.65rem 0.1rem 0.35rem;
+}
+
+.menuBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  margin-top: 0.1rem;
+  justify-self: start;
+}
+
+.menuBtn:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.content {
+  min-width: 0;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 999px;
+  background: var(--gradient-brand);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.meta {
+  min-width: 0;
+}
+
+.commentAuthor {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.time {
+  margin: 0.1rem 0 0;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  line-height: 1.2;
+}
+
+.body {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #1e293b;
+  word-break: break-word;
+}
