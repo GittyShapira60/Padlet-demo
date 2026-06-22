@@ -3,12 +3,11 @@ import {
   removePostReaction,
   setPostReaction,
 } from '../services/reaction-service';
-import { getEmojiByCode } from '../emoji/emoji-catalog';
+import { resolveEmojiByCode, saveRecentEmojiCode } from '@/modules/emoji';
 import type {
   PadletReactionsStore,
   PostReactionsView,
 } from '../types/post-reaction';
-import { saveRecentEmojiCode } from '../utils/post-reaction-local-store';
 
 export function enrichPostReactionsView(
   view: PostReactionsView,
@@ -18,7 +17,7 @@ export function enrichPostReactionsView(
     summaries: view.summaries.map((summary) => ({
       ...summary,
       reactors: summary.reactors ?? [],
-      glyph: getEmojiByCode(summary.reactionCode)?.glyph ?? '❓',
+      glyph: resolveEmojiByCode(summary.reactionCode)?.glyph ?? '❓',
     })),
   };
 }

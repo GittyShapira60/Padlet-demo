@@ -20,8 +20,8 @@ export function loadRecentEmojiCodes(): string[] {
   }
 }
 
-export function saveRecentEmojiCode(reactionCode: string): void {
-  const current = loadRecentEmojiCodes().filter((code) => code !== reactionCode);
-  const next = [reactionCode, ...current].slice(0, MAX_RECENT_EMOJIS);
+export function saveRecentEmojiCode(code: string): void {
+  const current = loadRecentEmojiCodes().filter((item) => item !== code);
+  const next = [code, ...current].slice(0, MAX_RECENT_EMOJIS);
   localStorage.setItem(RECENT_EMOJIS_KEY, JSON.stringify(next));
 }

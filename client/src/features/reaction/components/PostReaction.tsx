@@ -1,9 +1,11 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { SmilePlus } from '../../../shared/icons';
-import EmojiPickerPopover from './EmojiPickerPopover';
+import {
+  EmojiPickerPopover,
+  type EmojiDefinition,
+} from '@/modules/emoji';
 import ReactionPill from './ReactionPill';
 import { usePostReactionsContext } from '../context/post-reactions-context';
-import { usePostReactionPicker } from '../hooks/usePostReactionPicker';
 import styles from './PostReaction.module.css';
 
 interface PostReactionProps {
@@ -12,19 +14,18 @@ interface PostReactionProps {
 
 export default function PostReaction({ postId }: PostReactionProps) {
   const anchorRef = useRef<HTMLDivElement>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const { canReact, getPostReactions, setReaction, removeReaction } =
     usePostReactionsContext();
   const reactions = getPostReactions(postId);
-  const picker = usePostReactionPicker();
 
-  function handleSelect(reactionCode: string) {
-    if (reactions.currentUserReactionCode === reactionCode) {
+  function handleSelect(emoji: EmojiDefinition) {
+    if (reactions.currentUserReactionCode === emoji.code) {
       void removeReaction(postId);
     } else {
-      void setReaction(postId, reactionCode);
+      void setReaction(postId, emoji.code);
     }
-    picker.refreshRecents();
-    picker.closePicker();
+    setPickerOpen(false);
   }
 
   function handleRemoveOwnReaction() {
@@ -40,7 +41,7 @@ export default function PostReaction({ postId }: PostReactionProps) {
       return;
     }
 
-    picker.openPicker();
+    setPickerOpen(true);
   }
 
   const visibleSummaries = (reactions.summaries ?? []).filter(
@@ -72,18 +73,12 @@ export default function PostReaction({ postId }: PostReactionProps) {
       ) : null}
 
       <EmojiPickerPopover
-        isOpen={picker.isOpen}
-        isLoading={picker.isLoading}
+        isOpen={pickerOpen}
+        onClose={() => setPickerOpen(false)}
         anchorRef={anchorRef}
-        activeCategory={picker.activeCategory}
-        searchQuery={picker.searchQuery}
-        visibleEmojis={picker.visibleEmojis}
-        activeCategoryLabel={picker.activeCategoryLabel}
-        selectedReactionCode={reactions.currentUserReactionCode}
-        onSearchChange={picker.setSearchQuery}
-        onCategoryChange={picker.setActiveCategory}
+        catalogMode="reaction"
+        selectedCode={reactions.currentUserReactionCode}
         onSelect={handleSelect}
-        onClose={picker.closePicker}
       />
     </div>
   );
