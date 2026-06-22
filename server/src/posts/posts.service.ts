@@ -53,7 +53,7 @@ type PollWithOptionsAndVotes = Poll & {
   poll_votes: PollVote[];
 };
 
-type PostWithAuthor = Prisma.PostGetPayload<{
+export type PostWithAuthor = Prisma.PostGetPayload<{
   include: {
     user: true;
     poll: {

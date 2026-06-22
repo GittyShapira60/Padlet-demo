@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PadletBoardType, PadletPermission, type Padlet } from '@prisma/client';
-import { PostsService, type PostResponseDto } from '../posts/posts.service';
+import { PostsService, type PostResponseDto, type PostWithAuthor } from '../posts/posts.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CopyPadletDto, CreatePadletDto } from './dto/create-padlet.dto';
 
@@ -118,7 +118,7 @@ export class PadletsService {
     return {
       padlet: this.toPadletResponse(padlet, padlet.user_id !== requesterId),
       posts: padlet.posts.map((post) =>
-        this.postsService.toPostResponse(post as any, requesterId),
+        this.postsService.toPostResponse(post as PostWithAuthor, requesterId),
       ),
     };
   }
