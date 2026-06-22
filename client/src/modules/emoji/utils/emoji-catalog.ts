@@ -1,28 +1,11 @@
 import type { EmojiMartData } from '@emoji-mart/data';
-import { loadEmojiMartData } from './emoji-mart-loader';
-
-export type EmojiCategoryId =
-  | 'recents'
-  | 'smileys'
-  | 'animals'
-  | 'food'
-  | 'activities'
-  | 'travel'
-  | 'objects'
-  | 'symbols'
-  | 'flags';
+import type { EmojiCatalogMode, EmojiCategoryId, EmojiDefinition } from '../types';
+import { loadEmojiMartData } from '../services/emoji-mart-loader';
 
 export interface EmojiCategory {
   id: EmojiCategoryId;
   label: string;
   navIcon: string;
-}
-
-export interface EmojiDefinition {
-  code: string;
-  glyph: string;
-  keywords: string[];
-  category: Exclude<EmojiCategoryId, 'recents'>;
 }
 
 export const EMOJI_CATEGORIES: EmojiCategory[] = [
@@ -59,13 +42,21 @@ const MAX_REACTION_CODE_LENGTH = 32;
 
 let catalogBuilt = false;
 let buildPromise: Promise<void> | null = null;
-let emojiByCode = new Map<string, EmojiDefinition>();
-let emojisByCategory = new Map<
+let martData: EmojiMartData | null = null;
+
+let reactionByCode = new Map<string, EmojiDefinition>();
+let reactionByCategory = new Map<
+  Exclude<EmojiCategoryId, 'recents'>,
+  EmojiDefinition[]
+>();
+let reactionAll: EmojiDefinition[] = [];
+
+let allByCode = new Map<string, EmojiDefinition>();
+let allByCategory = new Map<
   Exclude<EmojiCategoryId, 'recents'>,
   EmojiDefinition[]
 >();
 let allEmojis: EmojiDefinition[] = [];
-let martData: EmojiMartData | null = null;
 
 function isValidReactionCode(code: string): boolean {
   return (
@@ -112,22 +103,28 @@ function resolveEmojiId(code: string): string | null {
   return null;
 }
 
+function emptyCategoryMap(): Map<
+  Exclude<EmojiCategoryId, 'recents'>,
+  EmojiDefinition[]
+> {
+  const map = new Map<Exclude<EmojiCategoryId, 'recents'>, EmojiDefinition[]>();
+
+  for (const category of EMOJI_CATEGORIES) {
+    if (category.id !== 'recents') {
+      map.set(category.id, []);
+    }
+  }
+
+  return map;
+}
+
 function buildCatalog(data: EmojiMartData): void {
   martData = data;
 
-  const nextByCode = new Map<string, EmojiDefinition>();
-  const nextByCategory = new Map<
-    Exclude<EmojiCategoryId, 'recents'>,
-    EmojiDefinition[]
-  >();
-
-  for (const category of EMOJI_CATEGORIES) {
-    if (category.id === 'recents') {
-      continue;
-    }
-
-    nextByCategory.set(category.id, []);
-  }
+  const nextReactionByCode = new Map<string, EmojiDefinition>();
+  const nextReactionByCategory = emptyCategoryMap();
+  const nextAllByCode = new Map<string, EmojiDefinition>();
+  const nextAllByCategory = emptyCategoryMap();
 
   for (const category of data.categories) {
     const uiCategory = MART_CATEGORY_TO_UI[category.id];
@@ -142,29 +139,60 @@ function buildCatalog(data: EmojiMartData): void {
         continue;
       }
 
-      const code = reactionCodeForEmojiId(emojiId, data.aliases);
-      if (!code || nextByCode.has(code)) {
+      const keywords = [emoji.name, ...(emoji.keywords ?? [])].map((keyword) =>
+        keyword.toLowerCase(),
+      );
+
+      if (!nextAllByCode.has(emojiId)) {
+        const allDefinition: EmojiDefinition = {
+          code: emojiId,
+          glyph,
+          keywords,
+          category: uiCategory,
+        };
+        nextAllByCode.set(emojiId, allDefinition);
+        nextAllByCategory.get(uiCategory)?.push(allDefinition);
+      }
+
+      const reactionCode = reactionCodeForEmojiId(emojiId, data.aliases);
+      if (!reactionCode || nextReactionByCode.has(reactionCode)) {
         continue;
       }
 
-      const definition: EmojiDefinition = {
-        code,
+      const reactionDefinition: EmojiDefinition = {
+        code: reactionCode,
         glyph,
-        keywords: [emoji.name, ...(emoji.keywords ?? [])].map((keyword) =>
-          keyword.toLowerCase(),
-        ),
+        keywords,
         category: uiCategory,
       };
-
-      nextByCode.set(code, definition);
-      nextByCategory.get(uiCategory)?.push(definition);
+      nextReactionByCode.set(reactionCode, reactionDefinition);
+      nextReactionByCategory.get(uiCategory)?.push(reactionDefinition);
     }
   }
 
-  emojiByCode = nextByCode;
-  emojisByCategory = nextByCategory;
-  allEmojis = Array.from(nextByCode.values());
+  reactionByCode = nextReactionByCode;
+  reactionByCategory = nextReactionByCategory;
+  reactionAll = Array.from(nextReactionByCode.values());
+
+  allByCode = nextAllByCode;
+  allByCategory = nextAllByCategory;
+  allEmojis = Array.from(nextAllByCode.values());
+
   catalogBuilt = true;
+}
+
+function mapsForMode(mode: EmojiCatalogMode) {
+  return mode === 'reaction'
+    ? {
+        byCode: reactionByCode,
+        byCategory: reactionByCategory,
+        all: reactionAll,
+      }
+    : {
+        byCode: allByCode,
+        byCategory: allByCategory,
+        all: allEmojis,
+      };
 }
 
 export function isEmojiCatalogReady(): boolean {
@@ -185,8 +213,8 @@ export function ensureEmojiCatalogReady(): Promise<void> {
   return buildPromise;
 }
 
-export function getEmojiByCode(code: string): EmojiDefinition | undefined {
-  const direct = emojiByCode.get(code);
+export function resolveEmojiByCode(code: string): EmojiDefinition | undefined {
+  const direct = reactionByCode.get(code) ?? allByCode.get(code);
   if (direct) {
     return direct;
   }
@@ -218,17 +246,21 @@ export function getEmojiByCode(code: string): EmojiDefinition | undefined {
 
 export function getEmojisByCategory(
   category: Exclude<EmojiCategoryId, 'recents'>,
+  mode: EmojiCatalogMode = 'reaction',
 ): EmojiDefinition[] {
-  return emojisByCategory.get(category) ?? [];
+  return mapsForMode(mode).byCategory.get(category) ?? [];
 }
 
-export function searchEmojis(query: string): EmojiDefinition[] {
+export function searchEmojis(
+  query: string,
+  mode: EmojiCatalogMode = 'reaction',
+): EmojiDefinition[] {
   const normalized = query.trim().toLowerCase();
   if (!normalized) {
     return [];
   }
 
-  return allEmojis.filter(
+  return mapsForMode(mode).all.filter(
     (emoji) =>
       emoji.code.includes(normalized) ||
       emoji.keywords.some((keyword) => keyword.includes(normalized)) ||
@@ -236,8 +268,13 @@ export function searchEmojis(query: string): EmojiDefinition[] {
   );
 }
 
-export function getRecentEmojis(codes: string[]): EmojiDefinition[] {
+export function getRecentEmojis(
+  codes: string[],
+  mode: EmojiCatalogMode = 'reaction',
+): EmojiDefinition[] {
+  const { byCode } = mapsForMode(mode);
+
   return codes
-    .map((code) => getEmojiByCode(code))
+    .map((code) => byCode.get(code) ?? resolveEmojiByCode(code))
     .filter((emoji): emoji is EmojiDefinition => Boolean(emoji));
 }

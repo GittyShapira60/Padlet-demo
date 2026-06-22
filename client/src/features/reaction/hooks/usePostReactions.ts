@@ -3,7 +3,10 @@ import type {
   PadletReactionsStore,
   PostReactionsView,
 } from '../types/post-reaction';
-import { ensureEmojiCatalogReady, getEmojiByCode } from '../emoji/emoji-catalog';
+import {
+  ensureEmojiCatalogReady,
+  resolveEmojiByCode,
+} from '@/modules/emoji';
 import {
   enrichPostReactionsView,
   loadPadletReactionsFromApi,
@@ -83,7 +86,7 @@ export function usePostReactions({
     async (postId: string, reactionCode: string) => {
       await ensureEmojiCatalogReady();
 
-      if (!getEmojiByCode(reactionCode)) {
+      if (!resolveEmojiByCode(reactionCode)) {
         return;
       }
 

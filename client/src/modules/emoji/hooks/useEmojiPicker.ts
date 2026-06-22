@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { EmojiCatalogMode, EmojiCategoryId, EmojiDefinition } from '../types';
 import {
   EMOJI_CATEGORIES,
   ensureEmojiCatalogReady,
@@ -6,13 +7,10 @@ import {
   getRecentEmojis,
   isEmojiCatalogReady,
   searchEmojis,
-  type EmojiCategoryId,
-  type EmojiDefinition,
-} from '../emoji/emoji-catalog';
-import { loadRecentEmojiCodes } from '../utils/post-reaction-local-store';
+} from '../utils/emoji-catalog';
+import { loadRecentEmojiCodes } from '../services/emoji-recent-store';
 
-export function usePostReactionPicker() {
-  const [isOpen, setIsOpen] = useState(false);
+export function useEmojiPicker(catalogMode: EmojiCatalogMode) {
   const [isLoading, setIsLoading] = useState(false);
   const [catalogReady, setCatalogReady] = useState(() => isEmojiCatalogReady());
   const [activeCategory, setActiveCategory] = useState<EmojiCategoryId>('smileys');
@@ -25,30 +23,20 @@ export function usePostReactionPicker() {
     setRecentCodes(loadRecentEmojiCodes());
   }, []);
 
-  const openPicker = useCallback(() => {
-    refreshRecents();
-    setIsOpen(true);
+  const reset = useCallback(() => {
+    setSearchQuery('');
+  }, []);
 
-    if (isEmojiCatalogReady()) {
-      setCatalogReady(true);
+  useEffect(() => {
+    if (catalogReady) {
       return;
     }
 
     setIsLoading(true);
     void ensureEmojiCatalogReady()
-      .then(() => {
-        setCatalogReady(true);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [refreshRecents]);
-
-  const closePicker = useCallback(() => {
-    setIsOpen(false);
-    setSearchQuery('');
-    setIsLoading(false);
-  }, []);
+      .then(() => setCatalogReady(true))
+      .finally(() => setIsLoading(false));
+  }, [catalogReady]);
 
   const visibleEmojis = useMemo((): EmojiDefinition[] => {
     if (!catalogReady) {
@@ -57,15 +45,15 @@ export function usePostReactionPicker() {
 
     const trimmed = searchQuery.trim();
     if (trimmed) {
-      return searchEmojis(trimmed);
+      return searchEmojis(trimmed, catalogMode);
     }
 
     if (activeCategory === 'recents') {
-      return getRecentEmojis(recentCodes);
+      return getRecentEmojis(recentCodes, catalogMode);
     }
 
-    return getEmojisByCategory(activeCategory);
-  }, [activeCategory, catalogReady, recentCodes, searchQuery]);
+    return getEmojisByCategory(activeCategory, catalogMode);
+  }, [activeCategory, catalogMode, catalogReady, recentCodes, searchQuery]);
 
   const activeCategoryLabel = useMemo(() => {
     if (isLoading) {
@@ -83,7 +71,6 @@ export function usePostReactionPicker() {
   }, [activeCategory, isLoading, searchQuery]);
 
   return {
-    isOpen,
     isLoading,
     activeCategory,
     searchQuery,
@@ -91,8 +78,7 @@ export function usePostReactionPicker() {
     activeCategoryLabel,
     setActiveCategory,
     setSearchQuery,
-    openPicker,
-    closePicker,
     refreshRecents,
+    reset,
   };
 }

@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { ensureEmojiCatalogReady, isEmojiCatalogReady } from '../emoji/emoji-catalog';
+import {
+  ensureEmojiCatalogReady,
+  isEmojiCatalogReady,
+} from '@/modules/emoji';
 import { PostReactionsContext } from '../context/post-reactions-context';
 import { usePostReactions } from '../hooks/usePostReactions';
 
