@@ -21,7 +21,7 @@ export default function CreatePostModalTabs({
   onTabChange,
 }: CreatePostModalTabsProps) {
   return (
-    <div className={styles.tabs} role="tablist" aria-label="סוג פוסט">
+    <div className={styles.tabs}>
       {TABS.map((tab) => {
         const isActive = activeTab === tab.id;
 
@@ -29,25 +29,20 @@ export default function CreatePostModalTabs({
           <button
             key={tab.id}
             type="button"
-            role="tab"
-            aria-selected={isActive}
             className={`${styles.tab} ${isActive ? styles.tabActive : ''}`}
             onClick={() => onTabChange(tab.id)}
           >
             {tab.id === PostContentTabValues.Text ? (
               <span
                 className={`${styles.tabIconText} ${isActive ? styles.tabIconTextActive : ''}`}
-                aria-hidden="true"
               >
                 {tab.icon}
               </span>
             ) : (
-              <span className={styles.tabEmoji} aria-hidden="true">
-                {tab.icon}
-              </span>
+              <span className={styles.tabEmoji}>{tab.icon}</span>
             )}
             <span>{tab.label}</span>
-            {isActive ? <span className={styles.underline} aria-hidden="true" /> : null}
+            {isActive ? <span className={styles.underline} /> : null}
           </button>
         );
       })}

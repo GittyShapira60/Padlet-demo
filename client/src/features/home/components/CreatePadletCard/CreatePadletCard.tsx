@@ -7,7 +7,7 @@ interface CreatePadletCardProps {
 export default function CreatePadletCard({ onClick }: CreatePadletCardProps) {
   return (
     <button type="button" className={styles.card} onClick={onClick}>
-      <span className={styles.plus} aria-hidden="true">
+      <span className={styles.plus}>
         +
       </span>
       <span className={styles.text}>צור לוח חדש</span>
