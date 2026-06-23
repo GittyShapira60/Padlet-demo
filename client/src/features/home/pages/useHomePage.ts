@@ -5,7 +5,7 @@ import type { Padlet } from '../../padlet/interfaces/padlet';
 
 export function useHomePage() {
   const { user } = useAuth();
-  const { boards, hasBoards, isLoading, error, addPadlet, removePadlet, duplicatePadlet } = usePadlets();
+  const { boards, hasBoards, isLoading, error, addPadlet, removePadlet, duplicatePadlet, leaveSharedPadlet } = usePadlets();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const username = user?.username ?? 'משתמש';
@@ -45,5 +45,6 @@ export function useHomePage() {
     handlePadletCreated,
     handleDeletePadlet: removePadlet,
     handleCopyPadlet: duplicatePadlet,
+    handleLeavePadlet: leaveSharedPadlet,
   };
 }

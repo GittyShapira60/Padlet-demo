@@ -22,6 +22,7 @@ export default function HomePage() {
     handlePadletCreated,
     handleDeletePadlet,
     handleCopyPadlet,
+    handleLeavePadlet,
   } = useHomePage();
 
   return (
@@ -55,7 +56,7 @@ export default function HomePage() {
                   count={boards.shared.length}
                   badgeColor="blue"
                 >
-                  <PadletGrid padlets={boards.shared} />
+                  <PadletGrid padlets={boards.shared} onLeave={handleLeavePadlet} />
                 </PadletSection>
               ) : null}
             </div>
