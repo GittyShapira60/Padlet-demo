@@ -1,3 +1,4 @@
+import { BACKGROUND_COLOR_LIGHT } from '../../../../shared/constants/background-colors';
 import { Pencil, Trash2 } from '../../../../shared/icons';
 import type { Post } from '../../interfaces/post';
 import { PostReaction } from '../../../reaction';
@@ -45,7 +46,7 @@ export default function PadletPostCard({
   onEdit,
   onDelete,
 }: PadletPostCardProps) {
-  const background = post.color ?? '#ffffff';
+  const background = BACKGROUND_COLOR_LIGHT[post.color ?? ''] ?? post.color ?? '#ffffff';
 
   return (
     <article className={styles.card} style={{ background }}>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Padlet } from '../../../padlet/interfaces/padlet';
 import type { CopyPadletOptions } from '../../../padlet/services/padlet-service';
+import { BACKGROUND_COLOR_GRADIENTS } from '../../../../shared/constants/background-colors';
 import { Calendar, Copy, LayoutDashboard, Lock, Trash2, Users } from '../../../../shared/icons';
 import styles from './PadletCard.module.css';
 
@@ -54,7 +55,7 @@ export default function PadletCard({ padlet, onDelete, onCopy }: PadletCardProps
       <button
         type="button"
         className={cardClassName}
-        style={{ background: padlet.background ?? undefined }}
+        style={{ background: BACKGROUND_COLOR_GRADIENTS[padlet.background ?? ''] ?? padlet.background ?? undefined }}
         onClick={handleOpen}
       >
         <div className={styles.top}>

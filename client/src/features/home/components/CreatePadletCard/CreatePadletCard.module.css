@@ -1,8 +1,8 @@
 .card {
-  border: 2px dashed #d1d5db;
+  border: 2px dashed var(--color-accent);
   border-radius: 12px;
-  width: 180px;
-  min-height: 150px;
+  width: 220px;
+  min-height: 190px;
   background: #ffffff;
   color: #9ca3af;
   cursor: pointer;
@@ -15,7 +15,6 @@
 }
 
 .card:hover {
-  border-color: var(--color-accent);
   transform: translateY(-2px);
 }
 

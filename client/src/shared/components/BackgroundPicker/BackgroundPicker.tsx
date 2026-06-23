@@ -1,4 +1,4 @@
-import { BACKGROUND_COLORS } from '../../constants/background-colors';
+import { BACKGROUND_COLOR_GRADIENTS, BACKGROUND_COLORS } from '../../constants/background-colors';
 import styles from './BackgroundPicker.module.css';
 
 export type BackgroundTab = 'colors' | 'images' | 'patterns';
@@ -46,7 +46,7 @@ export default function BackgroundPicker({
               key={color}
               type="button"
               className={`${styles.swatch} ${selectedColor === color ? styles.swatchSelected : ''}`}
-              style={{ background: color }}
+              style={{ background: BACKGROUND_COLOR_GRADIENTS[color] ?? color }}
               onClick={() => onColorChange(color)}
             />
           ))}

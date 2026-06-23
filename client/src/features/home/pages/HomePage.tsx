@@ -60,15 +60,6 @@ export default function HomePage() {
               ) : null}
             </div>
 
-            <aside className={styles.sidebar}>
-              <button
-                type="button"
-                className={styles.createBtn}
-                onClick={handleCreatePadlet}
-              >
-                + לוח חדש
-              </button>
-            </aside>
           </div>
         ) : null}
       </div>

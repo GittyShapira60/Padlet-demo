@@ -1,3 +1,4 @@
+import { BACKGROUND_COLOR_GRADIENTS } from '../../../shared/constants/background-colors';
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
 import { PostReactionsProvider } from '../../reaction';
@@ -47,7 +48,7 @@ export default function PadletPage() {
   return (
     <div
       className={styles.page}
-      style={{ background: padlet.background ?? '#f3f4f6' }}
+      style={{ background: BACKGROUND_COLOR_GRADIENTS[padlet.background ?? ''] ?? padlet.background ?? '#f3f4f6' }}
     >
       <PadletBoardHeader
         title={padlet.title}
