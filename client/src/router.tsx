@@ -5,33 +5,36 @@ import AuthPage from './features/auth/pages/AuthPage';
 import HomePage from './features/home/pages/HomePage';
 import PadletPage from './features/padlet/pages/PadletPage';
 import { AuthProvider } from './features/auth/context/AuthProvider';
+import { NotificationProvider } from './features/notification';
 
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<AuthPage />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <App />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<HomePage />} />
-          </Route>
-          <Route
-            path="/padlets/:padletId"
-            element={
-              <ProtectedRoute>
-                <PadletPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <NotificationProvider>
+          <Routes>
+            <Route path="/login" element={<AuthPage />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <App />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<HomePage />} />
+            </Route>
+            <Route
+              path="/padlets/:padletId"
+              element={
+                <ProtectedRoute>
+                  <PadletPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>
   );

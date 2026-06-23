@@ -1,5 +1,6 @@
 import { useAuth } from '../../../features/auth/context/AuthProvider';
-import { BarChart3, Bell,  LogOut } from '../../icons';
+import { NotificationBell } from '../../../features/notification';
+import { BarChart3, LogOut } from '../../icons';
 import styles from './AppHeader.module.css';
 
 export default function AppHeader() {
@@ -27,10 +28,7 @@ export default function AppHeader() {
 
           <span className={styles.greeting}>שלום, {username}</span>
 
-          <button type="button" className={styles.bell}>
-            <Bell size={18} strokeWidth={1.5} />
-            <span className={styles.bellBadge}>1</span>
-          </button>
+          <NotificationBell />
 
           <div className={styles.avatar}>
             {initial}

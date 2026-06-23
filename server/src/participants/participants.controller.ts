@@ -38,7 +38,7 @@ export class ParticipantsController {
     @Param('padletId') padletId: string,
     @Body() dto: CreateParticipantDto,
   ) {
-    return this.participantsService.inviteParticipant(user.id, padletId, dto);
+    return this.participantsService.inviteParticipant(user.id, user.username, padletId, dto);
   }
 
   @Patch(':participantUserId')
