@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SetReactionDto } from './dto/set-reaction.dto';
 
@@ -28,7 +29,10 @@ export interface PadletReactionsResponseDto {
 
 @Injectable()
 export class ReactionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly padletAccess: PadletAccessService,
+  ) {}
 
   async getPadletReactions(
     userId: string,
@@ -37,7 +41,7 @@ export class ReactionService {
     const requesterId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
 
-    await this.assertPadletAccess(requesterId, padletId);
+    await this.padletAccess.assertCanView(requesterId, padletId);
 
     const reactions = await this.prisma.postReaction.findMany({
       where: {
@@ -77,7 +81,7 @@ export class ReactionService {
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
     const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
 
-    await this.assertPostAccess(requesterId, padletId, postId);
+    await this.assertPostAccess(requesterId, padletId, postId, false);
 
     const reactions = await this.prisma.postReaction.findMany({
       where: { post_id: postId },
@@ -104,7 +108,7 @@ export class ReactionService {
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
     const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
 
-    await this.assertPostAccess(requesterId, padletId, postId);
+    await this.assertPostAccess(requesterId, padletId, postId, true);
 
     const existingForUser = await this.prisma.postReaction.findMany({
       where: {
@@ -160,7 +164,7 @@ export class ReactionService {
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
     const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
 
-    await this.assertPostAccess(requesterId, padletId, postId);
+    await this.assertPostAccess(requesterId, padletId, postId, true);
 
     await this.prisma.postReaction.deleteMany({
       where: {
@@ -219,32 +223,17 @@ export class ReactionService {
     };
   }
 
-  private async assertPadletAccess(
-    userId: bigint,
-    padletId: bigint,
-  ): Promise<void> {
-    const padlet = await this.prisma.padlet.findFirst({
-      where: {
-        padlet_id: padletId,
-        OR: [
-          { user_id: userId },
-          { participants: { some: { user_id: userId } } },
-        ],
-      },
-      select: { padlet_id: true },
-    });
-
-    if (!padlet) {
-      throw new NotFoundException('הלוח לא נמצא');
-    }
-  }
-
   private async assertPostAccess(
     userId: bigint,
     padletId: bigint,
     postId: bigint,
+    requireReact: boolean,
   ): Promise<void> {
-    await this.assertPadletAccess(userId, padletId);
+    if (requireReact) {
+      await this.padletAccess.assertCanReact(userId, padletId);
+    } else {
+      await this.padletAccess.assertCanView(userId, padletId);
+    }
 
     const post = await this.prisma.post.findFirst({
       where: {

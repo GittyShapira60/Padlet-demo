@@ -1,6 +1,6 @@
 import { PadletBoardType } from '../../../padlet/enums/padlet-board-type';
-import type { Post, PostLayout } from '../../interfaces/post';
-import BrainstormingPostsLayout from '../board-layouts/brainstorming/BrainstormingPostsLayout';
+import { usePadletCapabilities } from '../../../padlet/context/PadletCapabilitiesContext';
+import type { Post, PostLayout } from '../../interfaces/post';import BrainstormingPostsLayout from '../board-layouts/brainstorming/BrainstormingPostsLayout';
 import FreeWallPostsLayout from '../board-layouts/free_wall/FreeWallPostsLayout';
 import GridPostsLayout from '../board-layouts/grid/GridPostsLayout';
 import TimelinePostsLayout from '../board-layouts/timeline/TimelinePostsLayout';
@@ -9,7 +9,6 @@ import styles from './PadletPostsLayer.module.css';
 interface PadletPostsLayerProps {
   boardType: PadletBoardType;
   posts: Post[];
-  currentUsername?: string;
   onEditPost?: (post: Post) => void;
   onDeletePost?: (post: Post) => void;
   onLayoutChange?: (postId: string, layout: PostLayout) => void;
@@ -18,13 +17,13 @@ interface PadletPostsLayerProps {
 export default function PadletPostsLayer({
   boardType,
   posts,
-  currentUsername,
   onEditPost,
   onDeletePost,
   onLayoutChange,
 }: PadletPostsLayerProps) {
-  if (posts.length === 0) {
-    return (
+  const { canEditPost, canDragPost } = usePadletCapabilities();
+
+  if (posts.length === 0) {    return (
       <div className={styles.layer}>
         <p className={styles.empty}>
           עדיין אין פוסטים בלוח. לחצי על &quot;פוסט חדש&quot; כדי להתחיל.
@@ -35,12 +34,12 @@ export default function PadletPostsLayer({
 
   const layoutProps = {
     posts,
-    currentUsername,
+    canEditPost,
+    canDragPost,
     onEditPost,
     onDeletePost,
     onLayoutChange,
   };
-
   let content;
 
   switch (boardType) {

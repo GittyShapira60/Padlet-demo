@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import type { AuthUserDto } from '../authentication/authentication.service';
 import { CurrentUser } from '../authentication/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 import { CopyPadletDto, CreatePadletDto } from './dto/create-padlet.dto';
+import { UpdatePadletDefaultPermissionDto } from './dto/update-padlet-default-permission.dto';
 import { PadletsService } from './padlets.service';
 
 @ApiTags('padlets')
@@ -39,6 +41,16 @@ export class PadletsController {
   @ApiOperation({ summary: 'Get a single padlet with its posts' })
   getPadletDetail(@CurrentUser() user: AuthUserDto, @Param('padletId') padletId: string) {
     return this.padletsService.getPadletDetail(user.id, padletId);
+  }
+
+  @Patch(':padletId/default-permission')
+  @ApiOperation({ summary: 'Update link default permission for a padlet' })
+  updateDefaultPermission(
+    @CurrentUser() user: AuthUserDto,
+    @Param('padletId') padletId: string,
+    @Body() dto: UpdatePadletDefaultPermissionDto,
+  ) {
+    return this.padletsService.updateDefaultPermission(user.id, padletId, dto);
   }
 
   @Delete(':padletId')

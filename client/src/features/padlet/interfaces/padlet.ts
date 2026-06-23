@@ -20,4 +20,6 @@ export interface PadletBoards {
 export interface PadletDetail {
   padlet: Padlet;
   posts: Post[];
+  currentUserPermission: string;
+  defaultPermission: string | null;
 }

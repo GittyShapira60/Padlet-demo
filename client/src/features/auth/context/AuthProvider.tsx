@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -43,6 +44,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  useEffect(() => {
+    function syncAuthFromStorage() {
+      setUser(getAuthData()?.user ?? null);
+    }
+
+    window.addEventListener('storage', syncAuthFromStorage);
+    return () => window.removeEventListener('storage', syncAuthFromStorage);
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -61,7 +71,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
-;
   if (!context) {
     throw new Error('useAuth must be used within AuthProvider');
   }

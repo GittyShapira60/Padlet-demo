@@ -1,5 +1,4 @@
 import {
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -7,8 +6,8 @@ import {
   PadletBoardType,
   PostContentKind,
   Prisma,
-  type Post,
 } from '@prisma/client';
+import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostContentInputDto } from './dto/post-content-input.dto';
@@ -36,7 +35,10 @@ const GRID_COLUMNS = 4;
 
 @Injectable()
 export class PostsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly padletAccess: PadletAccessService,
+  ) {}
 
   async createPost(
     userId: string,
@@ -46,7 +48,7 @@ export class PostsService {
     const authorId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
 
-    const padlet = await this.getAccessiblePadlet(authorId, padletId);
+    const padlet = await this.padletAccess.assertCanCreatePost(authorId, padletId);
 
     const existingCount = await this.prisma.post.count({
       where: { padlet_id: padletId },
@@ -64,7 +66,7 @@ export class PostsService {
         subject,
         color: dto.color ?? null,
         data_layout: this.toJsonLayout(
-          this.buildLayout(padlet.board_type, existingCount),
+          this.buildLayout(padlet.boardType, existingCount),
         ),
         created_at: now,
         updated_at: now,
@@ -93,7 +95,11 @@ export class PostsService {
       postId,
     );
 
-    this.assertPostAuthor(existingPost, requesterId);
+    await this.padletAccess.assertCanEditPost(
+      requesterId,
+      padletId,
+      existingPost.user_id,
+    );
 
     const { contentKind, title, subject } = this.mapPostContent(dto);
     const now = new Date();
@@ -131,7 +137,11 @@ export class PostsService {
       postId,
     );
 
-    this.assertPostAuthor(existingPost, requesterId);
+    await this.padletAccess.assertCanEditPost(
+      requesterId,
+      padletId,
+      existingPost.user_id,
+    );
 
     const now = new Date();
 
@@ -164,17 +174,21 @@ export class PostsService {
       postId,
     );
 
-    this.assertPostAuthor(existingPost, requesterId);
+    await this.padletAccess.assertCanDeletePost(
+      requesterId,
+      padletId,
+      existingPost.user_id,
+    );
 
-    const padlet = await this.getAccessiblePadlet(requesterId, padletId);
+    const padlet = await this.padletAccess.assertCanView(requesterId, padletId);
     const now = new Date();
 
     await this.prisma.post.delete({
       where: { post_id: postId },
     });
 
-    if (padlet.board_type !== PadletBoardType.free_wall) {
-      await this.reindexPostLayouts(padletId, padlet.board_type);
+    if (padlet.boardType !== PadletBoardType.free_wall) {
+      await this.reindexPostLayouts(padletId, padlet.boardType);
     }
 
     await this.touchPadlet(padletId, now);
@@ -197,31 +211,12 @@ export class PostsService {
     };
   }
 
-  private async getAccessiblePadlet(userId: bigint, padletId: bigint) {
-    const padlet = await this.prisma.padlet.findFirst({
-      where: {
-        padlet_id: padletId,
-        OR: [
-          { user_id: userId },
-          { participants: { some: { user_id: userId } } },
-        ],
-      },
-      select: { padlet_id: true, board_type: true },
-    });
-
-    if (!padlet) {
-      throw new NotFoundException('הלוח לא נמצא');
-    }
-
-    return padlet;
-  }
-
   private async findPostForUser(
     userId: bigint,
     padletId: bigint,
     postId: bigint,
   ): Promise<PostWithAuthor> {
-    await this.getAccessiblePadlet(userId, padletId);
+    await this.padletAccess.assertCanView(userId, padletId);
 
     const post = await this.prisma.post.findFirst({
       where: {
@@ -246,12 +241,6 @@ export class PostsService {
     });
 
     return posts.map((post) => this.toPostResponse(post));
-  }
-
-  private assertPostAuthor(post: Post, requesterId: bigint): void {
-    if (post.user_id !== requesterId) {
-      throw new ForbiddenException('אין הרשאה לערוך או למחוק פוסט זה');
-    }
   }
 
   private async touchPadlet(padletId: bigint, updatedAt: Date): Promise<void> {

@@ -7,7 +7,12 @@ import {
   updatePostLayout,
 } from '../../post/services/post-service';
 import type { Padlet } from '../interfaces/padlet';
+import {
+  PadletPermission,
+  type PadletPermission as PadletPermissionType,
+} from '../enums/padlet-permission';
 import { getPadletDetail } from '../services/padlet-service';
+import { mapApiPermission } from '../utils/padlet-capabilities';
 
 export function usePadletPage() {
   const { padletId } = useParams<{ padletId: string }>();
@@ -20,6 +25,10 @@ export function usePadletPage() {
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [postToEdit, setPostToEdit] = useState<Post | null>(null);
+  const [currentUserPermission, setCurrentUserPermission] =
+    useState<PadletPermissionType | null>(null);
+  const [defaultPermission, setDefaultPermission] =
+    useState<PadletPermissionType | null>(null);
 
   const currentUsername = user?.username;
 
@@ -53,6 +62,12 @@ export function usePadletPage() {
 
         setPadlet(detail.padlet);
         setPosts(detail.posts);
+        setCurrentUserPermission(mapApiPermission(detail.currentUserPermission));
+        setDefaultPermission(
+          detail.defaultPermission
+            ? mapApiPermission(detail.defaultPermission)
+            : PadletPermission.None,
+        );
       } catch {
         if (isMounted) {
           setError('לא הצלחנו לטעון את הלוח');
@@ -69,7 +84,7 @@ export function usePadletPage() {
     return () => {
       isMounted = false;
     };
-  }, [padletId]);
+  }, [padletId, user?.id]);
 
   const handleBack = useCallback(() => {
     navigate('/');
@@ -169,6 +184,9 @@ export function usePadletPage() {
     isShareOpen,
     postToEdit,
     currentUsername,
+    currentUserPermission,
+    defaultPermission,
+    setDefaultPermission,
     handleBack,
     handleCreatePost,
     handleClosePostModal,

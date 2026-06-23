@@ -58,7 +58,7 @@ model Padlet {
   padlet_id          BigInt           @id @default(autoincrement())
   user_id            BigInt
   board_type         PadletBoardType
-  default_permission PadletPermission @default(viewer)
+  default_permission PadletPermission?
   title              String           @db.VarChar(255)
   description        String?
   background         String?          @db.VarChar(255)

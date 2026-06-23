@@ -1,8 +1,10 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PadletBoardType, PadletPermission, type Padlet } from '@prisma/client';
+import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PostsService, type PostResponseDto } from '../posts/posts.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CopyPadletDto, CreatePadletDto } from './dto/create-padlet.dto';
+import { UpdatePadletDefaultPermissionDto } from './dto/update-padlet-default-permission.dto';
 
 export interface PadletResponseDto {
   id: string;
@@ -23,6 +25,8 @@ export interface PadletBoardsResponseDto {
 export interface PadletDetailResponseDto {
   padlet: PadletResponseDto;
   posts: PostResponseDto[];
+  currentUserPermission: PadletPermission;
+  defaultPermission: PadletPermission | null;
 }
 
 type PadletWithCount = Padlet & { _count: { posts: number } };
@@ -34,6 +38,7 @@ export class PadletsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly postsService: PostsService,
+    private readonly padletAccess: PadletAccessService,
   ) {}
 
   async getBoards(userId: string): Promise<PadletBoardsResponseDto> {
@@ -82,14 +87,10 @@ export class PadletsService {
     const requesterId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
 
-    const padlet = await this.prisma.padlet.findFirst({
-      where: {
-        padlet_id: padletId,
-        OR: [
-          { user_id: requesterId },
-          { participants: { some: { user_id: requesterId } } },
-        ],
-      },
+    const access = await this.padletAccess.assertCanView(requesterId, padletId);
+
+    const padlet = await this.prisma.padlet.findUnique({
+      where: { padlet_id: padletId },
       include: {
         _count: { select: { posts: true } },
         posts: {
@@ -102,21 +103,40 @@ export class PadletsService {
     if (!padlet) throw new NotFoundException('הלוח לא נמצא');
 
     return {
-      padlet: this.toPadletResponse(padlet, padlet.user_id !== requesterId),
+      padlet: this.toPadletResponse(padlet, !access.isOwner),
       posts: padlet.posts.map((post) => this.postsService.toPostResponse(post)),
+      currentUserPermission: access.permission,
+      defaultPermission: access.defaultPermission,
     };
-
   }
+
+  async updateDefaultPermission(
+    userId: string,
+    padletIdRaw: string,
+    dto: UpdatePadletDefaultPermissionDto,
+  ): Promise<{ defaultPermission: PadletPermission | null }> {
+    const requesterId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+
+    await this.padletAccess.assertCanManageSharing(requesterId, padletId);
+
+    const updated = await this.prisma.padlet.update({
+      where: { padlet_id: padletId },
+      data: {
+        default_permission: dto.default_permission,
+        updated_at: new Date(),
+      },
+      select: { default_permission: true },
+    });
+
+    return { defaultPermission: updated.default_permission };
+  }
+
   async deletePadlet(userId: string, padletIdRaw: string): Promise<void> {
-  const ownerId = this.parseId(userId, 'משתמש לא נמצא');
-  const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+    const requesterId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
 
-  const padlet = await this.prisma.padlet.findUnique({
-    where: { padlet_id: padletId },
-  });
-
-  if (!padlet) throw new NotFoundException('הלוח לא נמצא');
-  if (padlet.user_id !== ownerId) throw new ForbiddenException('רק הבעלים יכול למחוק את הלוח');
+    await this.padletAccess.assertCanDeletePadlet(requesterId, padletId);
 
   await this.prisma.post.deleteMany({ where: { padlet_id: padletId } });
   await this.prisma.participant.deleteMany({ where: { padlet_id: padletId } });
@@ -140,6 +160,8 @@ export class PadletsService {
   async copyPadlet(userId: string, padletIdRaw: string, dto: CopyPadletDto): Promise<PadletResponseDto> {
     const ownerId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+
+    await this.padletAccess.assertCanView(ownerId, padletId);
 
     const original = await this.prisma.padlet.findUnique({
       where: { padlet_id: padletId },

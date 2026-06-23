@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { HealthModule } from './health/health.module';
+import { PadletAccessModule } from './padlet-access/padlet-access.module';
 import { PadletsModule } from './padlets/padlets.module';
 import { ParticipantsModule } from './participants/participants.module';
 import { PostsModule } from './posts/posts.module';
@@ -17,6 +18,7 @@ import { UsersModule } from './users/users.module';
     PrismaModule,
     HealthModule,
     AuthenticationModule,
+    PadletAccessModule,
     PadletsModule,
     ParticipantsModule,
     PostsModule,

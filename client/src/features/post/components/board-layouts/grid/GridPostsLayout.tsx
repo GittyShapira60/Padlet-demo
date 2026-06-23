@@ -4,7 +4,7 @@ import styles from './GridPostsLayout.module.css';
 
 export default function GridPostsLayout({
   posts,
-  currentUsername,
+  canEditPost,
   onEditPost,
   onDeletePost,
 }: BoardLayoutProps) {
@@ -14,7 +14,7 @@ export default function GridPostsLayout({
         <div key={post.id} className={styles.item}>
           <BoardPostCard
             post={post}
-            currentUsername={currentUsername}
+            canManage={canEditPost(post)}
             onEditPost={onEditPost}
             onDeletePost={onDeletePost}
           />

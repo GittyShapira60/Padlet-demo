@@ -5,12 +5,14 @@ interface PadletBoardHeaderProps {
   title: string;
   onBack: () => void;
   onShareClick: () => void;
+  showShare?: boolean;
 }
 
 export default function PadletBoardHeader({
   title,
   onBack,
   onShareClick,
+  showShare = true,
 }: PadletBoardHeaderProps) {
   return (
     <>
@@ -20,14 +22,16 @@ export default function PadletBoardHeader({
       </button>
       <header className={styles.header}>
         <h1 className={styles.title}>{title}</h1>
-        <button
-          type="button"
-          className={styles.share}
-          onClick={onShareClick}
-        >
-          <Share2 size={16} strokeWidth={2} />
-          שיתוף
-        </button>
+        {showShare ? (
+          <button
+            type="button"
+            className={styles.share}
+            onClick={onShareClick}
+          >
+            <Share2 size={16} strokeWidth={2} />
+            שיתוף
+          </button>
+        ) : null}
       </header>
     </>
   );

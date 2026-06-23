@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PadletPermission } from '@prisma/client';
+import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateParticipantDto } from './dto/create-participant.dto';
 import { UpdateParticipantPermissionDto } from './dto/update-participant-permission.dto';
@@ -24,7 +25,10 @@ const ASSIGNABLE_PERMISSIONS = new Set<PadletPermission>([
 
 @Injectable()
 export class ParticipantsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly padletAccess: PadletAccessService,
+  ) {}
 
   async getParticipants(
     userId: string,
@@ -33,7 +37,7 @@ export class ParticipantsService {
     const requesterId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
 
-    await this.assertPadletOwner(requesterId, padletId);
+    await this.padletAccess.assertCanManageSharing(requesterId, padletId);
 
     const participants = await this.prisma.participant.findMany({
       where: { padlet_id: padletId },
@@ -55,7 +59,7 @@ export class ParticipantsService {
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
     const inviteeId = this.parseId(dto.user_id, 'משתמש לא נמצא');
 
-    await this.assertPadletOwner(ownerId, padletId);
+    await this.padletAccess.assertCanManageSharing(ownerId, padletId);
     this.assertAssignablePermission(dto.permission);
 
     if (ownerId === inviteeId) {
@@ -111,7 +115,7 @@ export class ParticipantsService {
       'משתמש לא נמצא',
     );
 
-    await this.assertPadletOwner(ownerId, padletId);
+    await this.padletAccess.assertCanManageSharing(ownerId, padletId);
     this.assertAssignablePermission(dto.permission);
 
     const participant = await this.prisma.participant.findUnique({
@@ -156,23 +160,6 @@ export class ParticipantsService {
       username: participant.user.username,
       permission: participant.permission,
     };
-  }
-
-  private async assertPadletOwner(
-    userId: bigint,
-    padletId: bigint,
-  ): Promise<void> {
-    const padlet = await this.prisma.padlet.findFirst({
-      where: {
-        padlet_id: padletId,
-        user_id: userId,
-      },
-      select: { padlet_id: true },
-    });
-
-    if (!padlet) {
-      throw new ForbiddenException('אין הרשאה לנהל שיתוף לוח זה');
-    }
   }
 
   private assertAssignablePermission(permission: PadletPermission): void {

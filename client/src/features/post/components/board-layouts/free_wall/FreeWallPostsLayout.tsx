@@ -13,7 +13,8 @@ function getDefaultLayout(index: number): PostLayout {
 
 export default function FreeWallPostsLayout({
   posts,
-  currentUsername,
+  canEditPost,
+  canDragPost,
   onEditPost,
   onDeletePost,
   onLayoutChange,
@@ -22,20 +23,19 @@ export default function FreeWallPostsLayout({
     <div className={styles.canvas}>
       {posts.map((post, index) => {
         const layout = post.layout ?? getDefaultLayout(index);
-        const canDrag = currentUsername === post.authorUsername;
 
         return (
           <DraggablePost
             key={post.id}
             layout={layout}
-            canDrag={canDrag}
+            canDrag={canDragPost(post)}
             onLayoutChange={(nextLayout) =>
               onLayoutChange?.(post.id, nextLayout)
             }
           >
             <BoardPostCard
               post={post}
-              currentUsername={currentUsername}
+              canManage={canEditPost(post)}
               onEditPost={onEditPost}
               onDeletePost={onDeletePost}
             />

@@ -12,25 +12,33 @@ import {
   inviteParticipant,
   updateParticipantPermission,
 } from '../services/participant-service';
+import { updatePadletDefaultPermission } from '../services/padlet-service';
 import {
   buildShareUrl,
   filterUsersForPicker,
   getPermissionHint,
 } from '../utils/share-padlet.utils';
+import {
+  mapLinkPermissionToApi,
+} from '../utils/padlet-capabilities';
 import { useUsers } from './useUsers';
 import type { User } from '../../../shared/interfaces/user';
 
 interface UseSharePadletModalOptions {
   padletId: string;
   currentUsername?: string;
+  initialDefaultPermission: PadletPermissionType;
+  onDefaultPermissionChange?: (permission: PadletPermissionType) => void;
 }
 
 export function useSharePadletModal({
   padletId,
   currentUsername,
+  initialDefaultPermission,
+  onDefaultPermissionChange,
 }: UseSharePadletModalOptions) {
   const [linkPermission, setLinkPermission] = useState<PadletPermissionType>(
-    PadletPermission.Viewer,
+    initialDefaultPermission,
   );
   const [searchQuery, setSearchQuery] = useState('');
   const [inviteError, setInviteError] = useState('');
@@ -57,6 +65,10 @@ export function useSharePadletModal({
       ),
     [allUsers, collaborators, currentUsername, searchQuery],
   );
+
+  useEffect(() => {
+    setLinkPermission(initialDefaultPermission);
+  }, [initialDefaultPermission]);
 
   useEffect(() => {
     let isMounted = true;
@@ -176,6 +188,31 @@ export function useSharePadletModal({
     [collaboratorMinimum, padletId],
   );
 
+  const handleLinkPermissionChange = useCallback(
+    async (permission: PadletPermissionType) => {
+      const previous = linkPermission;
+      setLinkPermission(permission);
+      setInviteError('');
+
+      try {
+        const result = await updatePadletDefaultPermission(
+          padletId,
+          mapLinkPermissionToApi(permission),
+        );
+        const nextPermission =
+          result.defaultPermission === null
+            ? PadletPermission.None
+            : (result.defaultPermission as PadletPermissionType);
+        setLinkPermission(nextPermission);
+        onDefaultPermissionChange?.(nextPermission);
+      } catch {
+        setLinkPermission(previous);
+        setInviteError('עדכון הרשאת הקישור נכשל');
+      }
+    },
+    [linkPermission, onDefaultPermissionChange, padletId],
+  );
+
   function reportCopyError() {
     setInviteError('לא הצלחנו להעתיק את הקישור');
   }
@@ -189,7 +226,7 @@ export function useSharePadletModal({
   return {
     shareUrl,
     linkPermission,
-    setLinkPermission,
+    handleLinkPermissionChange,
     collaboratorMinimum,
     permissionHint,
     searchQuery,
