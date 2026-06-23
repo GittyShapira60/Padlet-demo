@@ -7,7 +7,7 @@ import {
   updatePostLayout,
 } from '../../post/services/post-service';
 import type { Padlet } from '../interfaces/padlet';
-import { getPadletDetail } from '../services/padlet-service';
+import { getPadletDetail, leavePadlet } from '../services/padlet-service';
 
 export function usePadletPage() {
   const { padletId } = useParams<{ padletId: string }>();
@@ -20,6 +20,10 @@ export function usePadletPage() {
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [postToEdit, setPostToEdit] = useState<Post | null>(null);
+  const [postPendingDelete, setPostPendingDelete] = useState<Post | null>(null);
+  const [isDeletingPost, setIsDeletingPost] = useState(false);
+  const [isLeaveOpen, setIsLeaveOpen] = useState(false);
+  const [isLeavingPadlet, setIsLeavingPadlet] = useState(false);
 
   const currentUsername = user?.username;
 
@@ -115,32 +119,39 @@ export function usePadletPage() {
     setIsCreatePostOpen(true);
   }, []);
 
-  const handleDeletePost = useCallback(
-    async (post: Post) => {
-      if (!padletId || !padlet) {
-        return;
-      }
+  const handleRequestDeletePost = useCallback((post: Post) => {
+    setPostPendingDelete(post);
+  }, []);
 
-      const confirmed = window.confirm('למחוק את הפוסט?');
+  const handleCancelDeletePost = useCallback(() => {
+    if (isDeletingPost) {
+      return;
+    }
+    setPostPendingDelete(null);
+  }, [isDeletingPost]);
 
-      if (!confirmed) {
-        return;
-      }
+  const handleConfirmDeletePost = useCallback(async () => {
+    if (!padletId || !padlet || !postPendingDelete) {
+      return;
+    }
 
-      try {
-        const remainingPosts = await deletePost(padletId, post.id);
-        setPosts(remainingPosts);
-        setPadlet((current) =>
-          current
-            ? { ...current, postCount: remainingPosts.length }
-            : current,
-        );
-      } catch {
-        setError('מחיקת הפוסט נכשלה, נסי שוב');
-      }
-    },
-    [padlet, padletId],
-  );
+    setIsDeletingPost(true);
+
+    try {
+      const remainingPosts = await deletePost(padletId, postPendingDelete.id);
+      setPosts(remainingPosts);
+      setPadlet((current) =>
+        current
+          ? { ...current, postCount: remainingPosts.length }
+          : current,
+      );
+      setPostPendingDelete(null);
+    } catch {
+      setError('מחיקת הפוסט נכשלה, נסי שוב');
+    } finally {
+      setIsDeletingPost(false);
+    }
+  }, [padlet, padletId, postPendingDelete]);
 
   const handleLayoutChange = useCallback(
     async (postId: string, layout: PostLayout) => {
@@ -160,6 +171,34 @@ export function usePadletPage() {
     [padletId],
   );
 
+  const handleOpenLeave = useCallback(() => {
+    setIsLeaveOpen(true);
+  }, []);
+
+  const handleCancelLeave = useCallback(() => {
+    if (isLeavingPadlet) {
+      return;
+    }
+    setIsLeaveOpen(false);
+  }, [isLeavingPadlet]);
+
+  const handleConfirmLeave = useCallback(async () => {
+    if (!padletId) {
+      return;
+    }
+
+    setIsLeavingPadlet(true);
+
+    try {
+      await leavePadlet(padletId);
+      navigate('/');
+    } catch {
+      setError('לא הצלחנו לעזוב את הלוח, נסי שוב');
+      setIsLeavingPadlet(false);
+      setIsLeaveOpen(false);
+    }
+  }, [navigate, padletId]);
+
   return {
     padlet,
     posts,
@@ -168,6 +207,10 @@ export function usePadletPage() {
     isCreatePostOpen,
     isShareOpen,
     postToEdit,
+    postPendingDelete,
+    isDeletingPost,
+    isLeaveOpen,
+    isLeavingPadlet,
     currentUsername,
     handleBack,
     handleCreatePost,
@@ -176,7 +219,12 @@ export function usePadletPage() {
     handleCloseShare,
     handlePostSaved,
     handleEditPost,
-    handleDeletePost,
+    handleRequestDeletePost,
+    handleCancelDeletePost,
+    handleConfirmDeletePost,
     handleLayoutChange,
+    handleOpenLeave,
+    handleCancelLeave,
+    handleConfirmLeave,
   };
 }
