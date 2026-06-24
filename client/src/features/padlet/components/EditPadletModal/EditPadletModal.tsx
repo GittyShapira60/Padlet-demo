@@ -36,7 +36,7 @@ export default function EditPadletModal({
   } = useEditPadletModal({ padlet, onClose, onSubmit });
 
   return (
-    <Modal onClose={onClose} ariaLabelledBy="edit-padlet-title">
+    <Modal onClose={onClose}>
       <CreatePadletModalHeader
         title={title}
         background={selectedColor}

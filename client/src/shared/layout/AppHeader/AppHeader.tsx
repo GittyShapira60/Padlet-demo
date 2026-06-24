@@ -45,17 +45,6 @@ export default function AppHeader({
           ) : null}
         </div>
 
-        <div className={styles.leftGroup}>
-
-        <div className={styles.brand}>
-          <img
-            src="/main-icon.svg"
-            alt=""
-            className={styles.logoIcon}
-          />
-          <span className={styles.logo}>Padlet</span>
-        </div>
-
         <nav className={styles.actions}>
           <button type="button" className={styles.stats}>
             <BarChart3 size={17} strokeWidth={1.5} />
@@ -67,18 +56,6 @@ export default function AppHeader({
             <span className={styles.bellBadge}>1</span>
           </button>
 
-
-          <span className={styles.greeting}>שלום, {username}</span>
-
-          <button type="button" className={styles.bell}>
-            <Bell size={18} strokeWidth={1.5} />
-            <span className={styles.bellBadge}>1</span>
-          </button>
-
-          <div className={styles.avatar}>
-            {initial}
-          </div>
-
           <button type="button" className={styles.logout} onClick={logout}>
             <LogOut size={17} strokeWidth={1.5} />
             יציאה
@@ -87,7 +64,7 @@ export default function AppHeader({
           <div className={styles.avatar} aria-hidden="true">
             {initial}
           </div>
-        </div>
+        </nav>
       </div>
     </header>
   );

@@ -114,23 +114,6 @@ export default function PadletPage() {
         </div>
       </div>
 
-      <PadletPostsLayer
-        boardType={padlet.boardType}
-        posts={posts}
-        currentUsername={currentUsername}
-        onEditPost={handleEditPost}
-        onDeletePost={(post) => void handleRequestDeletePost(post)}
-        onLayoutChange={(postId, layout) =>
-          void handleLayoutChange(postId, layout)
-        }
-      />
-      <PadletBoardHeader
-        title={padlet.title}
-        isShared={padlet.isShared}
-        onBack={handleBack}
-        onShareClick={handleOpenShare}
-        onLeaveClick={handleOpenLeave}
-      />
       <PostReactionsProvider
         padletId={padlet.id}
         postIds={posts.map((post) => post.id)}
@@ -141,12 +124,13 @@ export default function PadletPage() {
           posts={posts}
           currentUsername={currentUsername}
           onEditPost={handleEditPost}
-          onDeletePost={(post) => handleRequestDeletePost(post)}
+          onDeletePost={(post) => void handleRequestDeletePost(post)}
           onLayoutChange={(postId, layout) =>
             void handleLayoutChange(postId, layout)
           }
         />
       </PostReactionsProvider>
+
       <CreatePostFab onClick={handleCreatePost} />
 
       {isShareOpen ? (
@@ -171,32 +155,6 @@ export default function PadletPage() {
           postToEdit={postToEdit}
           onClose={handleClosePostModal}
           onSubmit={handlePostSaved}
-        />
-      ) : null}
-
-      {postPendingDelete ? (
-        <ConfirmDialog
-          title={PADLET_PAGE_TEXTS.deletePost.title}
-          description={PADLET_PAGE_TEXTS.deletePost.description}
-          confirmLabel={PADLET_PAGE_TEXTS.deletePost.confirmLabel}
-          pendingLabel={PADLET_PAGE_TEXTS.deletePost.pendingLabel}
-          tone="danger"
-          isPending={isDeletingPost}
-          onConfirm={() => void handleConfirmDeletePost()}
-          onCancel={handleCancelDeletePost}
-        />
-      ) : null}
-
-      {isLeaveOpen ? (
-        <ConfirmDialog
-          title={PADLET_PAGE_TEXTS.leaveBoard.title}
-          description={PADLET_PAGE_TEXTS.leaveBoard.description(padlet.title)}
-          confirmLabel={PADLET_PAGE_TEXTS.leaveBoard.confirmLabel}
-          pendingLabel={PADLET_PAGE_TEXTS.leaveBoard.pendingLabel}
-          tone="danger"
-          isPending={isLeavingPadlet}
-          onConfirm={() => void handleConfirmLeave()}
-          onCancel={handleCancelLeave}
         />
       ) : null}
     </div>
