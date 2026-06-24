@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthProvider';
 import type { Post, PostLayout } from '../../post/interfaces/post';
@@ -22,8 +22,24 @@ export function usePadletPage() {
   const [isDeletingPost, setIsDeletingPost] = useState(false);
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
   const [isLeavingPadlet, setIsLeavingPadlet] = useState(false);
+  const [filterSearch, setFilterSearch] = useState('');
+  const [filterAuthor, setFilterAuthor] = useState('');
 
   const currentUsername = user?.username;
+
+  const filteredPosts = useMemo(() => {
+    const search = filterSearch.trim().toLowerCase();
+    const author = filterAuthor.trim().toLowerCase();
+    return posts.filter((post: Post) => {
+      const matchesSearch =
+        !search ||
+        post.title?.toLowerCase().includes(search) ||
+        post.subject?.toLowerCase().includes(search);
+      const matchesAuthor =
+        !author || post.authorUsername.toLowerCase().includes(author);
+      return matchesSearch && matchesAuthor;
+    });
+  }, [posts, filterSearch, filterAuthor]);
 
   useEffect(() => {
     if (!padletId) {
@@ -212,6 +228,11 @@ export function usePadletPage() {
   return {
     padlet,
     posts,
+    filteredPosts,
+    filterSearch,
+    setFilterSearch,
+    filterAuthor,
+    setFilterAuthor,
     isLoading,
     error,
     isCreatePostOpen,

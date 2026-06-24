@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -19,6 +20,7 @@ import {
   CreatePadletDto,
   UpdatePadletDto,
 } from './dto/create-padlet.dto';
+import { GetPadletDetailQueryDto } from './dto/padlet-filter.dto';
 import { PadletsService } from './padlets.service';
 
 @ApiTags('padlets')
@@ -42,8 +44,12 @@ export class PadletsController {
 
   @Get(':padletId')
   @ApiOperation({ summary: 'Get a single padlet with its posts' })
-  getPadletDetail(@CurrentUser() user: AuthUserDto, @Param('padletId') padletId: string) {
-    return this.padletsService.getPadletDetail(user.id, padletId);
+  getPadletDetail(
+    @CurrentUser() user: AuthUserDto,
+    @Param('padletId') padletId: string,
+    @Query() query: GetPadletDetailQueryDto,
+  ) {
+    return this.padletsService.getPadletDetail(user.id, padletId, query);
   }
 
   @Patch(':padletId')
