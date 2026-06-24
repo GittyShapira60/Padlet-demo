@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -55,5 +58,15 @@ export class ParticipantsController {
       participantUserId,
       dto,
     );
+  }
+
+  @Delete('me')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Leave a shared padlet board as the current user' })
+  leaveCurrentPadlet(
+    @CurrentUser() user: AuthUserDto,
+    @Param('padletId') padletId: string,
+  ) {
+    return this.participantsService.leavePadlet(user.id, padletId);
   }
 }
