@@ -43,6 +43,10 @@ export default function PadletBoardHeader({
         onClick={() => setIsOpen((prev: boolean) => !prev)}
       >
         <MoreVertical size={18} strokeWidth={2} aria-hidden="true" />
+    <>
+      <button type="button" className={styles.back} onClick={onBack}>
+        <ArrowRight size={18} strokeWidth={2} />
+        חזרה לבית
       </button>
 
       {isOpen ? (

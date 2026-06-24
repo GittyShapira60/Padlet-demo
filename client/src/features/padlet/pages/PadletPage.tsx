@@ -4,9 +4,11 @@ import type { AppOutletContext } from '../../../App';
 import { MoreVertical, Pencil, Share2 } from '../../../shared/icons';
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
+import { PostReactionsProvider } from '../../reaction';
 import PadletPostsLayer from '../../post/components/PadletPostsLayer/PadletPostsLayer';
 import EditPadletModal from '../components/EditPadletModal/EditPadletModal';
 import SharePadletModal from '../components/SharePadletModal/SharePadletModal';
+import { PADLET_PAGE_TEXTS } from './PadletPage.consts';
 import styles from './PadletPage.module.css';
 import { usePadletPage } from './usePadletPage';
 
@@ -59,15 +61,15 @@ export default function PadletPage() {
   }, [padlet, setHeaderBackground]);
 
   if (isLoading) {
-    return <p className={styles.status}>טוען לוח...</p>;
+    return <p className={styles.status}>{PADLET_PAGE_TEXTS.loading}</p>;
   }
 
   if (error || !padlet) {
     return (
       <div className={styles.error}>
-        <p className={styles.errorText}>{error || 'לוח לא נמצא'}</p>
+        <p className={styles.errorText}>{error || PADLET_PAGE_TEXTS.boardNotFound}</p>
         <button type="button" className={styles.backOnly} onClick={handleBack}>
-          חזרה לבית
+          {PADLET_PAGE_TEXTS.backToHome}
         </button>
       </div>
     );
@@ -122,6 +124,29 @@ export default function PadletPage() {
           void handleLayoutChange(postId, layout)
         }
       />
+      <PadletBoardHeader
+        title={padlet.title}
+        isShared={padlet.isShared}
+        onBack={handleBack}
+        onShareClick={handleOpenShare}
+        onLeaveClick={handleOpenLeave}
+      />
+      <PostReactionsProvider
+        padletId={padlet.id}
+        postIds={posts.map((post) => post.id)}
+        canReact={Boolean(currentUsername)}
+      >
+        <PadletPostsLayer
+          boardType={padlet.boardType}
+          posts={posts}
+          currentUsername={currentUsername}
+          onEditPost={handleEditPost}
+          onDeletePost={(post) => handleRequestDeletePost(post)}
+          onLayoutChange={(postId, layout) =>
+            void handleLayoutChange(postId, layout)
+          }
+        />
+      </PostReactionsProvider>
       <CreatePostFab onClick={handleCreatePost} />
 
       {isShareOpen ? (
@@ -146,6 +171,32 @@ export default function PadletPage() {
           postToEdit={postToEdit}
           onClose={handleClosePostModal}
           onSubmit={handlePostSaved}
+        />
+      ) : null}
+
+      {postPendingDelete ? (
+        <ConfirmDialog
+          title={PADLET_PAGE_TEXTS.deletePost.title}
+          description={PADLET_PAGE_TEXTS.deletePost.description}
+          confirmLabel={PADLET_PAGE_TEXTS.deletePost.confirmLabel}
+          pendingLabel={PADLET_PAGE_TEXTS.deletePost.pendingLabel}
+          tone="danger"
+          isPending={isDeletingPost}
+          onConfirm={() => void handleConfirmDeletePost()}
+          onCancel={handleCancelDeletePost}
+        />
+      ) : null}
+
+      {isLeaveOpen ? (
+        <ConfirmDialog
+          title={PADLET_PAGE_TEXTS.leaveBoard.title}
+          description={PADLET_PAGE_TEXTS.leaveBoard.description(padlet.title)}
+          confirmLabel={PADLET_PAGE_TEXTS.leaveBoard.confirmLabel}
+          pendingLabel={PADLET_PAGE_TEXTS.leaveBoard.pendingLabel}
+          tone="danger"
+          isPending={isLeavingPadlet}
+          onConfirm={() => void handleConfirmLeave()}
+          onCancel={handleCancelLeave}
         />
       ) : null}
     </div>

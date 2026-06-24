@@ -12,6 +12,8 @@ export {
   Pencil,
   Plus,
   Share2,
+  Search,
+  SmilePlus,
   Trash2,
   Users,
 } from './ui-icons';

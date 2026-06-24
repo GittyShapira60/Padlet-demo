@@ -13,22 +13,19 @@ export default function PostColorPicker({
   return (
     <div className={styles.root}>
       <span className={styles.label}>צבע רקע:</span>
-      <div className={styles.swatches} role="listbox" aria-label="צבע רקע">
-        {BACKGROUND_COLORS.map((color, index) => {
+      <div className={styles.swatches}>
+        {BACKGROUND_COLORS.map((color) => {
           const isSelected =
             selectedColor.toLowerCase() === color.toLowerCase();
 
           return (
-          <button
-            key={color}
-            type="button"
-            role="option"
-            aria-selected={isSelected}
-            className={`${styles.swatch} ${isSelected ? styles.swatchSelected : ''}`}
-            style={{ background: color }}
-            onClick={() => onColorChange(color)}
-            aria-label={`צבע רקע ${index + 1}`}
-          />
+            <button
+              key={color}
+              type="button"
+              className={`${styles.swatch} ${isSelected ? styles.swatchSelected : ''}`}
+              style={{ background: color }}
+              onClick={() => onColorChange(color)}
+            />
           );
         })}
       </div>

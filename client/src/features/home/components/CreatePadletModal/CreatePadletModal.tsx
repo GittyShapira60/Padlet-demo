@@ -33,7 +33,7 @@ export default function CreatePadletModal({
   } = useCreatePadletModal({ onClose, onSubmit });
 
   return (
-    <Modal onClose={onClose} ariaLabelledBy="create-padlet-title">
+    <Modal onClose={onClose}>
       <CreatePadletModalHeader
         title={title}
         background={selectedColor}

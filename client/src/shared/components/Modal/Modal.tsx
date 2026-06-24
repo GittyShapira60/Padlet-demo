@@ -4,14 +4,9 @@ import styles from './Modal.module.css';
 interface ModalProps {
   children: ReactNode;
   onClose: () => void;
-  ariaLabelledBy?: string;
 }
 
-export default function Modal({
-  children,
-  onClose,
-  ariaLabelledBy,
-}: ModalProps) {
+export default function Modal({ children, onClose }: ModalProps) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
@@ -24,16 +19,9 @@ export default function Modal({
   }, [onClose]);
 
   return (
-    <div
-      className={styles.overlay}
-      onClick={onClose}
-      role="presentation"
-    >
+    <div className={styles.overlay} onClick={onClose}>
       <div
         className={styles.dialog}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={ariaLabelledBy}
         onClick={(event) => event.stopPropagation()}
       >
         {children}

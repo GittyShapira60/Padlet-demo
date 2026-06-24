@@ -1,5 +1,6 @@
 import { Pencil, Trash2 } from '../../../../shared/icons';
 import type { Post } from '../../interfaces/post';
+import { PostReaction } from '../../../reaction';
 import styles from './PadletPostCard.module.css';
 
 interface PadletPostCardProps {
@@ -23,7 +24,6 @@ function PostActions({
       <button
         type="button"
         className={styles.actionBtn}
-        aria-label="עריכת פוסט"
         onClick={() => onEdit?.(post)}
       >
         <Pencil size={14} />
@@ -31,7 +31,6 @@ function PostActions({
       <button
         type="button"
         className={`${styles.actionBtn} ${styles.deleteBtn}`}
-        aria-label="מחיקת פוסט"
         onClick={() => onDelete?.(post)}
       >
         <Trash2 size={14} />
@@ -57,6 +56,7 @@ export default function PadletPostCard({
         {post.title ? <h3 className={styles.title}>{post.title}</h3> : null}
         {post.subject ? <p className={styles.subject}>{post.subject}</p> : null}
       </div>
+      <PostReaction postId={post.id} />
       <p className={styles.author}>{post.authorUsername}</p>
     </article>
   );

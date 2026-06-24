@@ -37,7 +37,6 @@ export default function CreatePostContentArea({
         <button
           type="button"
           className={styles.emojiBtn}
-          aria-label="הוסף אמוג׳י"
           onClick={() => undefined}
         >
           😊
@@ -71,7 +70,7 @@ export default function CreatePostContentArea({
           />
           {selectedFile || existingImageName ? (
             <div className={styles.fileSelected}>
-              <span className={styles.fileIcon} aria-hidden="true">
+              <span className={styles.fileIcon}>
                 📄
               </span>
               <p className={styles.fileName}>
@@ -81,7 +80,7 @@ export default function CreatePostContentArea({
             </div>
           ) : (
             <>
-              <span className={styles.fileIcon} aria-hidden="true">
+              <span className={styles.fileIcon}>
                 🖼️
               </span>
               <span className={styles.fileLabel}>
