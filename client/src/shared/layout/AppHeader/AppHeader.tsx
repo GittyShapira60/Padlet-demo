@@ -21,7 +21,7 @@ export default function AppHeader({
   return (
     <header
       className={`${styles.header} ${background ? styles.noBorder : ''}`}
-      style={background ? { background } : undefined}
+      style={background ? { background, backgroundAttachment: 'fixed' } : undefined}
     >
       <div className={styles.inner}>
         <div className={styles.rightGroup}>

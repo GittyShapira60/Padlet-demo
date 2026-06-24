@@ -1,3 +1,4 @@
+import { BACKGROUND_COLOR_GRADIENTS } from '../../../shared/constants/background-colors';
 import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../../../App';
@@ -53,7 +54,7 @@ export default function PadletPage() {
 
   useEffect(() => {
     if (padlet) {
-      setHeaderBackground(padlet.background ?? null);
+      setHeaderBackground(BACKGROUND_COLOR_GRADIENTS[padlet.background ?? ''] ?? padlet.background ?? null);
     }
     return () => {
       setHeaderBackground(null);
@@ -78,7 +79,7 @@ export default function PadletPage() {
   return (
     <div
       className={styles.page}
-      style={{ background: padlet.background ?? '#f3f4f6' }}
+      style={{ background: BACKGROUND_COLOR_GRADIENTS[padlet.background ?? ''] ?? padlet.background ?? '#f3f4f6', backgroundAttachment: 'fixed' }}
     >
       <div className={styles.titleRow}>
         <h1 className={styles.boardTitle}>{padlet.title}</h1>
