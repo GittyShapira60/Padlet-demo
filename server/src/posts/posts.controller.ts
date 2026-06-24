@@ -64,4 +64,15 @@ export class PostsController {
   ) {
     return this.postsService.deletePost(user.id, padletId, postId);
   }
+
+  @Post(':postId/vote')
+  @ApiOperation({ summary: 'Vote on a poll option' })
+  votePoll(
+    @CurrentUser() user: AuthUserDto,
+    @Param('padletId') padletId: string,
+    @Param('postId') postId: string,
+    @Body('option_id') optionId: string,
+  ) {
+    return this.postsService.votePoll(user.id, padletId, postId, optionId);
+  }
 }

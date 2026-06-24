@@ -2,10 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthProvider';
 import type { Post, PostLayout } from '../../post/interfaces/post';
-import {
-  deletePost,
-  updatePostLayout,
-} from '../../post/services/post-service';
+import { deletePost, updatePostLayout } from '../../post/services/post-service';
 import type { Padlet } from '../interfaces/padlet';
 import { getPadletDetail, leavePadlet } from '../services/padlet-service';
 
