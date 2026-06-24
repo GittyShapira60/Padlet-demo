@@ -9,6 +9,7 @@ import {
   CreatePadletDto,
   UpdatePadletDto,
 } from './dto/create-padlet.dto';
+import { GetPadletDetailQueryDto } from './dto/padlet-filter.dto';
 
 export interface PadletResponseDto {
   id: string;
@@ -118,9 +119,27 @@ export class PadletsService {
     return this.toPadletResponse(updated, false);
   }
 
-  async getPadletDetail(userId: string, padletIdRaw: string): Promise<PadletDetailResponseDto> {
+  async getPadletDetail(
+    userId: string,
+    padletIdRaw: string,
+    query: GetPadletDetailQueryDto = {},
+  ): Promise<PadletDetailResponseDto> {
     const requesterId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+
+    const postWhere = {
+      ...(query.search
+        ? {
+            OR: [
+              { title: { contains: query.search, mode: 'insensitive' as const } },
+              { subject: { contains: query.search, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+      ...(query.author
+        ? { user: { username: { contains: query.author, mode: 'insensitive' as const } } }
+        : {}),
+    };
 
     const padlet = await this.prisma.padlet.findFirst({
       where: {
@@ -133,6 +152,7 @@ export class PadletsService {
       include: {
         _count: { select: { posts: true } },
         posts: {
+          where: Object.keys(postWhere).length ? postWhere : undefined,
           include: { user: true },
           orderBy: { created_at: 'asc' },
         },

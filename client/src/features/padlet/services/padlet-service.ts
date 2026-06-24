@@ -57,9 +57,21 @@ export function createPadlet(input: CreatePadletInput): Promise<Padlet> {
   });
 }
 
-export async function getPadletDetail(padletId: string): Promise<PadletDetail | null> {
+export interface PadletDetailFilter {
+  search?: string;
+  author?: string;
+}
+
+export async function getPadletDetail(
+  padletId: string,
+  filter?: PadletDetailFilter,
+): Promise<PadletDetail | null> {
   try {
-    return await httpClient<PadletDetail>('padlets/' + padletId);
+    const params = new URLSearchParams();
+    if (filter?.search) params.set('search', filter.search);
+    if (filter?.author) params.set('author', filter.author);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return await httpClient<PadletDetail>('padlets/' + padletId + query);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
       return null;

@@ -5,8 +5,10 @@ import type { AppOutletContext } from '../../../App';
 import { MoreVertical, Pencil, Share2 } from '../../../shared/icons';
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
+import PostFilterBar from '../../post/components/PostFilterBar/PostFilterBar';
 import { PostReactionsProvider } from '../../reaction';
 import PadletPostsLayer from '../../post/components/PadletPostsLayer/PadletPostsLayer';
+import ConfirmDialog from '../../../shared/components/ConfirmDialog/ConfirmDialog';
 import EditPadletModal from '../components/EditPadletModal/EditPadletModal';
 import SharePadletModal from '../components/SharePadletModal/SharePadletModal';
 import { PADLET_PAGE_TEXTS } from './PadletPage.consts';
@@ -17,7 +19,11 @@ export default function PadletPage() {
   const { setHeaderBackground } = useOutletContext<AppOutletContext>();
   const {
     padlet,
-    posts,
+    filteredPosts,
+    filterSearch,
+    setFilterSearch,
+    filterAuthor,
+    setFilterAuthor,
     isLoading,
     error,
     isCreatePostOpen,
@@ -36,6 +42,10 @@ export default function PadletPage() {
     handlePostSaved,
     handleEditPost,
     handleRequestDeletePost,
+    handleCancelDeletePost,
+    handleConfirmDeletePost,
+    postPendingDelete,
+    isDeletingPost,
     handleLayoutChange,
   } = usePadletPage();
 
@@ -83,6 +93,12 @@ export default function PadletPage() {
     >
       <div className={styles.titleRow}>
         <h1 className={styles.boardTitle}>{padlet.title}</h1>
+        <PostFilterBar
+          search={filterSearch}
+          author={filterAuthor}
+          onSearchChange={setFilterSearch}
+          onAuthorChange={setFilterAuthor}
+        />
         <div className={styles.menuWrapper} ref={menuRef}>
           <button
             type="button"
@@ -117,12 +133,12 @@ export default function PadletPage() {
 
       <PostReactionsProvider
         padletId={padlet.id}
-        postIds={posts.map((post) => post.id)}
+        postIds={filteredPosts.map((post: { id: string }) => post.id)}
         canReact={Boolean(currentUsername)}
       >
         <PadletPostsLayer
           boardType={padlet.boardType}
-          posts={posts}
+          posts={filteredPosts}
           currentUsername={currentUsername}
           onEditPost={handleEditPost}
           onDeletePost={(post) => void handleRequestDeletePost(post)}
@@ -156,6 +172,19 @@ export default function PadletPage() {
           postToEdit={postToEdit}
           onClose={handleClosePostModal}
           onSubmit={handlePostSaved}
+        />
+      ) : null}
+
+      {postPendingDelete ? (
+        <ConfirmDialog
+          title="מחיקת פוסט"
+          description="האם את בטוחה שברצונך למחוק את הפוסט?"
+          confirmLabel="מחק"
+          pendingLabel="מוחק..."
+          isPending={isDeletingPost}
+          tone="danger"
+          onConfirm={() => void handleConfirmDeletePost()}
+          onCancel={handleCancelDeletePost}
         />
       ) : null}
     </div>
