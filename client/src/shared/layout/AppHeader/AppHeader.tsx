@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useAuth } from '../../../features/auth/context/AuthProvider';
-import { BarChart3, Bell, LogOut } from '../../icons';
+import { NotificationBell } from '../../../features/notification';
+import { BarChart3, LogOut } from '../../icons';
 import styles from './AppHeader.module.css';
 
 interface AppHeaderProps {
@@ -51,10 +52,9 @@ export default function AppHeader({
             סטטיסטיקות
           </button>
 
-          <button type="button" className={styles.bell} aria-label="התראות">
-            <Bell size={18} strokeWidth={1.5} aria-hidden="true" />
-            <span className={styles.bellBadge}>1</span>
-          </button>
+          <span className={styles.greeting}>שלום, {username}</span>
+
+          <NotificationBell />
 
           <button type="button" className={styles.logout} onClick={logout}>
             <LogOut size={17} strokeWidth={1.5} />

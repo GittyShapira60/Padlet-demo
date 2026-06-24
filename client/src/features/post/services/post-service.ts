@@ -7,6 +7,7 @@ export interface PostInput {
   contentTab: PostContentTab;
   content?: string;
   imageFileName?: string;
+  pollAnswers?: string[];
 }
 
 /**
@@ -65,5 +66,6 @@ function toContentBody(input: PostInput) {
     content_kind: input.contentTab,
     content: input.content,
     image_file_name: input.imageFileName,
+    poll_answers: input.pollAnswers,
   };
 }

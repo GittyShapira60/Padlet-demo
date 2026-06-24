@@ -9,6 +9,7 @@ import PostFilterBar from '../../post/components/PostFilterBar/PostFilterBar';
 import { PostReactionsProvider } from '../../reaction';
 import PadletPostsLayer from '../../post/components/PadletPostsLayer/PadletPostsLayer';
 import ConfirmDialog from '../../../shared/components/ConfirmDialog/ConfirmDialog';
+import { PollProvider } from '../../post/context/PollContext';
 import EditPadletModal from '../components/EditPadletModal/EditPadletModal';
 import SharePadletModal from '../components/SharePadletModal/SharePadletModal';
 import { PADLET_PAGE_TEXTS } from './PadletPage.consts';
@@ -131,31 +132,29 @@ export default function PadletPage() {
         </div>
       </div>
 
-      <PostReactionsProvider
-        padletId={padlet.id}
-        postIds={filteredPosts.map((post: { id: string }) => post.id)}
-        canReact={Boolean(currentUsername)}
-      >
-        <PadletPostsLayer
-          boardType={padlet.boardType}
-          posts={filteredPosts}
-          currentUsername={currentUsername}
-          onEditPost={handleEditPost}
-          onDeletePost={(post) => void handleRequestDeletePost(post)}
-          onLayoutChange={(postId, layout) =>
-            void handleLayoutChange(postId, layout)
-          }
-        />
-      </PostReactionsProvider>
+      <PollProvider padletId={padlet.id} onVoteSuccess={handlePostSaved}>
+        <PostReactionsProvider
+          padletId={padlet.id}
+          postIds={filteredPosts.map((post: { id: string }) => post.id)}
+          canReact={Boolean(currentUsername)}
+        >
+          <PadletPostsLayer
+            boardType={padlet.boardType}
+            posts={filteredPosts}
+            currentUsername={currentUsername}
+            onEditPost={handleEditPost}
+            onDeletePost={(post) => void handleRequestDeletePost(post)}
+            onLayoutChange={(postId, layout) =>
+              void handleLayoutChange(postId, layout)
+            }
+          />
+        </PostReactionsProvider>
+      </PollProvider>
 
       <CreatePostFab onClick={handleCreatePost} />
 
       {isShareOpen ? (
-        <SharePadletModal
-          padletId={padlet.id}
-          currentUsername={currentUsername}
-          onClose={handleCloseShare}
-        />
+        <SharePadletModal padletId={padlet.id} currentUsername={currentUsername} onClose={handleCloseShare} />
       ) : null}
 
       {isEditOpen ? (
@@ -167,12 +166,7 @@ export default function PadletPage() {
       ) : null}
 
       {isCreatePostOpen ? (
-        <CreatePostModal
-          padletId={padlet.id}
-          postToEdit={postToEdit}
-          onClose={handleClosePostModal}
-          onSubmit={handlePostSaved}
-        />
+        <CreatePostModal padletId={padlet.id} postToEdit={postToEdit} onClose={handleClosePostModal} onSubmit={handlePostSaved} />
       ) : null}
 
       {postPendingDelete ? (
