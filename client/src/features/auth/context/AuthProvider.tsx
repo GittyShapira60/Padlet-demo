@@ -2,7 +2,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -42,15 +41,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     authService.logout();
     setUser(null);
-  }, []);
-
-  useEffect(() => {
-    function syncAuthFromStorage() {
-      setUser(getAuthData()?.user ?? null);
-    }
-
-    window.addEventListener('storage', syncAuthFromStorage);
-    return () => window.removeEventListener('storage', syncAuthFromStorage);
   }, []);
 
   const value = useMemo(

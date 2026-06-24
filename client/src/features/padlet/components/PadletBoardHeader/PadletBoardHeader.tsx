@@ -1,18 +1,22 @@
-import { ArrowRight, Share2 } from '../../../../shared/icons';
+import { ArrowRight, LogOut, Share2 } from '../../../../shared/icons';
 import styles from './PadletBoardHeader.module.css';
 
 interface PadletBoardHeaderProps {
   title: string;
+  isShared?: boolean;
   onBack: () => void;
   onShareClick: () => void;
   showShare?: boolean;
+  onLeaveClick?: () => void;
 }
 
 export default function PadletBoardHeader({
   title,
+  isShared = false,
   onBack,
   onShareClick,
   showShare = true,
+  onLeaveClick,
 }: PadletBoardHeaderProps) {
   return (
     <>
@@ -22,16 +26,30 @@ export default function PadletBoardHeader({
       </button>
       <header className={styles.header}>
         <h1 className={styles.title}>{title}</h1>
-        {showShare ? (
-          <button
-            type="button"
-            className={styles.share}
-            onClick={onShareClick}
-          >
-            <Share2 size={16} strokeWidth={2} />
-            שיתוף
-          </button>
-        ) : null}
+        <div className={styles.actions}>
+          {isShared && onLeaveClick ? (
+            <button
+              type="button"
+              className={styles.leave}
+              aria-label="עזיבת לוח"
+              onClick={onLeaveClick}
+            >
+              <LogOut size={16} strokeWidth={2} aria-hidden="true" />
+              עזוב לוח
+            </button>
+          ) : null}
+          {showShare ? (
+            <button
+              type="button"
+              className={styles.share}
+              aria-label="שיתוף"
+              onClick={onShareClick}
+            >
+              <Share2 size={16} strokeWidth={2} aria-hidden="true" />
+              שיתוף
+            </button>
+          ) : null}
+        </div>
       </header>
     </>
   );
