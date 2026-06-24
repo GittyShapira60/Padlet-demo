@@ -1,4 +1,4 @@
-import { BACKGROUND_COLORS } from '../../../../../shared/constants/background-colors';
+import { BACKGROUND_COLOR_GRADIENTS, BACKGROUND_COLORS } from '../../../../../shared/constants/background-colors';
 import styles from './PostColorPicker.module.css';
 
 interface PostColorPickerProps {
@@ -23,7 +23,7 @@ export default function PostColorPicker({
               key={color}
               type="button"
               className={`${styles.swatch} ${isSelected ? styles.swatchSelected : ''}`}
-              style={{ background: color }}
+              style={{ background: BACKGROUND_COLOR_GRADIENTS[color] ?? color }}
               onClick={() => onColorChange(color)}
             />
           );

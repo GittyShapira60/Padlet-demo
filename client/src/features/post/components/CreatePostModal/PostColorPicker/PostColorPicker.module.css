@@ -28,16 +28,28 @@
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
+  outline: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
-.swatch:hover {
+.swatch:hover,
+.swatch:focus,
+.swatch:focus-visible,
+.swatch:active {
+  outline: none;
+  border-color: rgba(0, 0, 0, 0.05);
   transform: scale(1.05);
 }
 
+.swatchSelected,
+.swatchSelected:hover,
+.swatchSelected:focus {
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
 .swatchSelected {
-  box-shadow:
-    0 0 0 2px #ffffff,
-    0 0 0 4px #1e293b;
-  transform: scale(1.05);
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }

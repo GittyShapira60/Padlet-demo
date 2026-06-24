@@ -9,6 +9,7 @@ import {
   canCreatePost,
   canDeletePadlet,
   canDeletePost,
+  canEditPadlet,
   canEditPost,
   canManageSharing,
   canReact,
@@ -131,6 +132,17 @@ export class PadletAccessService {
     const access = await this.assertCanView(userId, padletId);
     if (!canReact(access.permission)) {
       throw new ForbiddenException('אין הרשאה להגיב על פוסטים בלוח זה');
+    }
+    return access;
+  }
+
+  async assertCanEditPadlet(
+    userId: bigint,
+    padletId: bigint,
+  ): Promise<PadletAccessContext> {
+    const access = await this.resolveAccess(userId, padletId);
+    if (!canEditPadlet(access.permission)) {
+      throw new ForbiddenException('אין הרשאה לערוך את הלוח');
     }
     return access;
   }

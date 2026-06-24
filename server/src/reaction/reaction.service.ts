@@ -2,6 +2,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { NotificationType } from '@prisma/client';
+import { NotificationService } from '../notification/notification.service';
 import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SetReactionDto } from './dto/set-reaction.dto';
@@ -32,6 +34,7 @@ export class ReactionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly padletAccess: PadletAccessService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async getPadletReactions(
@@ -100,6 +103,7 @@ export class ReactionService {
 
   async setPostReaction(
     userId: string,
+    actorUsername: string,
     padletIdRaw: string,
     postIdRaw: string,
     dto: SetReactionDto,
@@ -121,6 +125,8 @@ export class ReactionService {
     const hasSameReaction = existingForUser.some(
       (reaction) => reaction.reaction_code === dto.reaction_code,
     );
+
+    let reactionAdded = false;
 
     await this.prisma.$transaction(async (tx) => {
       if (hasSameReaction) {
@@ -150,7 +156,26 @@ export class ReactionService {
           reaction_code: dto.reaction_code,
         },
       });
+
+      reactionAdded = true;
     });
+
+    if (reactionAdded) {
+      const post = await this.prisma.post.findUnique({
+        where: { post_id: postId },
+        select: { user_id: true },
+      });
+
+      if (post && post.user_id !== requesterId) {
+        void this.notificationService.create({
+          userId: post.user_id,
+          type: NotificationType.reaction,
+          actorUsername,
+          padletId,
+          postId,
+        });
+      }
+    }
 
     return this.getPostReactions(userId, padletIdRaw, postIdRaw);
   }

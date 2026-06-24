@@ -1,10 +1,16 @@
-import { useEffect } from 'react';
-import ConfirmDialog from '../../../shared/components/ConfirmDialog/ConfirmDialog';
+import { BACKGROUND_COLOR_GRADIENTS } from '../../../shared/constants/background-colors';
+import { useEffect, useRef, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
+import type { AppOutletContext } from '../../../App';
+import { LogOut, MoreVertical, Pencil, Share2 } from '../../../shared/icons';
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
+import PostFilterBar from '../../post/components/PostFilterBar/PostFilterBar';
 import { PostReactionsProvider } from '../../reaction';
 import PadletPostsLayer from '../../post/components/PadletPostsLayer/PadletPostsLayer';
-import PadletBoardHeader from '../components/PadletBoardHeader/PadletBoardHeader';
+import ConfirmDialog from '../../../shared/components/ConfirmDialog/ConfirmDialog';
+import { PollProvider } from '../../post/context/PollContext';
+import EditPadletModal from '../components/EditPadletModal/EditPadletModal';
 import SharePadletModal from '../components/SharePadletModal/SharePadletModal';
 import {
   PadletCapabilitiesProvider,
@@ -31,9 +37,15 @@ function PadletBoardBody({
   background,
   title,
   isShared,
-  posts,
+  padlet,
+  filteredPosts,
+  filterSearch,
+  setFilterSearch,
+  filterAuthor,
+  setFilterAuthor,
   isCreatePostOpen,
   isShareOpen,
+  isEditOpen,
   postToEdit,
   postPendingDelete,
   isDeletingPost,
@@ -42,11 +54,13 @@ function PadletBoardBody({
   currentUsername,
   defaultPermission,
   setDefaultPermission,
-  handleBack,
   handleCreatePost,
   handleClosePostModal,
   handleOpenShare,
   handleCloseShare,
+  handleOpenEdit,
+  handleCloseEdit,
+  handlePadletUpdated,
   handlePostSaved,
   handleEditPost,
   handleRequestDeletePost,
@@ -58,6 +72,32 @@ function PadletBoardBody({
   handleConfirmLeave,
 }: PadletBoardBodyProps) {
   const capabilities = usePadletCapabilities();
+  const { setHeaderBackground } = useOutletContext<AppOutletContext>();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (padlet) {
+      setHeaderBackground(
+        BACKGROUND_COLOR_GRADIENTS[padlet.background ?? ''] ??
+          padlet.background ??
+          null,
+      );
+    }
+    return () => {
+      setHeaderBackground(null);
+    };
+  }, [padlet, setHeaderBackground]);
 
   useEffect(() => {
     if (!capabilities.canShare && isShareOpen) {
@@ -65,35 +105,98 @@ function PadletBoardBody({
     }
   }, [capabilities.canShare, handleCloseShare, isShareOpen]);
 
+  const pageBackground =
+    BACKGROUND_COLOR_GRADIENTS[background ?? ''] ?? background ?? '#f3f4f6';
+  const showMenu =
+    capabilities.canEditPadlet || capabilities.canShare || isShared;
+
   return (
     <div
       className={styles.page}
-      style={{ background: background ?? '#f3f4f6' }}
+      style={{ background: pageBackground, backgroundAttachment: 'fixed' }}
     >
-      <PadletBoardHeader
-        title={title}
-        isShared={isShared}
-        onBack={handleBack}
-        onShareClick={handleOpenShare}
-        showShare={capabilities.canShare}
-        onLeaveClick={handleOpenLeave}
-      />
-
-      <PostReactionsProvider
-        padletId={padletId}
-        postIds={posts.map((post) => post.id)}
-        canReact={capabilities.canReact}
-      >
-        <PadletPostsLayer
-          boardType={boardType}
-          posts={posts}
-          onEditPost={handleEditPost}
-          onDeletePost={handleRequestDeletePost}
-          onLayoutChange={(postId, layout) =>
-            void handleLayoutChange(postId, layout)
-          }
+      <div className={styles.titleRow}>
+        <h1 className={styles.boardTitle}>{title}</h1>
+        <PostFilterBar
+          search={filterSearch}
+          author={filterAuthor}
+          onSearchChange={setFilterSearch}
+          onAuthorChange={setFilterAuthor}
         />
-      </PostReactionsProvider>
+        {showMenu ? (
+          <div className={styles.menuWrapper} ref={menuRef}>
+            <button
+              type="button"
+              className={styles.menuBtn}
+              aria-label="אפשרויות"
+              onClick={() => setIsMenuOpen((prev: boolean) => !prev)}
+            >
+              <MoreVertical size={20} strokeWidth={2} aria-hidden="true" />
+            </button>
+            {isMenuOpen ? (
+              <div className={styles.dropdown}>
+                {capabilities.canEditPadlet ? (
+                  <button
+                    type="button"
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      handleOpenEdit();
+                    }}
+                  >
+                    <Pencil size={15} strokeWidth={2} aria-hidden="true" />
+                    עריכה
+                  </button>
+                ) : null}
+                {capabilities.canShare ? (
+                  <button
+                    type="button"
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      handleOpenShare();
+                    }}
+                  >
+                    <Share2 size={15} strokeWidth={2} aria-hidden="true" />
+                    שיתוף
+                  </button>
+                ) : null}
+                {isShared ? (
+                  <button
+                    type="button"
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      handleOpenLeave();
+                    }}
+                  >
+                    <LogOut size={15} strokeWidth={2} aria-hidden="true" />
+                    עזוב לוח
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+
+      <PollProvider padletId={padletId} onVoteSuccess={handlePostSaved}>
+        <PostReactionsProvider
+          padletId={padletId}
+          postIds={filteredPosts.map((post) => post.id)}
+          canReact={capabilities.canReact}
+        >
+          <PadletPostsLayer
+            boardType={boardType}
+            posts={filteredPosts}
+            onEditPost={handleEditPost}
+            onDeletePost={(post) => void handleRequestDeletePost(post)}
+            onLayoutChange={(postId, layout) =>
+              void handleLayoutChange(postId, layout)
+            }
+          />
+        </PostReactionsProvider>
+      </PollProvider>
 
       {capabilities.canCreatePost ? (
         <CreatePostFab onClick={handleCreatePost} />
@@ -106,6 +209,14 @@ function PadletBoardBody({
           initialDefaultPermission={defaultPermission ?? PadletPermission.Viewer}
           onDefaultPermissionChange={setDefaultPermission}
           onClose={handleCloseShare}
+        />
+      ) : null}
+
+      {isEditOpen && padlet ? (
+        <EditPadletModal
+          padlet={padlet}
+          onClose={handleCloseEdit}
+          onSubmit={handlePadletUpdated}
         />
       ) : null}
 
@@ -124,8 +235,8 @@ function PadletBoardBody({
           description={PADLET_PAGE_TEXTS.deletePost.description}
           confirmLabel={PADLET_PAGE_TEXTS.deletePost.confirmLabel}
           pendingLabel={PADLET_PAGE_TEXTS.deletePost.pendingLabel}
-          tone="danger"
           isPending={isDeletingPost}
+          tone="danger"
           onConfirm={() => void handleConfirmDeletePost()}
           onCancel={handleCancelDeletePost}
         />

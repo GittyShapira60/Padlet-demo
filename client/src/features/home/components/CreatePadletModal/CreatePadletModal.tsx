@@ -49,6 +49,20 @@ export default function CreatePadletModal({
         </div>
 
         <div className={styles.field}>
+          <label className={styles.label} htmlFor="padlet-description">
+            תיאור
+          </label>
+          <textarea
+            id="padlet-description"
+            className={styles.textarea}
+            placeholder="תאר את מטרת הלוח..."
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            rows={2}
+          />
+        </div>
+
+        <div className={styles.field}>
           <span className={styles.label}>רקע</span>
           <BackgroundPicker
             activeTab={bgTab}
@@ -63,20 +77,6 @@ export default function CreatePadletModal({
           <BoardTypePicker value={boardType} onChange={setBoardType} />
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="padlet-description">
-            תיאור
-          </label>
-          <textarea
-            id="padlet-description"
-            className={styles.textarea}
-            placeholder="תאר את מטרת הלוח..."
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            rows={2}
-          />
-        </div>
-
         {error ? <p className={styles.error}>{error}</p> : null}
 
         <div className={styles.actions}>
@@ -87,14 +87,6 @@ export default function CreatePadletModal({
             disabled={isLoading || !title.trim()}
           >
             {isLoading ? 'יוצר לוח...' : 'צור לוח'}
-          </button>
-          <button
-            type="button"
-            className={styles.cancelBtn}
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            ביטול
           </button>
         </div>
       </div>

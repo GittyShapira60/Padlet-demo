@@ -1,11 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthProvider';
 import type { Post, PostLayout } from '../../post/interfaces/post';
-import {
-  deletePost,
-  updatePostLayout,
-} from '../../post/services/post-service';
+import { deletePost, updatePostLayout } from '../../post/services/post-service';
 import type { Padlet } from '../interfaces/padlet';
 import {
   PadletPermission,
@@ -24,6 +21,7 @@ export function usePadletPage() {
   const [error, setError] = useState('');
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [postToEdit, setPostToEdit] = useState<Post | null>(null);
   const [currentUserPermission, setCurrentUserPermission] =
     useState<PadletPermissionType | null>(null);
@@ -33,8 +31,24 @@ export function usePadletPage() {
   const [isDeletingPost, setIsDeletingPost] = useState(false);
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
   const [isLeavingPadlet, setIsLeavingPadlet] = useState(false);
+  const [filterSearch, setFilterSearch] = useState('');
+  const [filterAuthor, setFilterAuthor] = useState('');
 
   const currentUsername = user?.username;
+
+  const filteredPosts = useMemo(() => {
+    const search = filterSearch.trim().toLowerCase();
+    const author = filterAuthor.trim().toLowerCase();
+    return posts.filter((post: Post) => {
+      const matchesSearch =
+        !search ||
+        post.title?.toLowerCase().includes(search) ||
+        post.subject?.toLowerCase().includes(search);
+      const matchesAuthor =
+        !author || post.authorUsername.toLowerCase().includes(author);
+      return matchesSearch && matchesAuthor;
+    });
+  }, [posts, filterSearch, filterAuthor]);
 
   useEffect(() => {
     if (!padletId) {
@@ -110,6 +124,18 @@ export function usePadletPage() {
 
   const handleCloseShare = useCallback(() => {
     setIsShareOpen(false);
+  }, []);
+
+  const handleOpenEdit = useCallback(() => {
+    setIsEditOpen(true);
+  }, []);
+
+  const handleCloseEdit = useCallback(() => {
+    setIsEditOpen(false);
+  }, []);
+
+  const handlePadletUpdated = useCallback((updated: Padlet) => {
+    setPadlet((current) => (current ? { ...current, ...updated } : updated));
   }, []);
 
   const handlePostSaved = useCallback((post: Post) => {
@@ -217,10 +243,16 @@ export function usePadletPage() {
   return {
     padlet,
     posts,
+    filteredPosts,
+    filterSearch,
+    setFilterSearch,
+    filterAuthor,
+    setFilterAuthor,
     isLoading,
     error,
     isCreatePostOpen,
     isShareOpen,
+    isEditOpen,
     postToEdit,
     postPendingDelete,
     isDeletingPost,
@@ -235,6 +267,9 @@ export function usePadletPage() {
     handleClosePostModal,
     handleOpenShare,
     handleCloseShare,
+    handleOpenEdit,
+    handleCloseEdit,
+    handlePadletUpdated,
     handlePostSaved,
     handleEditPost,
     handleRequestDeletePost,

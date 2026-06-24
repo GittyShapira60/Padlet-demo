@@ -39,6 +39,13 @@ enum PostContentKind {
   poll
 }
 
+enum NotificationType {
+  reaction
+  comment
+  new_post
+  padlet_share
+}
+
 // ─── Models ──────────────────────────────────────────────
 
 model User {
@@ -46,12 +53,13 @@ model User {
   username      String         @unique @db.VarChar(64)
   password_hash String
 
-  padlets       Padlet[]
-  posts         Post[]
-  comments      Comment[]
-  poll_votes    PollVote[]
+  padlets        Padlet[]
+  posts          Post[]
+  comments       Comment[]
+  poll_votes     PollVote[]
   post_reactions PostReaction[]
-  participants  Participant[]
+  participants   Participant[]
+  notifications  Notification[]
 }
 
 model Padlet {
@@ -165,4 +173,17 @@ model PostReaction {
   user User @relation(fields: [user_id], references: [id])
 
   @@id([post_id, user_id, reaction_code])
+}
+
+model Notification {
+  id             BigInt           @id @default(autoincrement())
+  user_id        BigInt
+  type           NotificationType
+  actor_username String           @db.VarChar(64)
+  padlet_id      BigInt?
+  post_id        BigInt?
+  is_read        Boolean          @default(false)
+  created_at     DateTime         @db.Timestamptz()
+
+  user User @relation(fields: [user_id], references: [id])
 }

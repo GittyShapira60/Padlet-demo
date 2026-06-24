@@ -1,3 +1,4 @@
+
 import { PadletBoardType } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import {
@@ -27,4 +28,28 @@ export class CopyPadletDto {
   @ApiProperty({ example: true })
   @IsBoolean()
   includeParticipants!: boolean;
+}
+
+export class UpdatePadletDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(255)
+  title?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  background?: string;
+
+  @ApiProperty({ required: false, enum: PadletBoardType })
+  @IsOptional()
+  @IsEnum(PadletBoardType)
+  board_type?: PadletBoardType;
 }

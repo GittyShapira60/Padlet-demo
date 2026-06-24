@@ -4,7 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PadletPermission } from '@prisma/client';
+import { NotificationType, PadletPermission } from '@prisma/client';
+import { NotificationService } from '../notification/notification.service';
 import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateParticipantDto } from './dto/create-participant.dto';
@@ -28,6 +29,7 @@ export class ParticipantsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly padletAccess: PadletAccessService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async getParticipants(
@@ -52,6 +54,7 @@ export class ParticipantsService {
 
   async inviteParticipant(
     userId: string,
+    actorUsername: string,
     padletIdRaw: string,
     dto: CreateParticipantDto,
   ): Promise<ParticipantResponseDto> {
@@ -98,6 +101,13 @@ export class ParticipantsService {
     });
 
     await this.touchPadlet(padletId);
+
+    void this.notificationService.create({
+      userId: inviteeId,
+      type: NotificationType.padlet_share,
+      actorUsername,
+      padletId,
+    });
 
     return this.toParticipantResponse(invitee.id, participant);
   }

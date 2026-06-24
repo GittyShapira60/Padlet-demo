@@ -50,6 +50,7 @@ export class ReactionController {
   ) {
     return this.reactionService.setPostReaction(
       user.id,
+      user.username,
       padletId,
       postId,
       dto,
