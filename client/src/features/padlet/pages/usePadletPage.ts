@@ -19,6 +19,7 @@ export function usePadletPage() {
   const [error, setError] = useState('');
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [postToEdit, setPostToEdit] = useState<Post | null>(null);
   const [postPendingDelete, setPostPendingDelete] = useState<Post | null>(null);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
@@ -95,6 +96,18 @@ export function usePadletPage() {
 
   const handleCloseShare = useCallback(() => {
     setIsShareOpen(false);
+  }, []);
+
+  const handleOpenEdit = useCallback(() => {
+    setIsEditOpen(true);
+  }, []);
+
+  const handleCloseEdit = useCallback(() => {
+    setIsEditOpen(false);
+  }, []);
+
+  const handlePadletUpdated = useCallback((updated: Padlet) => {
+    setPadlet((current) => (current ? { ...current, ...updated } : updated));
   }, []);
 
   const handlePostSaved = useCallback((post: Post) => {
@@ -206,6 +219,7 @@ export function usePadletPage() {
     error,
     isCreatePostOpen,
     isShareOpen,
+    isEditOpen,
     postToEdit,
     postPendingDelete,
     isDeletingPost,
@@ -217,6 +231,9 @@ export function usePadletPage() {
     handleClosePostModal,
     handleOpenShare,
     handleCloseShare,
+    handleOpenEdit,
+    handleCloseEdit,
+    handlePadletUpdated,
     handlePostSaved,
     handleEditPost,
     handleRequestDeletePost,

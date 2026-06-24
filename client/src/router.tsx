@@ -23,15 +23,8 @@ export default function AppRouter() {
               }
             >
               <Route index element={<HomePage />} />
+              <Route path="padlets/:padletId" element={<PadletPage />} />
             </Route>
-            <Route
-              path="/padlets/:padletId"
-              element={
-                <ProtectedRoute>
-                  <PadletPage />
-                </ProtectedRoute>
-              }
-            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </NotificationProvider>
