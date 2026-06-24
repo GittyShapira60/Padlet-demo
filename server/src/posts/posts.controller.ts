@@ -30,7 +30,7 @@ export class PostsController {
     @Param('padletId') padletId: string,
     @Body() dto: CreatePostDto,
   ) {
-    return this.postsService.createPost(user.id, padletId, dto);
+    return this.postsService.createPost(user.id, user.username, padletId, dto);
   }
 
   @Patch(':postId')

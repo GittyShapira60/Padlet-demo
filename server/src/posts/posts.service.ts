@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  NotificationType,
   PadletBoardType,
   PostContentKind,
   Prisma,
@@ -12,6 +13,7 @@ import {
   type PollVote,
   type Post,
 } from '@prisma/client';
+import { NotificationService } from '../notification/notification.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostContentInputDto } from './dto/post-content-input.dto';
@@ -70,10 +72,14 @@ const GRID_COLUMNS = 4;
 
 @Injectable()
 export class PostsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async createPost(
     userId: string,
+    actorUsername: string,
     padletIdRaw: string,
     dto: CreatePostDto,
   ): Promise<PostResponseDto> {
@@ -139,9 +145,45 @@ export class PostsService {
 
     await this.touchPadlet(padletId, now);
 
+    void this.notifyPadletMembers(padletId, authorId, actorUsername, post.post_id);
+
     // טעינה מחדש עם נתוני הסקר
     const postWithPoll = await this.findPostWithPoll(post.post_id);
     return this.toPostResponse(postWithPoll, authorId);
+  }
+
+  private async notifyPadletMembers(
+    padletId: bigint,
+    authorId: bigint,
+    actorUsername: string,
+    postId: bigint,
+  ): Promise<void> {
+    const padletWithMembers = await this.prisma.padlet.findUnique({
+      where: { padlet_id: padletId },
+      select: {
+        user_id: true,
+        participants: { select: { user_id: true } },
+      },
+    });
+
+    if (!padletWithMembers) return;
+
+    const recipientIds = [
+      padletWithMembers.user_id,
+      ...padletWithMembers.participants.map((p: { user_id: bigint }) => p.user_id),
+    ].filter((id) => id !== authorId);
+
+    await Promise.all(
+      recipientIds.map((recipientId) =>
+        this.notificationService.create({
+          userId: recipientId,
+          type: NotificationType.new_post,
+          actorUsername,
+          padletId,
+          postId,
+        }),
+      ),
+    );
   }
 
   async updatePost(
