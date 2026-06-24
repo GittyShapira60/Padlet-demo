@@ -9,8 +9,30 @@ export interface CreatePadletInput {
   boardType: PadletBoardType;
 }
 
+export interface UpdatePadletInput {
+  title: string;
+  description?: string;
+  background: string;
+  boardType: PadletBoardType;
+}
+
 export function deletePadlet(padletId: string): Promise<void> {
   return httpClient<void>('padlets/' + padletId, { method: 'DELETE' });
+}
+
+export function updatePadlet(
+  padletId: string,
+  input: UpdatePadletInput,
+): Promise<Padlet> {
+  return httpClient<Padlet>('padlets/' + padletId, {
+    method: 'PATCH',
+    body: {
+      title: input.title,
+      description: input.description,
+      background: input.background,
+      board_type: input.boardType,
+    },
+  });
 }
 
 export function leavePadlet(padletId: string): Promise<void> {

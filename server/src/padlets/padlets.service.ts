@@ -1,8 +1,14 @@
+// נתיב: server/src/padlets/padlets.service.ts
+
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PadletBoardType, PadletPermission, type Padlet } from '@prisma/client';
 import { PostsService, type PostResponseDto } from '../posts/posts.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { CopyPadletDto, CreatePadletDto } from './dto/create-padlet.dto';
+import {
+  CopyPadletDto,
+  CreatePadletDto,
+  UpdatePadletDto,
+} from './dto/create-padlet.dto';
 
 export interface PadletResponseDto {
   id: string;
@@ -76,6 +82,40 @@ export class PadletsService {
     });
 
     return this.toPadletResponse(padlet, false);
+  }
+
+  async updatePadlet(
+    userId: string,
+    padletIdRaw: string,
+    dto: UpdatePadletDto,
+  ): Promise<PadletResponseDto> {
+    const ownerId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+
+    const padlet = await this.prisma.padlet.findUnique({
+      where: { padlet_id: padletId },
+    });
+
+    if (!padlet) throw new NotFoundException('הלוח לא נמצא');
+    if (padlet.user_id !== ownerId) {
+      throw new ForbiddenException('רק הבעלים יכול לערוך את הלוח');
+    }
+
+    const updated = await this.prisma.padlet.update({
+      where: { padlet_id: padletId },
+      data: {
+        ...(dto.title !== undefined ? { title: dto.title.trim() } : {}),
+        ...(dto.description !== undefined
+          ? { description: dto.description.trim() || null }
+          : {}),
+        ...(dto.background !== undefined ? { background: dto.background } : {}),
+        ...(dto.board_type !== undefined ? { board_type: dto.board_type } : {}),
+        updated_at: new Date(),
+      },
+      include: { _count: { select: { posts: true } } },
+    });
+
+    return this.toPadletResponse(updated, false);
   }
 
   async getPadletDetail(userId: string, padletIdRaw: string): Promise<PadletDetailResponseDto> {

@@ -128,7 +128,7 @@ export default function PadletCard({ padlet, onDelete, onCopy, onLeave }: Padlet
       {activeDialog === 'delete' && (
         <ConfirmDialog
           title="מחיקת לוח"
-          description={`האם את/ה בטוח/ה שברצונך למחוק את הלוח "${padlet.title}"? אינה הפיכה.`}
+          description={`האם את/ה בטוח/ה שברצונך למחוק את הלוח "${padlet.title}"?`}
           confirmLabel="מחק"
           pendingLabel="מוחק..."
           tone="danger"
