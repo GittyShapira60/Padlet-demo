@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { BACKGROUND_COLORS } from '../../../../shared/constants/background-colors';
 import {
   PostContentTab as PostContentTabValues,
@@ -17,7 +17,11 @@ interface UseCreatePostModalOptions {
 
 export const MAX_POLL_ANSWERS = 4;
 export const MIN_POLL_ANSWERS = 2;
-const INITIAL_POLL_ANSWERS: string[] = ['', ''];
+export type PollAnswer = { id: number; value: string };
+const INITIAL_POLL_ANSWERS: PollAnswer[] = [
+  { id: 1, value: '' },
+  { id: 2, value: '' },
+];
 
 function getInitialState(postToEdit?: Post | null) {
   if (!postToEdit) {
@@ -31,7 +35,7 @@ function getInitialState(postToEdit?: Post | null) {
   const activeTab = inferContentTab(postToEdit);
   const pollAnswers =
     activeTab === PostContentTabValues.Poll && postToEdit.poll
-      ? postToEdit.poll.options.map((o) => o.label)
+      ? postToEdit.poll.options.map((o, i) => ({ id: i + 1, value: o.label }))
       : [...INITIAL_POLL_ANSWERS];
   return {
     activeTab,
@@ -54,7 +58,8 @@ export function useCreatePostModal({
   const [textContent, setTextContent] = useState(initialState.textContent);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>(initialState.selectedColor);
-  const [pollAnswers, setPollAnswers] = useState<string[]>(initialState.pollAnswers);
+  const [pollAnswers, setPollAnswers] = useState<PollAnswer[]>(initialState.pollAnswers);
+  const nextIdRef = useRef(initialState.pollAnswers.length + 1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -63,18 +68,25 @@ export function useCreatePostModal({
     setTextContent('');
     setSelectedFile(null);
     setPollAnswers([...INITIAL_POLL_ANSWERS]);
+    nextIdRef.current = INITIAL_POLL_ANSWERS.length + 1;
   }, []);
 
-  const updatePollAnswer = useCallback((index: number, value: string) => {
-    setPollAnswers((prev) => prev.map((a, i) => (i === index ? value : a)));
+  const updatePollAnswer = useCallback((id: number, value: string) => {
+    setPollAnswers((prev) => prev.map((a) => (a.id === id ? { ...a, value } : a)));
   }, []);
 
   const addPollAnswer = useCallback(() => {
-    setPollAnswers((prev) => prev.length < MAX_POLL_ANSWERS ? [...prev, ''] : prev);
+    setPollAnswers((prev) => {
+      if (prev.length >= MAX_POLL_ANSWERS) return prev;
+      const id = nextIdRef.current++;
+      return [...prev, { id, value: '' }];
+    });
   }, []);
 
-  const removePollAnswer = useCallback((index: number) => {
-    setPollAnswers((prev) => prev.length > MIN_POLL_ANSWERS ? prev.filter((_, i) => i !== index) : prev);
+  const removePollAnswer = useCallback((id: number) => {
+    setPollAnswers((prev) =>
+      prev.length > MIN_POLL_ANSWERS ? prev.filter((a) => a.id !== id) : prev,
+    );
   }, []);
 
   const hasImageContent =
@@ -82,7 +94,7 @@ export function useCreatePostModal({
     (isEditMode && activeTab === PostContentTabValues.Image && Boolean(postToEdit?.subject));
 
   const hasEnoughPollAnswers =
-    pollAnswers.filter((a) => a.trim().length > 0).length >= MIN_POLL_ANSWERS;
+    pollAnswers.filter((a) => a.value.trim().length > 0).length >= MIN_POLL_ANSWERS;
 
   const canSubmit =
     (activeTab === PostContentTabValues.Text && textContent.trim().length > 0) ||
@@ -104,7 +116,7 @@ export function useCreatePostModal({
           : undefined,
       pollAnswers:
         activeTab === PostContentTabValues.Poll
-          ? pollAnswers.filter((a) => a.trim().length > 0)
+          ? pollAnswers.filter((a) => a.value.trim().length > 0).map((a) => a.value)
           : undefined,
     };
     try {
@@ -117,6 +129,7 @@ export function useCreatePostModal({
       setSelectedFile(null);
       setSelectedColor(BACKGROUND_COLORS[0]);
       setPollAnswers([...INITIAL_POLL_ANSWERS]);
+      nextIdRef.current = INITIAL_POLL_ANSWERS.length + 1;
       onClose();
     } catch {
       setError(isEditMode ? 'עדכון הפוסט נכשל, נסי שוב' : 'יצירת הפוסט נכשלה, נסי שוב');

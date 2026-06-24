@@ -15,17 +15,19 @@ export default function PollView({ postId, poll, accentColor }: PollViewProps) {
     poll.userVotedOptionId,
   );
   const [isVoting, setIsVoting] = useState(false);
+  const [voteError, setVoteError] = useState<string | null>(null);
   const hasVoted = poll.userVotedOptionId !== null;
   const rootStyle = { '--poll-accent': accentColor } as CSSProperties;
 
   const handleVote = useCallback(async () => {
     if (!selectedOptionId || isVoting) return;
     setIsVoting(true);
+    setVoteError(null);
     try {
       const updated = await votePoll(postId, selectedOptionId);
       onVoteSuccess(updated);
     } catch {
-      // silent
+      setVoteError('ההצבעה נכשלה, נסה שוב');
     } finally {
       setIsVoting(false);
     }
@@ -93,6 +95,7 @@ export default function PollView({ postId, poll, accentColor }: PollViewProps) {
           {isVoting ? '...' : 'הצבע'}
         </button>
       )}
+      {voteError ? <p className={styles.voteError}>{voteError}</p> : null}
       <p className={styles.voteCount}>{poll.totalVotes} הצבעות</p>
     </div>
   );

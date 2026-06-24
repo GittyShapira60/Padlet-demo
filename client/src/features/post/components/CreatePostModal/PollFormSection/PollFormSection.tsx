@@ -2,11 +2,11 @@ import styles from './PollFormSection.module.css';
 
 interface PollFormSectionProps {
   question: string;
-  answers: string[];
+  answers: { id: number; value: string }[];
   onQuestionChange: (value: string) => void;
-  onAnswerChange: (index: number, value: string) => void;
+  onAnswerChange: (id: number, value: string) => void;
   onAddAnswer: () => void;
-  onRemoveAnswer: (index: number) => void;
+  onRemoveAnswer: (id: number) => void;
   maxAnswers: number;
 }
 
@@ -38,20 +38,20 @@ export default function PollFormSection({
         </label>
         <div className={styles.answersList}>
           {answers.map((answer, index) => (
-            <div key={index} className={styles.answerRow}>
+            <div key={answer.id} className={styles.answerRow}>
               <span className={styles.answerIndex}>{index + 1}</span>
               <input
                 className={styles.input}
                 type="text"
                 placeholder={`תשובה ${index + 1}...`}
-                value={answer}
-                onChange={(e) => onAnswerChange(index, e.target.value)}
+                value={answer.value}
+                onChange={(e) => onAnswerChange(answer.id, e.target.value)}
               />
               {answers.length > 2 && (
                 <button
                   type="button"
                   className={styles.removeBtn}
-                  onClick={() => onRemoveAnswer(index)}
+                  onClick={() => onRemoveAnswer(answer.id)}
                   aria-label="הסר תשובה"
                 >
                   ×

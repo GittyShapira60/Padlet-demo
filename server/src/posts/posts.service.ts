@@ -95,53 +95,56 @@ export class PostsService {
     const { contentKind, title, subject } = this.mapPostContent(dto);
     const now = new Date();
 
-    const post = await this.prisma.post.create({
-      data: {
-        padlet_id: padletId,
-        user_id: authorId,
-        content_kind: contentKind,
-        title,
-        subject,
-        color: dto.color ?? null,
-        data_layout: this.toJsonLayout(
-          this.buildLayout(padlet.board_type, existingCount),
-        ),
-        created_at: now,
-        updated_at: now,
-      },
-      include: {
-        user: true,
-        poll: {
-          include: {
-            poll_options: { include: { poll_votes: true }, orderBy: { sort_order: 'asc' } },
-            poll_votes: true,
-          },
-        },
-      },
-    });
-
-    // שמירת Poll + PollOption אם זה סקר
-    if (
-      dto.content_kind === 'poll' &&
-      dto.content &&
-      dto.poll_answers &&
-      dto.poll_answers.length >= 2
-    ) {
-      await this.prisma.poll.create({
+    const post = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.post.create({
         data: {
-          post_id: post.post_id,
-          question: dto.content,
-          poll_options: {
-            create: dto.poll_answers
-              .filter((label) => label.trim().length > 0)
-              .map((label, index) => ({
-                label: label.trim(),
-                sort_order: index,
-              })),
+          padlet_id: padletId,
+          user_id: authorId,
+          content_kind: contentKind,
+          title,
+          subject,
+          color: dto.color ?? null,
+          data_layout: this.toJsonLayout(
+            this.buildLayout(padlet.board_type, existingCount),
+          ),
+          created_at: now,
+          updated_at: now,
+        },
+        include: {
+          user: true,
+          poll: {
+            include: {
+              poll_options: { include: { poll_votes: true }, orderBy: { sort_order: 'asc' } },
+              poll_votes: true,
+            },
           },
         },
       });
-    }
+
+      if (
+        dto.content_kind === 'poll' &&
+        dto.content &&
+        dto.poll_answers &&
+        dto.poll_answers.length >= 2
+      ) {
+        await tx.poll.create({
+          data: {
+            post_id: created.post_id,
+            question: dto.content,
+            poll_options: {
+              create: dto.poll_answers
+                .filter((label) => label.trim().length > 0)
+                .map((label, index) => ({
+                  label: label.trim(),
+                  sort_order: index,
+                })),
+            },
+          },
+        });
+      }
+
+      return created;
+    });
 
     await this.touchPadlet(padletId, now);
 
@@ -258,7 +261,7 @@ export class PostsService {
     await this.touchPadlet(padletId, now);
 
     const postWithPoll = await this.findPostWithPoll(postId);
-    return this.toPostResponse(postWithPoll);
+    return this.toPostResponse(postWithPoll, requesterId);
   }
 
   async updatePostLayout(
@@ -329,8 +332,8 @@ export class PostsService {
 
     await this.getAccessiblePadlet(voterId, padletId);
 
-    const poll = await this.prisma.poll.findUnique({
-      where: { post_id: postId },
+    const poll = await this.prisma.poll.findFirst({
+      where: { post_id: postId, post: { padlet_id: padletId } },
       include: { poll_options: true },
     });
 

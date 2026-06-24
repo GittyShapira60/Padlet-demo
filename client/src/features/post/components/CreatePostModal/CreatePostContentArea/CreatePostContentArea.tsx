@@ -15,11 +15,11 @@ interface CreatePostContentAreaProps {
   onTextChange: (value: string) => void;
   onFileChange: (file: File | null) => void;
   // poll
-  pollAnswers: string[];
+  pollAnswers: { id: number; value: string }[];
   onPollQuestionChange: (value: string) => void;
-  onPollAnswerChange: (index: number, value: string) => void;
+  onPollAnswerChange: (id: number, value: string) => void;
   onAddPollAnswer: () => void;
-  onRemovePollAnswer: (index: number) => void;
+  onRemovePollAnswer: (id: number) => void;
   maxPollAnswers: number;
 }
 

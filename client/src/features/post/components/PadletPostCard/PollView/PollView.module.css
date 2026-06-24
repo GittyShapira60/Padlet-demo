@@ -85,6 +85,13 @@
 .voteBtn:hover:not(:disabled) { opacity: 0.85; }
 .voteBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+.voteError {
+  margin: 0.25rem 0 0;
+  font-size: 0.72rem;
+  color: #dc2626;
+  text-align: center;
+}
+
 .voteCount {
   margin: 0.2rem 0 0;
   font-size: 0.68rem;
