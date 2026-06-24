@@ -1,52 +1,62 @@
-import { ArrowRight, LogOut, Share2 } from '../../../../shared/icons';
+import { useEffect, useRef, useState } from 'react';
+import { MoreVertical, Pencil, Share2 } from '../../../../shared/icons';
 import styles from './PadletBoardHeader.module.css';
 
 interface PadletBoardHeaderProps {
-  title: string;
-  isShared?: boolean;
-  onBack: () => void;
   onShareClick: () => void;
-  onLeaveClick?: () => void;
+  onEditClick: () => void;
 }
 
 export default function PadletBoardHeader({
-  title,
-  isShared = false,
-  onBack,
   onShareClick,
-  onLeaveClick,
+  onEditClick,
 }: PadletBoardHeaderProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  function handleEdit() {
+    setIsOpen(false);
+    onEditClick();
+  }
+
+  function handleShare() {
+    setIsOpen(false);
+    onShareClick();
+  }
+
   return (
-    <>
-      <button type="button" className={styles.back} onClick={onBack}>
-        <ArrowRight size={18} strokeWidth={2} />
-        חזרה לבית
+    <div className={styles.row} ref={ref}>
+      <button
+        type="button"
+        className={styles.menuBtn}
+        aria-label="אפשרויות נוספות"
+        onClick={() => setIsOpen((prev: boolean) => !prev)}
+      >
+        <MoreVertical size={18} strokeWidth={2} aria-hidden="true" />
       </button>
-      <header className={styles.header}>
-        <h1 className={styles.title}>{title}</h1>
-        <div className={styles.actions}>
-          {isShared && onLeaveClick ? (
-            <button
-              type="button"
-              className={styles.leave}
-              aria-label="עזיבת לוח"
-              onClick={onLeaveClick}
-            >
-              <LogOut size={16} strokeWidth={2} aria-hidden="true" />
-              עזוב לוח
-            </button>
-          ) : null}
-          <button
-            type="button"
-            className={styles.share}
-            aria-label="שיתוף"
-            onClick={onShareClick}
-          >
-            <Share2 size={16} strokeWidth={2} aria-hidden="true" />
+
+      {isOpen ? (
+        <div className={styles.dropdown}>
+          <button type="button" className={styles.dropdownItem} onClick={handleEdit}>
+            <Pencil size={15} strokeWidth={2} aria-hidden="true" />
+            עריכה
+          </button>
+          <button type="button" className={styles.dropdownItem} onClick={handleShare}>
+            <Share2 size={15} strokeWidth={2} aria-hidden="true" />
             שיתוף
           </button>
         </div>
-      </header>
-    </>
+      ) : null}
+    </div>
   );
 }

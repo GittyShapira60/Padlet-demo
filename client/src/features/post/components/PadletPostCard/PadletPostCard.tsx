@@ -1,3 +1,4 @@
+import { BACKGROUND_COLOR_LIGHT } from '../../../../shared/constants/background-colors';
 import { Pencil, Trash2 } from '../../../../shared/icons';
 import type { Post } from '../../interfaces/post';
 import { PostReaction } from '../../../reaction';
@@ -36,13 +37,19 @@ function PostActions({ post, onEdit, onDelete }: {
   );
 }
 
-export default function PadletPostCard({ post, canManage = false, onEdit, onDelete }: PadletPostCardProps) {
+export default function PadletPostCard({
+  post,
+  canManage = false,
+  onEdit,
+  onDelete,
+}: PadletPostCardProps) {
+  const background = BACKGROUND_COLOR_LIGHT[post.color ?? ''] ?? post.color ?? '#ffffff';
   const cardStyle = post.poll
     ? {
         background: '#ffffff',
         border: `2px solid ${post.color ?? '#e5e7eb'}`,
       }
-    : { background: post.color ?? '#ffffff' };
+    : { background };
 
   return (
     <article className={styles.card} style={cardStyle}>
