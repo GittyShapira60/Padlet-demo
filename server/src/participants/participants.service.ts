@@ -147,6 +147,46 @@ export class ParticipantsService {
     );
   }
 
+  async leavePadlet(userId: string, padletIdRaw: string): Promise<void> {
+    const requesterId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+
+    const padlet = await this.prisma.padlet.findUnique({
+      where: { padlet_id: padletId },
+      select: { padlet_id: true, user_id: true },
+    });
+
+    if (!padlet) {
+      throw new NotFoundException('הלוח לא נמצא');
+    }
+
+    if (padlet.user_id === requesterId) {
+      throw new ForbiddenException('בעל הלוח לא יכול לעזוב אותו, ניתן למחוק אותו');
+    }
+
+    const participant = await this.prisma.participant.findUnique({
+      where: {
+        padlet_id_user_id: {
+          padlet_id: padletId,
+          user_id: requesterId,
+        },
+      },
+    });
+
+    if (!participant) {
+      throw new NotFoundException('אינך משתתף בלוח זה');
+    }
+
+    await this.prisma.participant.delete({
+      where: {
+        padlet_id_user_id: {
+          padlet_id: padletId,
+          user_id: requesterId,
+        },
+      },
+    });
+  }
+
   private toParticipantResponse(
     userId: bigint,
     participant: { user: { username: string }; permission: PadletPermission },

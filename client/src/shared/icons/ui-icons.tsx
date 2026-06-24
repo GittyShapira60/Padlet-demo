@@ -8,6 +8,7 @@ import {
   LayoutDashboard as LucideLayoutDashboard,
   Lock as LucideLock,
   LogOut as LucideLogOut,
+  MoreVertical as LucideMoreVertical,
   Pencil as LucidePencil,
   Plus as LucidePlus,
   Share2 as LucideShare2,
@@ -43,3 +44,4 @@ export const Users = createUiIcon(LucideUsers);
 export const Lock = createUiIcon(LucideLock);
 export const Calendar = createUiIcon(LucideCalendar);
 export const LayoutDashboard = createUiIcon(LucideLayoutDashboard);
+export const MoreVertical = createUiIcon(LucideMoreVertical);
