@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   clampPermission,
   getCollaboratorMinimum,
@@ -19,6 +19,7 @@ import {
   getPermissionHint,
 } from '../utils/share-padlet.utils';
 import {
+  mapApiPermission,
   mapLinkPermissionToApi,
 } from '../utils/padlet-capabilities';
 import { useUsers } from './useUsers';
@@ -40,6 +41,8 @@ export function useSharePadletModal({
   const [linkPermission, setLinkPermission] = useState<PadletPermissionType>(
     initialDefaultPermission,
   );
+  const linkPermissionRef = useRef(linkPermission);
+  linkPermissionRef.current = linkPermission;
   const [searchQuery, setSearchQuery] = useState('');
   const [inviteError, setInviteError] = useState('');
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
@@ -190,7 +193,7 @@ export function useSharePadletModal({
 
   const handleLinkPermissionChange = useCallback(
     async (permission: PadletPermissionType) => {
-      const previous = linkPermission;
+      const previous = linkPermissionRef.current;
       setLinkPermission(permission);
       setInviteError('');
 
@@ -202,7 +205,7 @@ export function useSharePadletModal({
         const nextPermission =
           result.defaultPermission === null
             ? PadletPermission.None
-            : (result.defaultPermission as PadletPermissionType);
+            : mapApiPermission(result.defaultPermission);
         setLinkPermission(nextPermission);
         onDefaultPermissionChange?.(nextPermission);
       } catch {
@@ -210,7 +213,7 @@ export function useSharePadletModal({
         setInviteError('עדכון הרשאת הקישור נכשל');
       }
     },
-    [linkPermission, onDefaultPermissionChange, padletId],
+    [onDefaultPermissionChange, padletId],
   );
 
   function reportCopyError() {

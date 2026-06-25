@@ -1,6 +1,7 @@
 import { PadletBoardType } from '../../../padlet/enums/padlet-board-type';
 import { usePadletCapabilities } from '../../../padlet/context/PadletCapabilitiesContext';
-import type { Post, PostLayout } from '../../interfaces/post';import BrainstormingPostsLayout from '../board-layouts/brainstorming/BrainstormingPostsLayout';
+import type { Post, PostLayout } from '../../interfaces/post';
+import BrainstormingPostsLayout from '../board-layouts/brainstorming/BrainstormingPostsLayout';
 import FreeWallPostsLayout from '../board-layouts/free_wall/FreeWallPostsLayout';
 import GridPostsLayout from '../board-layouts/grid/GridPostsLayout';
 import TimelinePostsLayout from '../board-layouts/timeline/TimelinePostsLayout';

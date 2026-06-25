@@ -169,7 +169,7 @@ export class PadletAccessService {
     return access;
   }
 
-  parseId(raw: string, errorMessage: string): bigint {
+  private parseId(raw: string, errorMessage: string): bigint {
     try {
       return BigInt(raw);
     } catch {
