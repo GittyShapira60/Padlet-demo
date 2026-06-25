@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useAuth } from '../../../features/auth/context/AuthProvider';
 import { NotificationBell } from '../../../features/notification';
 import { BarChart3, LogOut } from '../../icons';
+import { resolveBackgroundStyle } from '../../constants/background-colors';
 import styles from './AppHeader.module.css';
 
 interface AppHeaderProps {
@@ -22,7 +23,7 @@ export default function AppHeader({
   return (
     <header
       className={`${styles.header} ${background ? styles.noBorder : ''}`}
-      style={background ? { background, backgroundAttachment: 'fixed' } : undefined}
+      style={background ? { ...resolveBackgroundStyle(background), backgroundAttachment: 'fixed' } : undefined}
     >
       <div className={styles.inner}>
         <div className={styles.rightGroup}>

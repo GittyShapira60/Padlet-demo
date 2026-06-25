@@ -1,4 +1,4 @@
-import { BACKGROUND_COLOR_GRADIENTS } from '../../../shared/constants/background-colors';
+import { resolveBackgroundStyle } from '../../../shared/constants/background-colors';
 import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../../../App';
@@ -26,7 +26,6 @@ type PadletPageState = ReturnType<typeof usePadletPage>;
 interface PadletBoardBodyProps extends PadletPageState {
   padletId: string;
   boardType: NonNullable<PadletPageState['padlet']>['boardType'];
-  background: string | null;
   title: string;
   isShared: boolean;
 }
@@ -34,7 +33,6 @@ interface PadletBoardBodyProps extends PadletPageState {
 function PadletBoardBody({
   padletId,
   boardType,
-  background,
   title,
   isShared,
   padlet,
@@ -88,11 +86,7 @@ function PadletBoardBody({
 
   useEffect(() => {
     if (padlet) {
-      setHeaderBackground(
-        BACKGROUND_COLOR_GRADIENTS[padlet.background ?? ''] ??
-          padlet.background ??
-          null,
-      );
+      setHeaderBackground(padlet.background ?? null);
     }
     return () => {
       setHeaderBackground(null);
@@ -105,15 +99,13 @@ function PadletBoardBody({
     }
   }, [capabilities.canShare, handleCloseShare, isShareOpen]);
 
-  const pageBackground =
-    BACKGROUND_COLOR_GRADIENTS[background ?? ''] ?? background ?? '#f3f4f6';
   const showMenu =
     capabilities.canEditPadlet || capabilities.canShare || isShared;
 
   return (
     <div
       className={styles.page}
-      style={{ background: pageBackground, backgroundAttachment: 'fixed' }}
+      style={{ ...resolveBackgroundStyle(padlet?.background ?? null), backgroundAttachment: 'fixed' }}
     >
       <div className={styles.titleRow}>
         <h1 className={styles.boardTitle}>{title}</h1>
@@ -295,7 +287,6 @@ export default function PadletPage() {
         {...page}
         padletId={padlet.id}
         boardType={padlet.boardType}
-        background={padlet.background}
         title={padlet.title}
         isShared={padlet.isShared}
       />
