@@ -17,7 +17,7 @@ function getDefaultLayout(index: number): PostLayout {
 
 export default function BrainstormingPostsLayout({
   posts,
-  currentUsername,
+  canEditPost,
   onEditPost,
   onDeletePost,
 }: BoardLayoutProps) {
@@ -26,7 +26,6 @@ export default function BrainstormingPostsLayout({
       {posts.map((post, index) => {
         const layout = post.layout ?? getDefaultLayout(index);
         const tilt = TILTS[index % TILTS.length];
-        const canManage = currentUsername === post.authorUsername;
 
         return (
           <div
@@ -40,7 +39,7 @@ export default function BrainstormingPostsLayout({
           >
             <BrainstormingPostCard
               post={post}
-              canManage={canManage}
+              canManage={canEditPost(post)}
               onEdit={onEditPost}
               onDelete={onDeletePost}
             />

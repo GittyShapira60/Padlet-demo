@@ -21,6 +21,7 @@ import {
   UpdatePadletDto,
 } from './dto/create-padlet.dto';
 import { GetPadletDetailQueryDto } from './dto/padlet-filter.dto';
+import { UpdatePadletDefaultPermissionDto } from './dto/update-padlet-default-permission.dto';
 import { PadletsService } from './padlets.service';
 
 @ApiTags('padlets')
@@ -60,6 +61,16 @@ export class PadletsController {
     @Body() dto: UpdatePadletDto,
   ) {
     return this.padletsService.updatePadlet(user.id, padletId, dto);
+  }
+
+  @Patch(':padletId/default-permission')
+  @ApiOperation({ summary: 'Update link default permission for a padlet' })
+  updateDefaultPermission(
+    @CurrentUser() user: AuthUserDto,
+    @Param('padletId') padletId: string,
+    @Body() dto: UpdatePadletDefaultPermissionDto,
+  ) {
+    return this.padletsService.updateDefaultPermission(user.id, padletId, dto);
   }
 
   @Delete(':padletId')
