@@ -39,9 +39,24 @@ export const BACKGROUND_COLOR_LIGHT: Record<string, string> = {
 
 export type BackgroundColor = (typeof BACKGROUND_COLORS)[number];
 
-/** Wallpaper images for the images tab in the background picker. */
-const wallpaperModules = import.meta.glob('../../assets/wallpapers/*', { eager: true, query: '?url', import: 'default' });
-export const BACKGROUND_IMAGES: string[] = Object.values(wallpaperModules) as string[];
+/** Wallpaper images for the images tab in the background picker. Served from /public for stable (unhashed) URLs. */
+export const BACKGROUND_IMAGES: string[] = [
+  '/wallpapers/p1.jpg',
+  '/wallpapers/p2.jpg',
+  '/wallpapers/p3.jpg',
+  '/wallpapers/p4.jpg',
+  '/wallpapers/p5.jpg',
+  '/wallpapers/p6.jpg',
+  '/wallpapers/p7.jpg',
+  '/wallpapers/p8.jpeg',
+  '/wallpapers/p9.jpg',
+  '/wallpapers/p10.jpg',
+  '/wallpapers/p11.avif',
+  '/wallpapers/p12.jpg',
+  '/wallpapers/p13.webp',
+  '/wallpapers/p14.jpg',
+  '/wallpapers/p15.webp',
+];
 
 /** Gradient wallpapers for the patterns tab in the background picker. */
 export const BACKGROUND_GRADIENTS = [
