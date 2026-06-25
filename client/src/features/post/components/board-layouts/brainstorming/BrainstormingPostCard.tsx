@@ -1,8 +1,11 @@
 import { BACKGROUND_COLOR_LIGHT } from '../../../../../shared/constants/background-colors';
+import { formatRelativeTime } from '../../../../../shared/utils/format-relative-time';
 import { Pencil, Trash2 } from '../../../../../shared/icons';
+import { useAuth } from '../../../../auth/context/AuthProvider';
 import type { Post } from '../../../interfaces/post';
 import { PostComments } from '../../../../comment';
-import { PostReaction } from '../../../../reaction';
+import { usePostComments } from '../../../../comment/hooks/usePostComments';
+import PostInteractionBar from '../../PostInteractionBar/PostInteractionBar';
 import cardStyles from '../../PadletPostCard/PadletPostCard.module.css';
 import ThoughtBubble from './ThoughtBubble/ThoughtBubble';
 
@@ -54,34 +57,55 @@ export default function BrainstormingPostCard({
   onEdit,
   onDelete,
 }: BrainstormingPostCardProps) {
+  const { user } = useAuth();
+  const { comments, sendComment, removeComment, editComment } = usePostComments(
+    padletId,
+    post.id,
+    canComment,
+  );
   const background = BACKGROUND_COLOR_LIGHT[post.color ?? ''] ?? post.color ?? '#ffffff';
+  const authorInitial = post.authorUsername.charAt(0).toUpperCase();
 
   return (
     <ThoughtBubble
       color={background}
       footer={
-        <>
-          <p className={`${cardStyles.author} ${cardStyles.bubbleAuthor}`}>
-            {post.authorUsername}
-          </p>
-          {canManage ? (
-            <PostActions post={post} onEdit={onEdit} onDelete={onDelete} />
-          ) : null}
-        </>
+        canManage ? (
+          <PostActions post={post} onEdit={onEdit} onDelete={onDelete} />
+        ) : null
       }
     >
+      <header className={cardStyles.header}>
+        <div className={cardStyles.authorMeta}>
+          <span className={cardStyles.avatar}>{authorInitial}</span>
+          <div className={cardStyles.authorInfo}>
+            <p className={cardStyles.authorName}>{post.authorUsername}</p>
+            <p className={cardStyles.authorTime}>{formatRelativeTime(post.createdAt)}</p>
+          </div>
+        </div>
+      </header>
+
       <div className={`${cardStyles.content} ${cardStyles.bubbleContent}`}>
         {post.title ? <h3 className={cardStyles.title}>{post.title}</h3> : null}
         {post.subject ? (
           <p className={cardStyles.subject}>{post.subject}</p>
         ) : null}
       </div>
-      <PostReaction postId={post.id} />
+
+      <PostInteractionBar
+        postId={post.id}
+        commentCount={comments.length}
+        showCommentCount={canComment}
+      />
+
       {canComment ? (
         <PostComments
-          padletId={padletId}
-          postId={post.id}
+          comments={comments}
+          currentUsername={user?.username}
           canComment={canComment}
+          onSendComment={sendComment}
+          onDeleteComment={removeComment}
+          onEditComment={editComment}
         />
       ) : null}
     </ThoughtBubble>

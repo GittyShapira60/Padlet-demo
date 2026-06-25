@@ -1,8 +1,11 @@
 import { BACKGROUND_COLOR_LIGHT } from '../../../../shared/constants/background-colors';
+import { formatRelativeTime } from '../../../../shared/utils/format-relative-time';
 import { Pencil, Trash2 } from '../../../../shared/icons';
+import { useAuth } from '../../../auth/context/AuthProvider';
 import type { Post } from '../../interfaces/post';
 import { PostComments } from '../../../comment';
-import { PostReaction } from '../../../reaction';
+import { usePostComments } from '../../../comment/hooks/usePostComments';
+import PostInteractionBar from '../PostInteractionBar/PostInteractionBar';
 import PollView from './PollView/PollView';
 import styles from './PadletPostCard.module.css';
 
@@ -48,7 +51,14 @@ export default function PadletPostCard({
   onEdit,
   onDelete,
 }: PadletPostCardProps) {
+  const { user } = useAuth();
+  const { comments, sendComment, removeComment, editComment } = usePostComments(
+    padletId,
+    post.id,
+    canComment,
+  );
   const background = BACKGROUND_COLOR_LIGHT[post.color ?? ''] ?? post.color ?? '#ffffff';
+  const authorInitial = post.authorUsername.charAt(0).toUpperCase();
   const cardStyle = post.poll
     ? {
         background: '#ffffff',
@@ -59,6 +69,17 @@ export default function PadletPostCard({
   return (
     <article className={styles.card} style={cardStyle}>
       {canManage ? <PostActions post={post} onEdit={onEdit} onDelete={onDelete} /> : null}
+
+      <header className={styles.header}>
+        <div className={styles.authorMeta}>
+          <span className={styles.avatar}>{authorInitial}</span>
+          <div className={styles.authorInfo}>
+            <p className={styles.authorName}>{post.authorUsername}</p>
+            <p className={styles.authorTime}>{formatRelativeTime(post.createdAt)}</p>
+          </div>
+        </div>
+      </header>
+
       {post.poll ? (
         <PollView postId={post.id} poll={post.poll} accentColor={post.color ?? '#7c3aed'} />
       ) : (
@@ -67,15 +88,23 @@ export default function PadletPostCard({
           {post.subject ? <p className={styles.subject}>{post.subject}</p> : null}
         </div>
       )}
-      <PostReaction postId={post.id} />
+
+      <PostInteractionBar
+        postId={post.id}
+        commentCount={comments.length}
+        showCommentCount={canComment}
+      />
+
       {canComment ? (
         <PostComments
-          padletId={padletId}
-          postId={post.id}
+          comments={comments}
+          currentUsername={user?.username}
           canComment={canComment}
+          onSendComment={sendComment}
+          onDeleteComment={removeComment}
+          onEditComment={editComment}
         />
       ) : null}
-      <p className={styles.author}>{post.authorUsername}</p>
     </article>
   );
 }

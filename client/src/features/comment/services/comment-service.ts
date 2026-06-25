@@ -21,6 +21,21 @@ export function createComment(
   });
 }
 
+export function updateComment(
+  padletId: string,
+  postId: string,
+  commentId: string,
+  body: string,
+): Promise<Comment> {
+  return httpClient<Comment>(
+    `padlets/${padletId}/posts/${postId}/comments/${commentId}`,
+    {
+      method: 'PATCH',
+      body: { body },
+    },
+  );
+}
+
 export function deleteComment(
   padletId: string,
   postId: string,

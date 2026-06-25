@@ -5,29 +5,31 @@
   gap: 0.35rem;
   width: 100%;
   box-sizing: border-box;
-  min-height: 2.65rem;
-  padding: 0.28rem 0.4rem 0.28rem 0.28rem;
-  border-radius: 999px;
-  background: #eceff3;
-}
-
-.sendBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.15rem;
-  height: 2.15rem;
-  border: none;
+  min-height: 1.75rem;
+  padding: 0.15rem 0;
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: 10px;
-  background: #f0248c;
-  color: #ffffff;
-  cursor: pointer;
-  flex-shrink: 0;
-  padding: 0;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    padding 0.15s ease;
 }
 
-.sendBtn:hover {
-  background: #d91f7d;
+.inputBarActive {
+  padding: 0.3rem 0.4rem;
+  background: rgba(15, 23, 42, 0.07);
+  border-color: rgba(15, 23, 42, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.inputBarTyping {
+  background: rgba(15, 23, 42, 0.09);
+  border-color: rgba(15, 23, 42, 0.18);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4),
+    0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
 .emojiBtn {
@@ -50,43 +52,67 @@
 .input {
   flex: 1;
   min-width: 0;
-  height: 1.75rem;
+  height: 1.5rem;
   border: none;
   background: transparent;
-  color: #1f2937;
+  color: #0f172a;
   font: inherit;
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   direction: rtl;
   text-align: right;
   outline: none;
   padding: 0;
+  cursor: text;
 }
 
 .input::placeholder {
-  color: #b4bcc8;
+  color: #94a3b8;
   opacity: 1;
 }
 
-.attachBtn {
+.activateBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border: none;
   border-radius: 999px;
-  background: #e2e6ec;
+  background: rgba(148, 163, 184, 0.18);
   cursor: pointer;
   flex-shrink: 0;
   padding: 0;
 }
 
-.attachBtn:hover {
-  background: #d8dde5;
+.activateBtn:hover:not(:disabled) {
+  background: rgba(148, 163, 184, 0.28);
+}
+
+.sendBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.18);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.sendBtn:hover:not(:disabled) {
+  background: rgba(148, 163, 184, 0.28);
+}
+
+.sendBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 .emojiBtn:disabled,
-.attachBtn:disabled {
+.activateBtn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }

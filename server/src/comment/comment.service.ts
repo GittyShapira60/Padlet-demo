@@ -6,6 +6,7 @@ import {
 import type { Comment, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { UpdateCommentDto } from './dto/update-comment.dto';
 
 export interface CommentResponseDto {
   id: string;
@@ -67,6 +68,47 @@ export class CommentService {
     });
 
     return this.toCommentResponse(comment);
+  }
+
+  async updateComment(
+    userId: string,
+    padletIdRaw: string,
+    postIdRaw: string,
+    commentIdRaw: string,
+    dto: UpdateCommentDto,
+  ): Promise<CommentResponseDto> {
+    const requesterId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+    const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
+    const commentId = this.parseId(commentIdRaw, 'התגובה לא נמצאה');
+
+    await this.assertPostInPadlet(requesterId, padletId, postId);
+
+    const comment = await this.prisma.comment.findFirst({
+      where: {
+        comment_id: commentId,
+        post_id: postId,
+      },
+    });
+
+    if (!comment) {
+      throw new NotFoundException('התגובה לא נמצאה');
+    }
+
+    if (comment.user_id !== requesterId) {
+      throw new ForbiddenException('אין הרשאה לערוך תגובה זו');
+    }
+
+    const updated = await this.prisma.comment.update({
+      where: { comment_id: commentId },
+      data: {
+        body: dto.body.trim(),
+        updated_at: new Date(),
+      },
+      include: { user: true },
+    });
+
+    return this.toCommentResponse(updated);
   }
 
   async deleteComment(

@@ -6,23 +6,34 @@ import {
 } from '@/modules/emoji';
 import styles from './CommentComposer.module.css';
 
-const PLACEHOLDER = 'זה המקום להודעות';
+const PLACEHOLDER = 'הוסף תגובה';
 
 interface CommentComposerProps {
   disabled?: boolean;
   onSend?: (body: string) => void;
-  onAttachClick?: () => void;
 }
 
 export default function CommentComposer({
   disabled = false,
   onSend,
-  onAttachClick,
 }: CommentComposerProps) {
   const anchorRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [value, setValue] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+
+  const isTyping = value.length > 0;
+  const isActive = isFocused || isTyping;
   const canSend = value.trim().length > 0 && !disabled;
+
+  function focusInput() {
+    if (disabled) {
+      return;
+    }
+
+    inputRef.current?.focus();
+  }
 
   function handleSend() {
     if (!canSend) {
@@ -31,6 +42,8 @@ export default function CommentComposer({
 
     onSend?.(value.trim());
     setValue('');
+    setIsFocused(false);
+    inputRef.current?.blur();
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -43,6 +56,7 @@ export default function CommentComposer({
   function handleEmojiSelect(emoji: EmojiDefinition) {
     setValue((current) => current + emoji.glyph);
     setPickerOpen(false);
+    inputRef.current?.focus();
   }
 
   function handleEmojiClick() {
@@ -53,12 +67,27 @@ export default function CommentComposer({
     setPickerOpen((open) => !open);
   }
 
+  const barClassName = [
+    styles.inputBar,
+    isActive ? styles.inputBarActive : '',
+    isTyping ? styles.inputBarTyping : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
     <>
-      <div ref={anchorRef} className={styles.inputBar}>
-        <button type="button" className={styles.sendBtn} onClick={handleSend}>
-          <ArrowLeft size={17} strokeWidth={2.75} color="#ffffff" />
-        </button>
+      <div ref={anchorRef} className={barClassName}>
+        {isTyping ? (
+          <button
+            type="button"
+            className={styles.sendBtn}
+            disabled={!canSend}
+            onClick={handleSend}
+          >
+            <ArrowLeft size={15} strokeWidth={2.25} color="#8a95a8" />
+          </button>
+        ) : null}
 
         <button
           type="button"
@@ -66,27 +95,34 @@ export default function CommentComposer({
           disabled={disabled}
           onClick={handleEmojiClick}
         >
-          <Smile size={20} strokeWidth={1.25} color="#adb5c2" />
+          <Smile size={18} strokeWidth={1.25} color="#64748b" />
         </button>
 
         <input
+          ref={inputRef}
           className={styles.input}
           type="text"
           value={value}
           placeholder={PLACEHOLDER}
           disabled={disabled}
           onChange={(event) => setValue(event.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           onKeyDown={handleKeyDown}
+          onClick={focusInput}
         />
 
-        <button
-          type="button"
-          className={styles.attachBtn}
-          disabled={disabled}
-          onClick={onAttachClick}
-        >
-          <Plus size={16} strokeWidth={2.25} color="#8a95a8" />
-        </button>
+        {!isTyping ? (
+          <button
+            type="button"
+            className={styles.activateBtn}
+            disabled={disabled}
+            onClick={focusInput}
+            aria-label="הוסף תגובה"
+          >
+            <Plus size={15} strokeWidth={2.25} color="#8a95a8" />
+          </button>
+        ) : null}
       </div>
 
       <EmojiPickerPopover

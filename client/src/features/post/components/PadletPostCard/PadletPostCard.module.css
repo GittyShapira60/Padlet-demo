@@ -69,6 +69,56 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 }
 
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-bottom: 0.5rem;
+  padding-inline-end: 0.15rem;
+}
+
+.authorMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: var(--gradient-brand);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.authorInfo {
+  min-width: 0;
+}
+
+.authorName {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.authorTime {
+  margin: 0.1rem 0 0;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #334155;
+  line-height: 1.2;
+}
+
 .content {
   flex: 1 1 auto;
   min-height: 0;
@@ -101,14 +151,6 @@
   font-size: 0.82rem;
   line-height: 1.45;
   color: #475569;
-}
-
-.author {
-  margin: 0.5rem 0 0;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #64748b;
-  flex-shrink: 0;
 }
 
 .bubbleContent {

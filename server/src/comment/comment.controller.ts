@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { CurrentUser } from '../authentication/decorators/current-user.decorator
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @ApiTags('comments')
 @ApiBearerAuth()
@@ -40,6 +42,24 @@ export class CommentController {
     @Body() dto: CreateCommentDto,
   ) {
     return this.commentService.createComment(user.id, padletId, postId, dto);
+  }
+
+  @Patch(':commentId')
+  @ApiOperation({ summary: 'Update a comment on a post' })
+  updateComment(
+    @CurrentUser() user: AuthUserDto,
+    @Param('padletId') padletId: string,
+    @Param('postId') postId: string,
+    @Param('commentId') commentId: string,
+    @Body() dto: UpdateCommentDto,
+  ) {
+    return this.commentService.updateComment(
+      user.id,
+      padletId,
+      postId,
+      commentId,
+      dto,
+    );
   }
 
   @Delete(':commentId')
