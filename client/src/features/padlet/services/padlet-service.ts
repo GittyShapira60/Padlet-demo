@@ -91,3 +91,16 @@ export function copyPadlet(padletId: string, options: CopyPadletOptions): Promis
     body: options,
   });
 }
+
+export function updatePadletDefaultPermission(
+  padletId: string,
+  defaultPermission: string | null,
+): Promise<{ defaultPermission: string | null }> {
+  return httpClient<{ defaultPermission: string | null }>(
+    'padlets/' + padletId + '/default-permission',
+    {
+      method: 'PATCH',
+      body: { default_permission: defaultPermission },
+    },
+  );
+}

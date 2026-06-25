@@ -1,5 +1,6 @@
 import type { Post } from '../../post/interfaces/post';
 import type { PadletBoardType } from '../enums/padlet-board-type';
+import type { PadletPermission } from '../enums/padlet-permission';
 
 export interface Padlet {
   id: string;
@@ -20,4 +21,6 @@ export interface PadletBoards {
 export interface PadletDetail {
   padlet: Padlet;
   posts: Post[];
+  currentUserPermission: PadletPermission;
+  defaultPermission: PadletPermission | null;
 }
