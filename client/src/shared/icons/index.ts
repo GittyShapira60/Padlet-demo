@@ -5,6 +5,7 @@ export {
   Bell,
   Calendar,
   Copy,
+  ExternalLink,
   LayoutDashboard,
   Lock,
   LogOut,

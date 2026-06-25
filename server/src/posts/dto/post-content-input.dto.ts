@@ -16,5 +16,9 @@ export class PostContentInputDto {
 
   image_file_name?: string;
 
+  image_data?: string;
+
+  description?: string;
+
   poll_options?: string[];
 }

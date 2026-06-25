@@ -40,6 +40,17 @@ export class CreatePostDto {
   @IsString()
   image_file_name?: string;
 
+  @ApiProperty({ example: 'data:image/png;base64,...', required: false })
+  @IsOptional()
+  @IsString()
+  image_data?: string;
+
+  @ApiProperty({ example: 'תיאור הפוסט', required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  description?: string;
+
   @ApiProperty({
     example: ['תשובה 1', 'תשובה 2'],
     required: false,

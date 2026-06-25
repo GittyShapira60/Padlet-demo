@@ -5,19 +5,12 @@ import {
 import type { Post } from '../interfaces/post';
 
 export function inferContentTab(post: Post): PostContentTab {
-  if (post.title === 'תמונה') {
-    return PostContentTabValues.Image;
+  switch (post.postType) {
+    case 'image': return PostContentTabValues.Image;
+    case 'link': return PostContentTabValues.Link;
+    case 'poll': return PostContentTabValues.Poll;
+    default: return PostContentTabValues.Text;
   }
-
-  if (post.title === 'קישור') {
-    return PostContentTabValues.Link;
-  }
-
-  if (post.subject === 'סקר') {
-    return PostContentTabValues.Poll;
-  }
-
-  return PostContentTabValues.Text;
 }
 
 export function getInitialTextContent(
@@ -33,4 +26,11 @@ export function getInitialTextContent(
     default:
       return '';
   }
+}
+
+export function getInitialDescription(post: Post): string {
+  if (post.postType === 'image' || post.postType === 'link') {
+    return post.title ?? '';
+  }
+  return '';
 }

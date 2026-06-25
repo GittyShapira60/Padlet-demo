@@ -6,7 +6,16 @@ import {
 } from '../../enums/post-content-tab';
 import type { Post } from '../../interfaces/post';
 import { createPost, updatePost } from '../../services/post-service';
-import { getInitialTextContent, inferContentTab } from '../../utils/post-form-utils';
+import { getInitialDescription, getInitialTextContent, inferContentTab } from '../../utils/post-form-utils';
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 interface UseCreatePostModalOptions {
   padletId: string;
@@ -28,6 +37,7 @@ function getInitialState(postToEdit?: Post | null) {
     return {
       activeTab: PostContentTabValues.Text,
       textContent: '',
+      description: '',
       selectedColor: BACKGROUND_COLORS[0],
       pollAnswers: [...INITIAL_POLL_ANSWERS],
     };
@@ -40,6 +50,7 @@ function getInitialState(postToEdit?: Post | null) {
   return {
     activeTab,
     textContent: getInitialTextContent(postToEdit, activeTab),
+    description: getInitialDescription(postToEdit),
     selectedColor: postToEdit.color ?? BACKGROUND_COLORS[0],
     pollAnswers,
   };
@@ -56,6 +67,7 @@ export function useCreatePostModal({
 
   const [activeTab, setActiveTab] = useState<PostContentTab>(initialState.activeTab);
   const [textContent, setTextContent] = useState(initialState.textContent);
+  const [description, setDescription] = useState(initialState.description);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>(initialState.selectedColor);
   const [pollAnswers, setPollAnswers] = useState<PollAnswer[]>(initialState.pollAnswers);
@@ -66,6 +78,7 @@ export function useCreatePostModal({
   const handleTabChange = useCallback((tab: PostContentTab) => {
     setActiveTab(tab);
     setTextContent('');
+    setDescription('');
     setSelectedFile(null);
     setPollAnswers([...INITIAL_POLL_ANSWERS]);
     nextIdRef.current = INITIAL_POLL_ANSWERS.length + 1;
@@ -91,7 +104,7 @@ export function useCreatePostModal({
 
   const hasImageContent =
     selectedFile !== null ||
-    (isEditMode && activeTab === PostContentTabValues.Image && Boolean(postToEdit?.subject));
+    (isEditMode && activeTab === PostContentTabValues.Image && Boolean(postToEdit?.imageUrl));
 
   const hasEnoughPollAnswers =
     pollAnswers.filter((a) => a.value.trim().length > 0).length >= MIN_POLL_ANSWERS;
@@ -106,6 +119,12 @@ export function useCreatePostModal({
     if (!canSubmit || isLoading) return;
     setIsLoading(true);
     setError('');
+
+    let imageData: string | undefined;
+    if (activeTab === PostContentTabValues.Image && selectedFile) {
+      imageData = await fileToBase64(selectedFile);
+    }
+
     const input = {
       color: selectedColor,
       contentTab: activeTab,
@@ -114,6 +133,8 @@ export function useCreatePostModal({
         activeTab === PostContentTabValues.Image
           ? selectedFile?.name ?? postToEdit?.subject ?? undefined
           : undefined,
+      imageData,
+      description: (activeTab === PostContentTabValues.Image || activeTab === PostContentTabValues.Link) ? description.trim() || undefined : undefined,
       pollAnswers:
         activeTab === PostContentTabValues.Poll
           ? pollAnswers.filter((a) => a.value.trim().length > 0).map((a) => a.value)
@@ -126,6 +147,7 @@ export function useCreatePostModal({
       onSubmit?.(post);
       setActiveTab(PostContentTabValues.Text);
       setTextContent('');
+      setDescription('');
       setSelectedFile(null);
       setSelectedColor(BACKGROUND_COLORS[0]);
       setPollAnswers([...INITIAL_POLL_ANSWERS]);
@@ -136,7 +158,7 @@ export function useCreatePostModal({
     } finally {
       setIsLoading(false);
     }
-  }, [activeTab, canSubmit, isEditMode, isLoading, onClose, onSubmit, padletId, pollAnswers, postToEdit, selectedColor, selectedFile, textContent]);
+  }, [activeTab, canSubmit, description, isEditMode, isLoading, onClose, onSubmit, padletId, pollAnswers, postToEdit, selectedColor, selectedFile, textContent]);
 
   return {
     isEditMode,
@@ -144,6 +166,8 @@ export function useCreatePostModal({
     handleTabChange,
     textContent,
     setTextContent,
+    description,
+    setDescription,
     selectedFile,
     setSelectedFile,
     selectedColor,
