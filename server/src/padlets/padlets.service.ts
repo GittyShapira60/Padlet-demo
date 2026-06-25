@@ -1,8 +1,15 @@
+// נתיב: server/src/padlets/padlets.service.ts
+
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PadletBoardType, PadletPermission, type Padlet } from '@prisma/client';
-import { PostsService, type PostResponseDto } from '../posts/posts.service';
+import { PostsService, type PostResponseDto, type PostWithAuthor } from '../posts/posts.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { CopyPadletDto, CreatePadletDto } from './dto/create-padlet.dto';
+import {
+  CopyPadletDto,
+  CreatePadletDto,
+  UpdatePadletDto,
+} from './dto/create-padlet.dto';
+import { GetPadletDetailQueryDto } from './dto/padlet-filter.dto';
 
 export interface PadletResponseDto {
   id: string;
@@ -78,9 +85,61 @@ export class PadletsService {
     return this.toPadletResponse(padlet, false);
   }
 
-  async getPadletDetail(userId: string, padletIdRaw: string): Promise<PadletDetailResponseDto> {
+  async updatePadlet(
+    userId: string,
+    padletIdRaw: string,
+    dto: UpdatePadletDto,
+  ): Promise<PadletResponseDto> {
+    const ownerId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+
+    const padlet = await this.prisma.padlet.findUnique({
+      where: { padlet_id: padletId },
+    });
+
+    if (!padlet) throw new NotFoundException('הלוח לא נמצא');
+    if (padlet.user_id !== ownerId) {
+      throw new ForbiddenException('רק הבעלים יכול לערוך את הלוח');
+    }
+
+    const updated = await this.prisma.padlet.update({
+      where: { padlet_id: padletId },
+      data: {
+        ...(dto.title !== undefined ? { title: dto.title.trim() } : {}),
+        ...(dto.description !== undefined
+          ? { description: dto.description.trim() || null }
+          : {}),
+        ...(dto.background !== undefined ? { background: dto.background } : {}),
+        ...(dto.board_type !== undefined ? { board_type: dto.board_type } : {}),
+        updated_at: new Date(),
+      },
+      include: { _count: { select: { posts: true } } },
+    });
+
+    return this.toPadletResponse(updated, false);
+  }
+
+  async getPadletDetail(
+    userId: string,
+    padletIdRaw: string,
+    query: GetPadletDetailQueryDto = {},
+  ): Promise<PadletDetailResponseDto> {
     const requesterId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+
+    const postWhere = {
+      ...(query.search
+        ? {
+            OR: [
+              { title: { contains: query.search, mode: 'insensitive' as const } },
+              { subject: { contains: query.search, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+      ...(query.author
+        ? { user: { username: { contains: query.author, mode: 'insensitive' as const } } }
+        : {}),
+    };
 
     const padlet = await this.prisma.padlet.findFirst({
       where: {
@@ -93,7 +152,19 @@ export class PadletsService {
       include: {
         _count: { select: { posts: true } },
         posts: {
-          include: { user: true },
+          where: Object.keys(postWhere).length ? postWhere : undefined,
+          include: {
+            user: true,
+            poll: {
+              include: {
+                poll_options: {
+                  include: { poll_votes: true },
+                  orderBy: { sort_order: 'asc' as const },
+                },
+                poll_votes: true,
+              },
+            },
+          },
           orderBy: { created_at: 'asc' },
         },
       },
@@ -103,41 +174,33 @@ export class PadletsService {
 
     return {
       padlet: this.toPadletResponse(padlet, padlet.user_id !== requesterId),
-      posts: padlet.posts.map((post) => this.postsService.toPostResponse(post)),
+      posts: padlet.posts.map((post) =>
+        this.postsService.toPostResponse(post as PostWithAuthor, requesterId),
+      ),
     };
-
   }
+
   async deletePadlet(userId: string, padletIdRaw: string): Promise<void> {
-  const ownerId = this.parseId(userId, 'משתמש לא נמצא');
-  const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+    const ownerId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
 
-  const padlet = await this.prisma.padlet.findUnique({
-    where: { padlet_id: padletId },
-  });
+    const padlet = await this.prisma.padlet.findUnique({
+      where: { padlet_id: padletId },
+    });
 
-  if (!padlet) throw new NotFoundException('הלוח לא נמצא');
-  if (padlet.user_id !== ownerId) throw new ForbiddenException('רק הבעלים יכול למחוק את הלוח');
+    if (!padlet) throw new NotFoundException('הלוח לא נמצא');
+    if (padlet.user_id !== ownerId) throw new ForbiddenException('רק הבעלים יכול למחוק את הלוח');
 
-  await this.prisma.post.deleteMany({ where: { padlet_id: padletId } });
-  await this.prisma.participant.deleteMany({ where: { padlet_id: padletId } });
-  await this.prisma.padlet.delete({ where: { padlet_id: padletId } });
-}
+    await this.prisma.post.deleteMany({ where: { padlet_id: padletId } });
+    await this.prisma.participant.deleteMany({ where: { padlet_id: padletId } });
+    await this.prisma.padlet.delete({ where: { padlet_id: padletId } });
+  }
 
-  // async deletePadlet(userId: string, padletIdRaw: string): Promise<void> {
-  //   const ownerId = this.parseId(userId, 'משתמש לא נמצא');
-  //   const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
-
-  //   const padlet = await this.prisma.padlet.findUnique({
-  //     where: { padlet_id: padletId },
-  //   });
-
-  //   if (!padlet) throw new NotFoundException('הלוח לא נמצא');
-  //   if (padlet.user_id !== ownerId) throw new ForbiddenException('רק הבעלים יכול למחוק את הלוח');
-
-  //   await this.prisma.padlet.delete({ where: { padlet_id: padletId } });
-  // }
-
-  async copyPadlet(userId: string, padletIdRaw: string, dto: CopyPadletDto): Promise<PadletResponseDto> {
+  async copyPadlet(
+    userId: string,
+    padletIdRaw: string,
+    dto: CopyPadletDto,
+  ): Promise<PadletResponseDto> {
     const ownerId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
 
@@ -202,7 +265,10 @@ export class PadletsService {
     };
   }
 
-  private toPadletResponse(padlet: PadletWithCount, isShared: boolean): PadletResponseDto {
+  private toPadletResponse(
+    padlet: PadletWithCount,
+    isShared: boolean,
+  ): PadletResponseDto {
     return {
       id: padlet.padlet_id.toString(),
       title: padlet.title,

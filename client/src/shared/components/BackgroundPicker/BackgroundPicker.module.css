@@ -33,21 +33,44 @@
 
 .colorGrid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 0.5rem;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 0.4rem;
 }
 
 .swatch {
   aspect-ratio: 1;
   border: 2px solid transparent;
-  border-radius: 10px;
+  border-radius: 50%;
   cursor: pointer;
   padding: 0;
+  outline: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.swatch:hover,
+.swatch:focus,
+.swatch:focus-visible,
+.swatch:active {
+  outline: none;
+  border-color: transparent;
+}
+
+.swatchSelected,
+.swatchSelected:hover,
+.swatchSelected:focus {
+  border-color: #ffffff;
 }
 
 .swatch:hover {
   transform: scale(1.06);
+  outline: none;
+}
+
+.swatch:focus,
+.swatch:focus-visible {
+  outline: none;
 }
 
 .swatchSelected {

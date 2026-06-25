@@ -4,7 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PadletPermission } from '@prisma/client';
+import { NotificationType, PadletPermission } from '@prisma/client';
+import { NotificationService } from '../notification/notification.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateParticipantDto } from './dto/create-participant.dto';
 import { UpdateParticipantPermissionDto } from './dto/update-participant-permission.dto';
@@ -24,7 +25,10 @@ const ASSIGNABLE_PERMISSIONS = new Set<PadletPermission>([
 
 @Injectable()
 export class ParticipantsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async getParticipants(
     userId: string,
@@ -48,6 +52,7 @@ export class ParticipantsService {
 
   async inviteParticipant(
     userId: string,
+    actorUsername: string,
     padletIdRaw: string,
     dto: CreateParticipantDto,
   ): Promise<ParticipantResponseDto> {
@@ -94,6 +99,13 @@ export class ParticipantsService {
     });
 
     await this.touchPadlet(padletId);
+
+    void this.notificationService.create({
+      userId: inviteeId,
+      type: NotificationType.padlet_share,
+      actorUsername,
+      padletId,
+    });
 
     return this.toParticipantResponse(invitee.id, participant);
   }
@@ -145,6 +157,46 @@ export class ParticipantsService {
       updatedParticipant.user.id,
       updatedParticipant,
     );
+  }
+
+  async leavePadlet(userId: string, padletIdRaw: string): Promise<void> {
+    const requesterId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+
+    const padlet = await this.prisma.padlet.findUnique({
+      where: { padlet_id: padletId },
+      select: { padlet_id: true, user_id: true },
+    });
+
+    if (!padlet) {
+      throw new NotFoundException('הלוח לא נמצא');
+    }
+
+    if (padlet.user_id === requesterId) {
+      throw new ForbiddenException('בעל הלוח לא יכול לעזוב אותו, ניתן למחוק אותו');
+    }
+
+    const participant = await this.prisma.participant.findUnique({
+      where: {
+        padlet_id_user_id: {
+          padlet_id: padletId,
+          user_id: requesterId,
+        },
+      },
+    });
+
+    if (!participant) {
+      throw new NotFoundException('אינך משתתף בלוח זה');
+    }
+
+    await this.prisma.participant.delete({
+      where: {
+        padlet_id_user_id: {
+          padlet_id: padletId,
+          user_id: requesterId,
+        },
+      },
+    });
   }
 
   private toParticipantResponse(

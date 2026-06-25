@@ -1,7 +1,9 @@
+import { BACKGROUND_COLOR_LIGHT } from '../../../../shared/constants/background-colors';
 import { Pencil, Trash2 } from '../../../../shared/icons';
 import type { Post } from '../../interfaces/post';
 import { PostComments } from '../../../comment';
 import { PostReaction } from '../../../reaction';
+import PollView from './PollView/PollView';
 import styles from './PadletPostCard.module.css';
 
 interface PadletPostCardProps {
@@ -13,11 +15,7 @@ interface PadletPostCardProps {
   onDelete?: (post: Post) => void;
 }
 
-function PostActions({
-  post,
-  onEdit,
-  onDelete,
-}: {
+function PostActions({ post, onEdit, onDelete }: {
   post: Post;
   onEdit?: (post: Post) => void;
   onDelete?: (post: Post) => void;
@@ -50,17 +48,25 @@ export default function PadletPostCard({
   onEdit,
   onDelete,
 }: PadletPostCardProps) {
-  const background = post.color ?? '#ffffff';
+  const background = BACKGROUND_COLOR_LIGHT[post.color ?? ''] ?? post.color ?? '#ffffff';
+  const cardStyle = post.poll
+    ? {
+        background: '#ffffff',
+        border: `2px solid ${post.color ?? '#e5e7eb'}`,
+      }
+    : { background };
 
   return (
-    <article className={styles.card} style={{ background }}>
-      {canManage ? (
-        <PostActions post={post} onEdit={onEdit} onDelete={onDelete} />
-      ) : null}
-      <div className={styles.content}>
-        {post.title ? <h3 className={styles.title}>{post.title}</h3> : null}
-        {post.subject ? <p className={styles.subject}>{post.subject}</p> : null}
-      </div>
+    <article className={styles.card} style={cardStyle}>
+      {canManage ? <PostActions post={post} onEdit={onEdit} onDelete={onDelete} /> : null}
+      {post.poll ? (
+        <PollView postId={post.id} poll={post.poll} accentColor={post.color ?? '#7c3aed'} />
+      ) : (
+        <div className={styles.content}>
+          {post.title ? <h3 className={styles.title}>{post.title}</h3> : null}
+          {post.subject ? <p className={styles.subject}>{post.subject}</p> : null}
+        </div>
+      )}
       <PostReaction postId={post.id} />
       {canComment ? (
         <PostComments

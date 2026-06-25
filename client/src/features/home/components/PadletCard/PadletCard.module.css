@@ -4,8 +4,8 @@
   text-align: right;
   font: inherit;
   border-radius: 12px;
-  width: 180px;
-  min-height: 150px;
+  width: 220px;
+  min-height: 190px;
   padding: 0.75rem;
   color: #ffffff;
   cursor: pointer;
@@ -108,7 +108,7 @@
 .wrapper {
   position: relative;
   display: inline-block;
-  width: 180px;
+  width: 220px;
 }
 
 .actions {
@@ -117,13 +117,7 @@
   left: 0.5rem;
   display: flex;
   gap: 0.35rem;
-  opacity: 0;
-  transition: opacity 0.15s ease;
   z-index: 3;
-}
-
-.wrapper:hover .actions {
-  opacity: 1;
 }
 
 .actionBtn {
@@ -131,7 +125,7 @@
   padding: 0 0.5rem;
   border-radius: 8px;
   border: none;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.28);
   color: #fff;
   cursor: pointer;
   display: flex;
@@ -139,73 +133,25 @@
   gap: 0.25rem;
   font-size: 0.7rem;
   font-weight: 600;
+  backdrop-filter: blur(2px);
   transition: background 0.15s ease;
 }
 
 .actionBtn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.42);
 }
 
-.modal {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #fff;
-  color: #111;
-  border-radius: 10px;
-  padding: 0.85rem 1rem;
-  z-index: 10;
-  width: 160px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+.dialogOptions {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.modalTitle {
-  font-size: 0.82rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.modalOption {
-  font-size: 0.78rem;
+.dialogOption {
+  font-size: 0.875rem;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   cursor: pointer;
-}
-
-.modalActions {
-  display: flex;
-  gap: 0.4rem;
-  margin-top: 0.25rem;
-}
-
-.modalConfirm {
-  flex: 1;
-  background: #6a3de8;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.3rem 0;
-  font-size: 0.78rem;
-  cursor: pointer;
-}
-
-.modalConfirm:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.modalCancel {
-  flex: 1;
-  background: #eee;
-  color: #333;
-  border: none;
-  border-radius: 6px;
-  padding: 0.3rem 0;
-  font-size: 0.78rem;
-  cursor: pointer;
+  color: var(--color-text-primary, #1e293b);
 }

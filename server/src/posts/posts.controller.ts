@@ -30,7 +30,7 @@ export class PostsController {
     @Param('padletId') padletId: string,
     @Body() dto: CreatePostDto,
   ) {
-    return this.postsService.createPost(user.id, padletId, dto);
+    return this.postsService.createPost(user.id, user.username, padletId, dto);
   }
 
   @Patch(':postId')
@@ -63,5 +63,16 @@ export class PostsController {
     @Param('postId') postId: string,
   ) {
     return this.postsService.deletePost(user.id, padletId, postId);
+  }
+
+  @Post(':postId/vote')
+  @ApiOperation({ summary: 'Vote on a poll option' })
+  votePoll(
+    @CurrentUser() user: AuthUserDto,
+    @Param('padletId') padletId: string,
+    @Param('postId') postId: string,
+    @Body('option_id') optionId: string,
+  ) {
+    return this.postsService.votePoll(user.id, padletId, postId, optionId);
   }
 }

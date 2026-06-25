@@ -11,8 +11,8 @@
 }
 
 .dialog {
-  width: min(100%, 520px);
-  max-height: min(92vh, 720px);
+  width: min(100%, 580px);
+  max-height: min(94vh, 800px);
   overflow: hidden;
   border-radius: 16px;
   background: var(--color-surface, #ffffff);
