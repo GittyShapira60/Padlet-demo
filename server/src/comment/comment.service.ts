@@ -4,6 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { Comment, User } from '@prisma/client';
+import { NotificationType } from '@prisma/client';
+import { NotificationService } from '../notification/notification.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -21,7 +23,10 @@ type CommentWithAuthor = Comment & { user: User };
 
 @Injectable()
 export class CommentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async listComments(
     userId: string,
@@ -45,6 +50,7 @@ export class CommentService {
 
   async createComment(
     userId: string,
+    actorUsername: string,
     padletIdRaw: string,
     postIdRaw: string,
     dto: CreateCommentDto,
@@ -53,7 +59,7 @@ export class CommentService {
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
     const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
 
-    await this.assertPostInPadlet(authorId, padletId, postId);
+    const post = await this.assertPostInPadlet(authorId, padletId, postId);
 
     const now = new Date();
     const comment = await this.prisma.comment.create({
@@ -66,6 +72,16 @@ export class CommentService {
       },
       include: { user: true },
     });
+
+    if (post.user_id !== authorId) {
+      void this.notificationService.create({
+        userId: post.user_id,
+        type: NotificationType.comment,
+        actorUsername,
+        padletId,
+        postId,
+      });
+    }
 
     return this.toCommentResponse(comment);
   }
@@ -159,7 +175,7 @@ export class CommentService {
     userId: bigint,
     padletId: bigint,
     postId: bigint,
-  ): Promise<void> {
+  ): Promise<{ user_id: bigint }> {
     const padlet = await this.prisma.padlet.findFirst({
       where: {
         padlet_id: padletId,
@@ -180,12 +196,14 @@ export class CommentService {
         post_id: postId,
         padlet_id: padletId,
       },
-      select: { post_id: true },
+      select: { post_id: true, user_id: true },
     });
 
     if (!post) {
       throw new NotFoundException('הפוסט לא נמצא');
     }
+
+    return post;
   }
 
   private parseId(raw: string, errorMessage: string): bigint {
