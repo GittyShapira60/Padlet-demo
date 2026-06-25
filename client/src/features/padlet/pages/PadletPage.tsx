@@ -105,7 +105,7 @@ function PadletBoardBody({
   return (
     <div
       className={styles.page}
-      style={{ ...resolveBackgroundStyle(padlet.background ?? null), backgroundAttachment: 'fixed' }}
+      style={{ ...resolveBackgroundStyle(padlet?.background ?? null), backgroundAttachment: 'fixed' }}
     >
       <div className={styles.titleRow}>
         <h1 className={styles.boardTitle}>{title}</h1>
