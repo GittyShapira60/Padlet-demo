@@ -6,6 +6,7 @@ import {
 import { PadletBoardType, PadletPermission } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
+  canComment,
   canCreatePost,
   canDeletePadlet,
   canDeletePost,
@@ -132,6 +133,17 @@ export class PadletAccessService {
     const access = await this.assertCanView(userId, padletId);
     if (!canReact(access.permission)) {
       throw new ForbiddenException('אין הרשאה להגיב על פוסטים בלוח זה');
+    }
+    return access;
+  }
+
+  async assertCanComment(
+    userId: bigint,
+    padletId: bigint,
+  ): Promise<PadletAccessContext> {
+    const access = await this.assertCanView(userId, padletId);
+    if (!canComment(access.permission)) {
+      throw new ForbiddenException('אין הרשאה להגיב בתגובות בלוח זה');
     }
     return access;
   }

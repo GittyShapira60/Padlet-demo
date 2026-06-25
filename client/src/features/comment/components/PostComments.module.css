@@ -6,6 +6,14 @@
   overflow: visible;
 }
 
+.error {
+  margin: 0 0 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #dc2626;
+  line-height: 1.35;
+}
+
 .list {
   display: flex;
   flex-direction: column;

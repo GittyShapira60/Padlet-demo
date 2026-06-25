@@ -58,7 +58,7 @@ export default function BrainstormingPostCard({
   onDelete,
 }: BrainstormingPostCardProps) {
   const { user } = useAuth();
-  const { comments, sendComment, removeComment, editComment } = usePostComments(
+  const { comments, error, sendComment, removeComment, editComment } = usePostComments(
     padletId,
     post.id,
     canComment,
@@ -101,6 +101,7 @@ export default function BrainstormingPostCard({
       {canComment ? (
         <PostComments
           comments={comments}
+          error={error}
           currentUsername={user?.username}
           canComment={canComment}
           onSendComment={sendComment}

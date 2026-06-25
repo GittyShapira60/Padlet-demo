@@ -10,7 +10,7 @@ const PLACEHOLDER = 'הוסף תגובה';
 
 interface CommentComposerProps {
   disabled?: boolean;
-  onSend?: (body: string) => void;
+  onSend?: (body: string) => Promise<void>;
 }
 
 export default function CommentComposer({
@@ -35,15 +35,21 @@ export default function CommentComposer({
     inputRef.current?.focus();
   }
 
-  function handleSend() {
+  async function handleSend() {
     if (!canSend) {
       return;
     }
 
-    onSend?.(value.trim());
-    setValue('');
-    setIsFocused(false);
-    inputRef.current?.blur();
+    const body = value.trim();
+
+    try {
+      await onSend?.(body);
+      setValue('');
+      setIsFocused(false);
+      inputRef.current?.blur();
+    } catch {
+      // Keep the draft so the user can retry.
+    }
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {

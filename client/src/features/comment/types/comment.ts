@@ -4,4 +4,5 @@ export interface Comment {
   authorUsername: string;
   body: string;
   createdAt: string;
+  updatedAt: string | null;
 }

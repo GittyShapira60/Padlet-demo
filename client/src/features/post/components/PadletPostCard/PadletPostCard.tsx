@@ -52,7 +52,7 @@ export default function PadletPostCard({
   onDelete,
 }: PadletPostCardProps) {
   const { user } = useAuth();
-  const { comments, sendComment, removeComment, editComment } = usePostComments(
+  const { comments, error, sendComment, removeComment, editComment } = usePostComments(
     padletId,
     post.id,
     canComment,
@@ -98,6 +98,7 @@ export default function PadletPostCard({
       {canComment ? (
         <PostComments
           comments={comments}
+          error={error}
           currentUsername={user?.username}
           canComment={canComment}
           onSendComment={sendComment}
