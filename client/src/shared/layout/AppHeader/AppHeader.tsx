@@ -6,12 +6,14 @@ import styles from './AppHeader.module.css';
 
 interface AppHeaderProps {
   centerSlot?: ReactNode;
+  actionSlot?: ReactNode;
   background?: string | null;
   onLogoClick?: () => void;
 }
 
 export default function AppHeader({
   centerSlot,
+  actionSlot,
   background,
   onLogoClick,
 }: AppHeaderProps) {
@@ -47,12 +49,11 @@ export default function AppHeader({
         </div>
 
         <nav className={styles.actions}>
+          {actionSlot ?? null}
           <button type="button" className={styles.stats}>
             <BarChart3 size={17} strokeWidth={1.5} />
             סטטיסטיקות
           </button>
-
-          <span className={styles.greeting}>שלום, {username}</span>
 
           <NotificationBell />
 

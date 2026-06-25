@@ -3,6 +3,35 @@ import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../../../App';
 import { MoreVertical, Pencil, Share2 } from '../../../shared/icons';
+
+function PadletMenuButton({ onEdit, onShare }: { onEdit: () => void; onShare: () => void }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  return (
+    <div ref={ref} className={styles.menuWrapper}>
+      <button type="button" className={styles.menuBtn} aria-label="אפשרויות" onClick={() => setIsOpen((prev: boolean) => !prev)}>
+        <MoreVertical size={17} strokeWidth={1.5} />
+      </button>
+      {isOpen ? (
+        <div className={styles.dropdown}>
+          <button type="button" className={styles.dropdownItem} onClick={() => { setIsOpen(false); onEdit(); }}>
+            <Pencil size={15} strokeWidth={2} aria-hidden="true" /> עריכה
+          </button>
+          <button type="button" className={styles.dropdownItem} onClick={() => { setIsOpen(false); onShare(); }}>
+            <Share2 size={15} strokeWidth={2} aria-hidden="true" /> שיתוף
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
 import PostFilterBar from '../../post/components/PostFilterBar/PostFilterBar';
@@ -17,7 +46,7 @@ import styles from './PadletPage.module.css';
 import { usePadletPage } from './usePadletPage';
 
 export default function PadletPage() {
-  const { setHeaderBackground } = useOutletContext<AppOutletContext>();
+  const { setHeaderBackground, setHeaderActionSlot } = useOutletContext<AppOutletContext>();
   const {
     padlet,
     filteredPosts,
@@ -50,18 +79,14 @@ export default function PadletPage() {
     handleLayoutChange,
   } = usePadletPage();
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
+    if (padlet) {
+      setHeaderActionSlot(
+        <PadletMenuButton onEdit={handleOpenEdit} onShare={handleOpenShare} />
+      );
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    return () => setHeaderActionSlot(null);
+  }, [padlet, handleOpenEdit, handleOpenShare, setHeaderActionSlot]);
 
   useEffect(() => {
     if (padlet) {
@@ -94,41 +119,13 @@ export default function PadletPage() {
     >
       <div className={styles.titleRow}>
         <h1 className={styles.boardTitle}>{padlet.title}</h1>
-        <PostFilterBar
-          search={filterSearch}
-          author={filterAuthor}
-          onSearchChange={setFilterSearch}
-          onAuthorChange={setFilterAuthor}
-        />
-        <div className={styles.menuWrapper} ref={menuRef}>
-          <button
-            type="button"
-            className={styles.menuBtn}
-            aria-label="אפשרויות"
-            onClick={() => setIsMenuOpen((prev: boolean) => !prev)}
-          >
-            <MoreVertical size={20} strokeWidth={2} aria-hidden="true" />
-          </button>
-          {isMenuOpen ? (
-            <div className={styles.dropdown}>
-              <button
-                type="button"
-                className={styles.dropdownItem}
-                onClick={() => { setIsMenuOpen(false); handleOpenEdit(); }}
-              >
-                <Pencil size={15} strokeWidth={2} aria-hidden="true" />
-                עריכה
-              </button>
-              <button
-                type="button"
-                className={styles.dropdownItem}
-                onClick={() => { setIsMenuOpen(false); handleOpenShare(); }}
-              >
-                <Share2 size={15} strokeWidth={2} aria-hidden="true" />
-                שיתוף
-              </button>
-            </div>
-          ) : null}
+        <div className={styles.filterCenter}>
+          <PostFilterBar
+            search={filterSearch}
+            author={filterAuthor}
+            onSearchChange={setFilterSearch}
+            onAuthorChange={setFilterAuthor}
+          />
         </div>
       </div>
 

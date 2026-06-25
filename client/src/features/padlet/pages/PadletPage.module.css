@@ -9,9 +9,13 @@
 .titleRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
   padding: 1rem 1.5rem 0.5rem;
+}
+
+.filterCenter {
+  flex: 1;
+  display: flex;
+  justify-content: center;
 }
 
 .boardTitle {
@@ -36,7 +40,7 @@
   outline: none;
   padding: 0.35rem;
   background: transparent;
-  color: #ffffff;
+  color: #64748b;
   cursor: pointer;
   transition: opacity 0.15s ease;
 }
