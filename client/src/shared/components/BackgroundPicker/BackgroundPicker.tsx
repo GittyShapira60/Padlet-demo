@@ -1,4 +1,4 @@
-import { BACKGROUND_COLOR_GRADIENTS, BACKGROUND_COLORS } from '../../constants/background-colors';
+import { BACKGROUND_COLOR_GRADIENTS, BACKGROUND_COLORS, BACKGROUND_GRADIENTS, BACKGROUND_IMAGES } from '../../constants/background-colors';
 import styles from './BackgroundPicker.module.css';
 
 export type BackgroundTab = 'colors' | 'images' | 'patterns';
@@ -51,9 +51,39 @@ export default function BackgroundPicker({
             />
           ))}
         </div>
-      ) : (
-        <p className={styles.empty}>בקרוב...</p>
-      )}
+      ) : activeTab === 'images' ? (
+        <div className={styles.gradientGrid}>
+          {BACKGROUND_IMAGES.map((src) => (
+            <button
+              key={src}
+              type="button"
+              className={`${styles.gradientSwatch} ${selectedColor === src ? styles.gradientSwatchSelected : ''}`}
+              style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+              onClick={() => onColorChange(src)}
+            >
+              {selectedColor === src && (
+                <span className={styles.gradientCheckmark}>✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+      ) : activeTab === 'patterns' ? (
+        <div className={styles.gradientGrid}>
+          {BACKGROUND_GRADIENTS.map((gradient) => (
+            <button
+              key={gradient}
+              type="button"
+              className={`${styles.gradientSwatch} ${selectedColor === gradient ? styles.gradientSwatchSelected : ''}`}
+              style={{ background: gradient }}
+              onClick={() => onColorChange(gradient)}
+            >
+              {selectedColor === gradient && (
+                <span className={styles.gradientCheckmark}>✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

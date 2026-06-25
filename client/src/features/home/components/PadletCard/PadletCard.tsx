@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Padlet } from '../../../padlet/interfaces/padlet';
 import type { CopyPadletOptions } from '../../../padlet/services/padlet-service';
-import { BACKGROUND_COLOR_GRADIENTS } from '../../../../shared/constants/background-colors';
+import { resolveBackgroundStyle } from '../../../../shared/constants/background-colors';
 import ConfirmDialog from '../../../../shared/components/ConfirmDialog/ConfirmDialog';
 import { Calendar, Copy, LayoutDashboard, Lock, LogOut, Trash2, Users } from '../../../../shared/icons';
 import styles from './PadletCard.module.css';
@@ -70,7 +70,7 @@ export default function PadletCard({ padlet, onDelete, onCopy, onLeave }: Padlet
       <button
         type="button"
         className={cardClassName}
-        style={{ background: BACKGROUND_COLOR_GRADIENTS[padlet.background ?? ''] ?? padlet.background ?? undefined }}
+        style={resolveBackgroundStyle(padlet.background ?? null, '#ffffff')}
         onClick={handleOpen}
       >
         <div className={styles.top}>
