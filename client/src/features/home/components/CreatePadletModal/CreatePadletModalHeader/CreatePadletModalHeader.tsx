@@ -1,4 +1,4 @@
-import { BACKGROUND_COLOR_GRADIENTS } from '../../../../../shared/constants/background-colors';
+import { resolveBackgroundStyle } from '../../../../../shared/constants/background-colors';
 import styles from './CreatePadletModalHeader.module.css';
 
 interface CreatePadletModalHeaderProps {
@@ -13,7 +13,7 @@ export default function CreatePadletModalHeader({
   onClose,
 }: CreatePadletModalHeaderProps) {
   return (
-    <header className={styles.header} style={{ background: BACKGROUND_COLOR_GRADIENTS[background] ?? background }}>
+    <header className={styles.header} style={resolveBackgroundStyle(background)}>
       <button
         type="button"
         className={styles.closeBtn}
