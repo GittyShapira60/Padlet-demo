@@ -1,4 +1,5 @@
 import { PadletBoardType } from '../../../padlet/enums/padlet-board-type';
+import { usePadletCapabilities } from '../../../padlet/context/PadletCapabilitiesContext';
 import type { Post, PostLayout } from '../../interfaces/post';
 import BrainstormingPostsLayout from '../board-layouts/brainstorming/BrainstormingPostsLayout';
 import FreeWallPostsLayout from '../board-layouts/free_wall/FreeWallPostsLayout';
@@ -10,8 +11,6 @@ interface PadletPostsLayerProps {
   padletId: string;
   boardType: PadletBoardType;
   posts: Post[];
-  currentUsername?: string;
-  canComment?: boolean;
   onEditPost?: (post: Post) => void;
   onDeletePost?: (post: Post) => void;
   onLayoutChange?: (postId: string, layout: PostLayout) => void;
@@ -21,12 +20,12 @@ export default function PadletPostsLayer({
   padletId,
   boardType,
   posts,
-  currentUsername,
-  canComment,
   onEditPost,
   onDeletePost,
   onLayoutChange,
 }: PadletPostsLayerProps) {
+  const { canEditPost, canDragPost, canComment } = usePadletCapabilities();
+
   if (posts.length === 0) {
     return (
       <div className={styles.layer}>
@@ -40,13 +39,13 @@ export default function PadletPostsLayer({
   const layoutProps = {
     padletId,
     posts,
-    currentUsername,
     canComment,
+    canEditPost,
+    canDragPost,
     onEditPost,
     onDeletePost,
     onLayoutChange,
   };
-
   let content;
 
   switch (boardType) {

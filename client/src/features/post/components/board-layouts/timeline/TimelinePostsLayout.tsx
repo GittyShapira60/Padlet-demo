@@ -5,8 +5,8 @@ import styles from './TimelinePostsLayout.module.css';
 export default function TimelinePostsLayout({
   padletId,
   posts,
-  currentUsername,
   canComment,
+  canEditPost,
   onEditPost,
   onDeletePost,
 }: BoardLayoutProps) {
@@ -29,7 +29,7 @@ export default function TimelinePostsLayout({
           <BoardPostCard
             post={post}
             padletId={padletId}
-            currentUsername={currentUsername}
+            canManage={canEditPost(post)}
             canComment={canComment}
             onEditPost={onEditPost}
             onDeletePost={onDeletePost}

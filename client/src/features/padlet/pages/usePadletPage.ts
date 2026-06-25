@@ -4,7 +4,12 @@ import { useAuth } from '../../auth/context/AuthProvider';
 import type { Post, PostLayout } from '../../post/interfaces/post';
 import { deletePost, updatePostLayout } from '../../post/services/post-service';
 import type { Padlet } from '../interfaces/padlet';
+import {
+  PadletPermission,
+  type PadletPermission as PadletPermissionType,
+} from '../enums/padlet-permission';
 import { getPadletDetail, leavePadlet } from '../services/padlet-service';
+import { mapApiPermission } from '../utils/padlet-capabilities';
 
 export function usePadletPage() {
   const { padletId } = useParams<{ padletId: string }>();
@@ -18,6 +23,10 @@ export function usePadletPage() {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [postToEdit, setPostToEdit] = useState<Post | null>(null);
+  const [currentUserPermission, setCurrentUserPermission] =
+    useState<PadletPermissionType | null>(null);
+  const [defaultPermission, setDefaultPermission] =
+    useState<PadletPermissionType | null>(null);
   const [postPendingDelete, setPostPendingDelete] = useState<Post | null>(null);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
@@ -71,6 +80,12 @@ export function usePadletPage() {
 
         setPadlet(detail.padlet);
         setPosts(detail.posts);
+        setCurrentUserPermission(mapApiPermission(detail.currentUserPermission));
+        setDefaultPermission(
+          detail.defaultPermission
+            ? mapApiPermission(detail.defaultPermission)
+            : PadletPermission.None,
+        );
       } catch {
         if (isMounted) {
           setError('לא הצלחנו לטעון את הלוח');
@@ -244,6 +259,9 @@ export function usePadletPage() {
     isLeaveOpen,
     isLeavingPadlet,
     currentUsername,
+    currentUserPermission,
+    defaultPermission,
+    setDefaultPermission,
     handleBack,
     handleCreatePost,
     handleClosePostModal,
