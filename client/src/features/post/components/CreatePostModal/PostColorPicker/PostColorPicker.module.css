@@ -46,10 +46,12 @@
 .swatchSelected,
 .swatchSelected:hover,
 .swatchSelected:focus {
-  border-color: rgba(0, 0, 0, 0.05);
+  border-color: #ffffff;
 }
 
 .swatchSelected {
   transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 0 0 2px var(--color-brand-pink),
+    0 4px 10px rgba(0, 0, 0, 0.15);
 }

@@ -3,6 +3,7 @@ import {
   PostContentTab as PostContentTabValues,
   type PostContentTab,
 } from '../../../enums/post-content-tab';
+import { BACKGROUND_COLOR_LIGHT } from '../../../../../shared/constants/background-colors';
 import PollFormSection from '../PollFormSection/PollFormSection';
 import styles from './CreatePostContentArea.module.css';
 
@@ -75,7 +76,7 @@ export default function CreatePostContentArea({
           placeholder="מה אתה חושב/ת?"
           value={textContent}
           onChange={(event) => onTextChange(event.target.value)}
-          style={{ backgroundColor: selectedColor }}
+          style={{ backgroundColor: BACKGROUND_COLOR_LIGHT[selectedColor] ?? selectedColor }}
         />
       </div>
     );
@@ -89,7 +90,7 @@ export default function CreatePostContentArea({
         <button
           type="button"
           className={styles.fileDrop}
-          style={{ backgroundColor: displayUrl ? 'transparent' : selectedColor }}
+          style={{ backgroundColor: displayUrl ? 'transparent' : BACKGROUND_COLOR_LIGHT[selectedColor] ?? selectedColor }}
           onClick={() => fileInputRef.current?.click()}
         >
           <input
@@ -131,7 +132,7 @@ export default function CreatePostContentArea({
           placeholder="הדבק או הקלד קישור כאן... 🔗"
           value={textContent}
           onChange={(event) => onTextChange(event.target.value)}
-          style={{ backgroundColor: selectedColor }}
+          style={{ backgroundColor: BACKGROUND_COLOR_LIGHT[selectedColor] ?? selectedColor }}
         />
         <input
           className={styles.descriptionInput}
