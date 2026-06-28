@@ -35,20 +35,20 @@ export default function CommentComposer({
     inputRef.current?.focus();
   }
 
-  async function handleSend() {
+  function handleSend() {
     if (!canSend) {
       return;
     }
 
     const body = value.trim();
 
-    try {
-      await onSend?.(body);
-      setValue('');
-      setIsFocused(false);
-      inputRef.current?.blur();
-    } catch {
-    }
+    void onSend?.(body)
+      .then(() => {
+        setValue('');
+        setIsFocused(false);
+        inputRef.current?.blur();
+      })
+      .catch(() => undefined);
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {

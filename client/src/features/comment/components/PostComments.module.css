@@ -125,6 +125,10 @@
   font-weight: 800;
   color: #0f172a;
   line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .time {
