@@ -116,9 +116,9 @@ export function usePadletPage() {
     const handlePostCreated = (post: Post) => {
       setPosts((prev: Post[]) => {
         if (prev.some((p: Post) => p.id === post.id)) return prev;
-        setPadlet((curr: Padlet | null) => curr ? { ...curr, postCount: curr.postCount + 1 } : curr);
         return [...prev, post];
       });
+      setPadlet((curr: Padlet | null) => curr ? { ...curr, postCount: curr.postCount + 1 } : curr);
     };
 
     const handlePostUpdated = (post: Post) => {
@@ -126,11 +126,8 @@ export function usePadletPage() {
     };
 
     const handlePostDeleted = ({ postId }: { postId: string }) => {
-      setPosts((prev: Post[]) => {
-        const next = prev.filter((p: Post) => p.id !== postId);
-        setPadlet((curr: Padlet | null) => curr ? { ...curr, postCount: next.length } : curr);
-        return next;
-      });
+      setPosts((prev: Post[]) => prev.filter((p: Post) => p.id !== postId));
+      setPadlet((curr: Padlet | null) => curr ? { ...curr, postCount: Math.max(0, curr.postCount - 1) } : curr);
     };
 
     socket.on('post:created', handlePostCreated);

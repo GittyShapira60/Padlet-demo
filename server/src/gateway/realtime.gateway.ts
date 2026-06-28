@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { verify, type JwtPayload } from 'jsonwebtoken';
 import type { Server, Socket } from 'socket.io';
+import { PadletAccessService } from '../padlet-access/padlet-access.service';
 
 interface AccessTokenPayload extends JwtPayload {
   sub: string;
@@ -20,7 +21,10 @@ export class RealtimeGateway
   @WebSocketServer()
   private server: Server;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly padletAccess: PadletAccessService,
+  ) {}
 
   handleConnection(client: Socket): void {
     const token = client.handshake.auth?.token as string | undefined;
@@ -28,6 +32,7 @@ export class RealtimeGateway
 
     try {
       const payload = verify(token ?? '', secret) as AccessTokenPayload;
+      client.data.userId = payload.sub;
       void client.join(`user:${payload.sub}`);
     } catch {
       client.disconnect();
@@ -40,8 +45,17 @@ export class RealtimeGateway
 
   /** Client joins the padlet room to receive real-time post/reaction updates. */
   @SubscribeMessage('padlet:join')
-  handleJoinPadlet(client: Socket, padletId: string): void {
-    void client.join(`padlet:${padletId}`);
+  async handleJoinPadlet(client: Socket, padletId: string): Promise<void> {
+    const userId = client.data.userId as string | undefined;
+    if (!userId) {
+      return;
+    }
+    try {
+      await this.padletAccess.assertCanView(BigInt(userId), BigInt(padletId));
+      void client.join(`padlet:${padletId}`);
+    } catch {
+      // User lacks view permission — silently reject the room join.
+    }
   }
 
   /** Client leaves the padlet room on page exit. */

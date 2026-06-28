@@ -32,9 +32,10 @@ export function usePadlets() {
     const socket = getSocket();
     if (!socket) return;
 
-    socket.on('padlet:shared', () => void loadPadlets());
+    const handler = () => void loadPadlets();
+    socket.on('padlet:shared', handler);
     return () => {
-      socket.off('padlet:shared');
+      socket.off('padlet:shared', handler);
     };
   }, [loadPadlets]);
 

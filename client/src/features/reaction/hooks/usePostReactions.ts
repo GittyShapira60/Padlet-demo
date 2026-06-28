@@ -68,15 +68,22 @@ export function usePostReactions({
         const existing = current[data.postId];
         const updated: PostReactionsView = {
           postId: data.postId,
-          summaries: data.summaries as ReactionSummary[],
+          summaries: data.summaries.map((s) => ({ ...s, glyph: '' })),
           currentUserReactionCode: existing?.currentUserReactionCode ?? null,
         };
         return { ...current, [data.postId]: enrichPostReactionsView(updated) };
       });
     };
 
+    const reregister = () => {
+      socket.off('reaction:updated', handleReactionUpdated);
+      socket.on('reaction:updated', handleReactionUpdated);
+    };
+
     socket.on('reaction:updated', handleReactionUpdated);
+    socket.on('connect', reregister);
     return () => {
+      socket.off('connect', reregister);
       socket.off('reaction:updated', handleReactionUpdated);
     };
   }, []);

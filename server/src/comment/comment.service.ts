@@ -121,11 +121,11 @@ export class CommentService {
     });
 
     if (!comment) {
-      throw new NotFoundException('התגובה לא נמצאה');
+      throw new NotFoundException('Comment not found');
     }
 
     if (comment.user_id !== requesterId) {
-      throw new ForbiddenException('אין הרשאה לערוך תגובה זו');
+      throw new ForbiddenException('Not authorized to edit this comment');
     }
 
     const updated = await this.prisma.comment.update({
@@ -167,11 +167,11 @@ export class CommentService {
     });
 
     if (!comment) {
-      throw new NotFoundException('התגובה לא נמצאה');
+      throw new NotFoundException('Comment not found');
     }
 
     if (comment.user_id !== requesterId) {
-      throw new ForbiddenException('אין הרשאה למחוק תגובה זו');
+      throw new ForbiddenException('Not authorized to delete this comment');
     }
 
     await this.prisma.comment.delete({
@@ -208,7 +208,7 @@ export class CommentService {
     });
 
     if (!post) {
-      throw new NotFoundException('הפוסט לא נמצא');
+      throw new NotFoundException('Post not found');
     }
 
     return post;
