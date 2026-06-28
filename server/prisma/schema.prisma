@@ -83,8 +83,10 @@ model Post {
   padlet_id    BigInt
   user_id      BigInt
   content_kind PostContentKind @default(none)
+  post_type    String?         @db.VarChar(20)
   title        String?         @db.VarChar(255)
   subject      String?
+  description  String?
   color        String?         @db.VarChar(32)
   data_layout  Json?
   created_at   DateTime        @db.Timestamptz()
@@ -104,7 +106,7 @@ model PostAttachment {
   /// picture/file: base64 encoded; link: url+title; see SCHEMA.md
   attachment_data String
 
-  post Post @relation(fields: [post_id], references: [post_id])
+  post Post @relation(fields: [post_id], references: [post_id], onDelete: Cascade)
 }
 
 model Poll {
