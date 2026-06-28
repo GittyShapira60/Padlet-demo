@@ -6,6 +6,7 @@ import {
   updateComment,
 } from '../services/comment-service';
 import type { Comment } from '../types/comment';
+import { getSocket } from '../../../shared/services/socket.service';
 
 const ERROR_MESSAGES = {
   load: 'טעינת התגובות נכשלה',
@@ -52,6 +53,41 @@ export function usePostComments(
       isMounted = false;
     };
   }, [enabled, padletId, postId]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket || !enabled) return;
+
+    const handleCreated = (data: { postId: string; comment: Comment }) => {
+      if (data.postId !== postId) return;
+      setComments((current) => {
+        if (current.some((c) => c.id === data.comment.id)) return current;
+        return [...current, data.comment];
+      });
+    };
+
+    const handleUpdated = (data: { postId: string; comment: Comment }) => {
+      if (data.postId !== postId) return;
+      setComments((current) =>
+        current.map((c) => (c.id === data.comment.id ? data.comment : c)),
+      );
+    };
+
+    const handleDeleted = (data: { postId: string; commentId: string }) => {
+      if (data.postId !== postId) return;
+      setComments((current) => current.filter((c) => c.id !== data.commentId));
+    };
+
+    socket.on('comment:created', handleCreated);
+    socket.on('comment:updated', handleUpdated);
+    socket.on('comment:deleted', handleDeleted);
+
+    return () => {
+      socket.off('comment:created', handleCreated);
+      socket.off('comment:updated', handleUpdated);
+      socket.off('comment:deleted', handleDeleted);
+    };
+  }, [enabled, postId]);
 
   const sendComment = useCallback(
     async (body: string) => {
