@@ -6,6 +6,7 @@ import {
   IsIn,
   IsOptional,
   IsString,
+  Matches,
   MaxLength,
   ValidateIf,
 } from 'class-validator';
@@ -43,6 +44,7 @@ export class CreatePostDto {
   @ApiProperty({ example: 'data:image/png;base64,...', required: false })
   @IsOptional()
   @IsString()
+  @Matches(/^data:image\/(png|jpe?g|gif|webp);base64,/, { message: 'image_data must be a valid base64-encoded image' })
   image_data?: string;
 
   @ApiProperty({ example: 'תיאור הפוסט', required: false })

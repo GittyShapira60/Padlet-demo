@@ -7,6 +7,10 @@ export const POST_CONTENT_INPUT_KINDS = [
 
 export type PostContentInputKind = (typeof POST_CONTENT_INPUT_KINDS)[number];
 
+/**
+ * Internal DTO — not exposed as a request body.
+ * Constructed by PostsController from validated CreatePostDto / UpdatePostDto before calling the service.
+ */
 export class PostContentInputDto {
   color?: string;
 

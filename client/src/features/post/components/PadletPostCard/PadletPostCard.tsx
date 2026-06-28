@@ -84,12 +84,12 @@ export default function PadletPostCard({
         <PollView postId={post.id} poll={post.poll} accentColor={post.color ?? '#7c3aed'} />
       ) : post.postType === 'image' ? (
         <div className={styles.imageContent}>
-          {post.title ? <p className={styles.imageDescription}>{post.title}</p> : null}
-          <img src={post.imageUrl ?? ''} alt={post.title ?? 'תמונה'} className={styles.postImage} />
+          {(post.description ?? post.title) ? <p className={styles.imageDescription}>{post.description ?? post.title}</p> : null}
+          <img src={post.imageUrl ?? ''} alt={post.description ?? post.title ?? 'תמונה'} className={styles.postImage} />
         </div>
       ) : post.postType === 'link' ? (
         <div className={styles.content}>
-          {post.title && post.title !== 'קישור' ? <p className={styles.linkDescription}>{post.title}</p> : null}
+          {(post.description ?? post.title) ? <p className={styles.linkDescription}>{post.description ?? post.title}</p> : null}
           <a
             href={post.subject ?? '#'}
             target="_blank"

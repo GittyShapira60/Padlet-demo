@@ -122,8 +122,15 @@ export function useCreatePostModal({
 
     let imageData: string | undefined;
     if (activeTab === PostContentTabValues.Image && selectedFile) {
+      if (selectedFile.size > 5_000_000) {
+        setError('Image must be under 5 MB');
+        setIsLoading(false);
+        return;
+      }
       imageData = await fileToBase64(selectedFile);
     }
+
+    const includesDescription = activeTab === PostContentTabValues.Image || activeTab === PostContentTabValues.Link;
 
     const input = {
       color: selectedColor,
@@ -134,7 +141,7 @@ export function useCreatePostModal({
           ? selectedFile?.name ?? postToEdit?.subject ?? undefined
           : undefined,
       imageData,
-      description: (activeTab === PostContentTabValues.Image || activeTab === PostContentTabValues.Link) ? description.trim() || undefined : undefined,
+      description: includesDescription ? description.trim() || undefined : undefined,
       pollAnswers:
         activeTab === PostContentTabValues.Poll
           ? pollAnswers.filter((a) => a.value.trim().length > 0).map((a) => a.value)

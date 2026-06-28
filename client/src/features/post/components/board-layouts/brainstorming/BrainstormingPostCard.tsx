@@ -87,12 +87,12 @@ export default function BrainstormingPostCard({
 
       {post.postType === 'image' ? (
         <div className={`${cardStyles.imageContent} ${cardStyles.bubbleContent}`}>
-          {post.title ? <p className={cardStyles.imageDescription}>{post.title}</p> : null}
-          <img src={post.imageUrl ?? ''} alt={post.title ?? 'תמונה'} className={cardStyles.postImage} />
+          {(post.description ?? post.title) ? <p className={cardStyles.imageDescription}>{post.description ?? post.title}</p> : null}
+          <img src={post.imageUrl ?? ''} alt={post.description ?? post.title ?? 'תמונה'} className={cardStyles.postImage} />
         </div>
       ) : post.postType === 'link' ? (
         <div className={`${cardStyles.content} ${cardStyles.bubbleContent}`}>
-          {post.title && post.title !== 'קישור' ? <p className={cardStyles.linkDescription}>{post.title}</p> : null}
+          {(post.description ?? post.title) ? <p className={cardStyles.linkDescription}>{post.description ?? post.title}</p> : null}
           <a
             href={post.subject ?? '#'}
             target="_blank"
