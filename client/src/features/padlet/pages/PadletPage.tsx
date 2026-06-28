@@ -179,6 +179,7 @@ function PadletBoardBody({
           canReact={capabilities.canReact}
         >
           <PadletPostsLayer
+            padletId={padletId}
             boardType={boardType}
             posts={filteredPosts}
             onEditPost={handleEditPost}

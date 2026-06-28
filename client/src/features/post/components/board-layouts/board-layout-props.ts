@@ -1,7 +1,9 @@
 import type { Post, PostLayout } from '../../interfaces/post';
 
 export interface BoardLayoutProps {
+  padletId: string;
   posts: Post[];
+  canComment: boolean;
   canEditPost: (post: Post) => boolean;
   canDragPost: (post: Post) => boolean;
   onEditPost?: (post: Post) => void;

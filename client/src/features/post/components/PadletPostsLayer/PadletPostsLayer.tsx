@@ -8,6 +8,7 @@ import TimelinePostsLayout from '../board-layouts/timeline/TimelinePostsLayout';
 import styles from './PadletPostsLayer.module.css';
 
 interface PadletPostsLayerProps {
+  padletId: string;
   boardType: PadletBoardType;
   posts: Post[];
   onEditPost?: (post: Post) => void;
@@ -16,15 +17,17 @@ interface PadletPostsLayerProps {
 }
 
 export default function PadletPostsLayer({
+  padletId,
   boardType,
   posts,
   onEditPost,
   onDeletePost,
   onLayoutChange,
 }: PadletPostsLayerProps) {
-  const { canEditPost, canDragPost } = usePadletCapabilities();
+  const { canEditPost, canDragPost, canComment } = usePadletCapabilities();
 
-  if (posts.length === 0) {    return (
+  if (posts.length === 0) {
+    return (
       <div className={styles.layer}>
         <p className={styles.empty}>
           עדיין אין פוסטים בלוח. לחצי על &quot;פוסט חדש&quot; כדי להתחיל.
@@ -34,7 +37,9 @@ export default function PadletPostsLayer({
   }
 
   const layoutProps = {
+    padletId,
     posts,
+    canComment,
     canEditPost,
     canDragPost,
     onEditPost,

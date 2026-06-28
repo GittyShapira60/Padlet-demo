@@ -23,6 +23,10 @@ export function canReact(permission: PadletPermission): boolean {
   return isPermissionAtLeast(permission, PadletPermission.commenter);
 }
 
+export function canComment(permission: PadletPermission): boolean {
+  return isPermissionAtLeast(permission, PadletPermission.commenter);
+}
+
 export function canCreatePost(permission: PadletPermission): boolean {
   return isPermissionAtLeast(permission, PadletPermission.editor);
 }

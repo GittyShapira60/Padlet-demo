@@ -3,21 +3,27 @@ import type { Post } from '../../interfaces/post';
 
 interface BoardPostCardProps {
   post: Post;
+  padletId: string;
   canManage: boolean;
+  canComment: boolean;
   onEditPost?: (post: Post) => void;
   onDeletePost?: (post: Post) => void;
 }
 
 export default function BoardPostCard({
   post,
+  padletId,
   canManage,
+  canComment,
   onEditPost,
   onDeletePost,
 }: BoardPostCardProps) {
   return (
     <PadletPostCard
       post={post}
+      padletId={padletId}
       canManage={canManage}
+      canComment={canComment}
       onEdit={onEditPost}
       onDelete={onDeletePost}
     />

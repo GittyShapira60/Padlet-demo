@@ -3,7 +3,7 @@ import styles from './NotificationDropdown.module.css';
 
 const TYPE_LABELS: Record<NotificationType, string> = {
   reaction: 'הגיב/ה לפוסט שלך',
-  comment: 'הגיב/ה בתגובה על פוסט שלך',
+  comment: 'הגיב/ה על הפוסט שלך',
   new_post: 'פרסם/ה פוסט חדש בלוח',
   padlet_share: 'שיתף/ה איתך לוח',
 };
