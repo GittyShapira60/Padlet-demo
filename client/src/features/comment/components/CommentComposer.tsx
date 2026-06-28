@@ -48,7 +48,6 @@ export default function CommentComposer({
       setIsFocused(false);
       inputRef.current?.blur();
     } catch {
-      // Keep the draft so the user can retry.
     }
   }
 
