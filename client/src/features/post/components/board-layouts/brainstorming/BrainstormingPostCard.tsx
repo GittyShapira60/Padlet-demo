@@ -85,12 +85,32 @@ export default function BrainstormingPostCard({
         </div>
       </header>
 
-      <div className={`${cardStyles.content} ${cardStyles.bubbleContent}`}>
-        {post.title ? <h3 className={cardStyles.title}>{post.title}</h3> : null}
-        {post.subject ? (
-          <p className={cardStyles.subject}>{post.subject}</p>
-        ) : null}
-      </div>
+      {post.postType === 'image' ? (
+        <div className={`${cardStyles.imageContent} ${cardStyles.bubbleContent}`}>
+          {(post.description ?? post.title) ? <p className={cardStyles.imageDescription}>{post.description ?? post.title}</p> : null}
+          <img src={post.imageUrl ?? ''} alt={post.description ?? post.title ?? 'תמונה'} className={cardStyles.postImage} />
+        </div>
+      ) : post.postType === 'link' ? (
+        <div className={`${cardStyles.content} ${cardStyles.bubbleContent}`}>
+          {(post.description ?? post.title) ? <p className={cardStyles.linkDescription}>{post.description ?? post.title}</p> : null}
+          <a
+            href={post.subject ?? '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cardStyles.linkAnchor}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className={cardStyles.linkUrl}>{post.subject}</span>
+          </a>
+        </div>
+      ) : (
+        <div className={`${cardStyles.content} ${cardStyles.bubbleContent}`}>
+          {post.title ? <h3 className={cardStyles.title}>{post.title}</h3> : null}
+          {post.subject ? (
+            <p className={cardStyles.subject}>{post.subject}</p>
+          ) : null}
+        </div>
+      )}
 
       <PostInteractionBar
         postId={post.id}

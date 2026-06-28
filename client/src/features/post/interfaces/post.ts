@@ -27,6 +27,7 @@ export interface Post {
   postType: PostType;
   title: string | null;
   subject: string | null;
+  description: string | null;
   color: string | null;
   layout: PostLayout | null;
   createdAt: string;

@@ -46,6 +46,7 @@ export interface PostResponseDto {
   postType: PostType;
   title: string | null;
   subject: string | null;
+  description: string | null;
   color: string | null;
   layout: PostLayoutDto | null;
   createdAt: string;
@@ -106,8 +107,10 @@ export class PostsService {
           padlet_id: padletId,
           user_id: authorId,
           content_kind: contentKind,
+          post_type: dto.content_kind,
           title,
           subject,
+          description: dto.description ?? null,
           color: dto.color ?? null,
           data_layout: this.toJsonLayout(
             this.buildLayout(access.boardType, existingCount),
@@ -234,15 +237,17 @@ export class PostsService {
       where: { post_id: postId },
       data: {
         content_kind: contentKind,
+        post_type: dto.content_kind,
         title,
         subject,
+        description: dto.description ?? null,
         color: dto.color ?? null,
         updated_at: now,
       },
       include: { user: true },
     });
 
-    // עדכון תמונה
+    // Update image attachment
     if (dto.content_kind === 'image' && dto.image_data) {
       await this.prisma.postAttachment.upsert({
         where: { post_id: postId },
@@ -255,7 +260,7 @@ export class PostsService {
       });
     }
 
-    // עדכון הסקר
+    // Update poll
     if (dto.content_kind === 'poll' && dto.content) {
       const existingPoll = await this.prisma.poll.findUnique({
         where: { post_id: postId },
@@ -364,7 +369,6 @@ export class PostsService {
     const padlet = await this.padletAccess.assertCanView(requesterId, padletId);
     const now = new Date();
 
-    await this.prisma.postAttachment.deleteMany({ where: { post_id: postId } });
     await this.prisma.post.delete({ where: { post_id: postId } });
 
     if (padlet.boardType !== PadletBoardType.free_wall) {
@@ -434,10 +438,11 @@ export class PostsService {
     }
 
     const postType: PostType =
-      post.poll ? 'poll'
-      : post.attachment ? 'image'
-      : post.content_kind === 'attachment' ? 'link'
-      : 'text';
+      (post.post_type as PostType | null) ??
+      (post.poll ? 'poll'
+        : post.attachment ? 'image'
+        : post.content_kind === 'attachment' ? 'link'
+        : 'text');
 
     return {
       id: post.post_id.toString(),
@@ -446,6 +451,7 @@ export class PostsService {
       postType,
       title: post.title,
       subject: post.subject,
+      description: post.description ?? null,
       color: post.color,
       layout: post.data_layout
         ? (post.data_layout as unknown as PostLayoutDto)
@@ -584,9 +590,9 @@ export class PostsService {
   } {
     switch (dto.content_kind) {
       case 'image':
-        return { contentKind: PostContentKind.attachment, title: dto.description ?? null, subject: dto.image_file_name ?? null };
+        return { contentKind: PostContentKind.attachment, title: null, subject: dto.image_file_name ?? null };
       case 'link':
-        return { contentKind: PostContentKind.attachment, title: dto.description ?? null, subject: dto.content ?? null };
+        return { contentKind: PostContentKind.attachment, title: null, subject: dto.content ?? null };
       case 'poll':
         return { contentKind: PostContentKind.poll, title: dto.content ?? null, subject: 'סקר' };
       case 'text':
