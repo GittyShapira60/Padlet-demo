@@ -5,11 +5,20 @@
   align-items: center;
   justify-content: flex-start;
   align-self: flex-end;
-  gap: 0.5rem;
+  gap: 0.35rem;
   width: 100%;
   padding-top: 0.55rem;
   margin-top: 0.55rem;
   border-top: 1px solid rgba(148, 163, 184, 0.35);
+  direction: rtl;
+}
+
+.barInline {
+  width: 100%;
+  padding-top: 0;
+  margin-top: 0;
+  border-top: none;
+  align-self: auto;
 }
 
 /* RTL: first item sits on the right — pills, then add button to their left */
@@ -64,11 +73,11 @@
   display: inline-flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.28rem;
+  gap: 0.2rem;
   direction: ltr;
-  height: 1.65rem;
-  padding: 0 0.42rem 0 0.38rem;
-  border: 1px solid rgba(148, 163, 184, 0.55);
+  height: 1.35rem;
+  padding: 0 0.3rem 0 0.28rem;
+  border: 1px solid rgba(148, 163, 184, 0.45);
   border-radius: 999px;
   background: #ffffff;
   color: #475569;
@@ -82,8 +91,8 @@
 }
 
 .count {
-  min-width: 0.45rem;
-  font-size: 0.92rem;
+  min-width: 0.35rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-align: center;
   color: #64748b;
@@ -93,15 +102,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.15rem;
+  font-size: 0.9rem;
   line-height: 1;
 }
 
 .pillOwn .glyph {
   background: #ffffff;
   border-radius: 999px;
-  min-width: 1.28rem;
-  min-height: 1.28rem;
+  min-width: 1rem;
+  min-height: 1rem;
 }
 
 .addBtn {
@@ -109,8 +118,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 1.65rem;
-  height: 1.65rem;
+  width: 1.35rem;
+  height: 1.35rem;
   padding: 0;
   border: none;
   border-radius: 999px;
