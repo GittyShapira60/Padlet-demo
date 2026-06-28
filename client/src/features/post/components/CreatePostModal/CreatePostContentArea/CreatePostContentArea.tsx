@@ -1,4 +1,9 @@
-import { useRef, type ChangeEvent } from 'react';
+import { useRef, useState, type ChangeEvent } from 'react';
+import {
+  EmojiPickerPopover,
+  type EmojiDefinition,
+} from '@/modules/emoji';
+import { Smile } from '@/shared/icons';
 import {
   PostContentTab as PostContentTabValues,
   type PostContentTab,
@@ -39,6 +44,15 @@ export default function CreatePostContentArea({
   maxPollAnswers,
 }: CreatePostContentAreaProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const emojiBtnRef = useRef<HTMLButtonElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  function handleEmojiSelect(emoji: EmojiDefinition) {
+    onTextChange(textContent + emoji.glyph);
+    setPickerOpen(false);
+    textareaRef.current?.focus();
+  }
 
   function handleFileInputChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
@@ -47,22 +61,38 @@ export default function CreatePostContentArea({
 
   if (activeTab === PostContentTabValues.Text) {
     return (
-      <div className={styles.area}>
-        <button
-          type="button"
-          className={styles.emojiBtn}
-          onClick={() => undefined}
-        >
-          😊
-        </button>
-        <textarea
-          className={styles.textarea}
-          placeholder="מה אתה חושב/ת?"
-          value={textContent}
-          onChange={(event) => onTextChange(event.target.value)}
+      <>
+        <div
+          className={styles.textBox}
           style={{ backgroundColor: selectedColor }}
+        >
+          <textarea
+            ref={textareaRef}
+            className={styles.textarea}
+            placeholder="מה אתה חושב/ת?"
+            value={textContent}
+            onChange={(event) => onTextChange(event.target.value)}
+          />
+          <button
+            ref={emojiBtnRef}
+            type="button"
+            className={styles.emojiBtn}
+            onClick={() => setPickerOpen((open) => !open)}
+          >
+            <Smile size={20} strokeWidth={1.25} color="#64748b" />
+          </button>
+        </div>
+
+        <EmojiPickerPopover
+          isOpen={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          anchorRef={emojiBtnRef}
+          catalogMode="all"
+          placement="above"
+          align="anchor-start"
+          onSelect={handleEmojiSelect}
         />
-      </div>
+      </>
     );
   }
 

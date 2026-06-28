@@ -4,16 +4,32 @@
   margin-bottom: 1.25rem;
 }
 
+.textBox {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 150px;
+  margin-bottom: 1.25rem;
+  border-radius: 18px;
+  border: 2px solid var(--color-accent-border);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
 .emojiBtn {
   position: absolute;
-  top: 0.875rem;
-  left: 0.875rem;
+  bottom: 0.65rem;
+  left: 0.75rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
-  font-size: 1.25rem;
+  padding: 0.15rem;
   cursor: pointer;
   opacity: 0.6;
-  z-index: 1;
   transition: opacity 0.2s ease;
 }
 
@@ -22,19 +38,35 @@
 }
 
 .textarea {
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  height: 150px;
-  padding: 1rem;
-  padding-left: 3rem;
-  border-radius: 18px;
-  border: 2px solid var(--color-accent-border);
+  padding: 0.85rem 1rem 2.6rem 2.6rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   font-size: 1.0625rem;
   outline: none;
   resize: none;
   font-family: inherit;
   box-sizing: border-box;
   color: #334155;
-  transition: background-color 0.2s ease;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(51, 65, 85, 0.35) transparent;
+}
+
+.textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+.textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.textarea::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.35);
+  border-radius: 999px;
 }
 
 .textarea::placeholder {

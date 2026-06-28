@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useState, type RefObject } from 'react';
+import type { EmojiPickerAlign, EmojiPickerPlacement } from '../types';
 
 const VIEWPORT_PADDING = 8;
 const ANCHOR_GAP = 8;
@@ -9,15 +10,26 @@ interface Position {
   ready: boolean;
 }
 
+interface AnchoredPopoverPositionOptions {
+  placement?: EmojiPickerPlacement;
+  align?: EmojiPickerAlign;
+}
+
 function computePosition(
   anchorRect: DOMRect,
   width: number,
   height: number,
+  options: AnchoredPopoverPositionOptions = {},
 ): Pick<Position, 'top' | 'right'> {
+  const { placement = 'auto', align = 'anchor-end' } = options;
   const spaceAbove = anchorRect.top - VIEWPORT_PADDING;
   const spaceBelow = window.innerHeight - anchorRect.bottom - VIEWPORT_PADDING;
   const openAbove =
-    spaceAbove >= height + ANCHOR_GAP || spaceAbove >= spaceBelow;
+    placement === 'above'
+      ? true
+      : placement === 'below'
+        ? false
+        : spaceAbove >= height + ANCHOR_GAP || spaceAbove >= spaceBelow;
 
   let top = openAbove
     ? anchorRect.top - ANCHOR_GAP - height
@@ -28,7 +40,10 @@ function computePosition(
     Math.min(top, window.innerHeight - VIEWPORT_PADDING - height),
   );
 
-  let right = window.innerWidth - anchorRect.right;
+  let right =
+    align === 'anchor-start'
+      ? window.innerWidth - anchorRect.left - width
+      : window.innerWidth - anchorRect.right;
   const maxRight = window.innerWidth - width - VIEWPORT_PADDING;
   right = Math.max(VIEWPORT_PADDING, Math.min(right, maxRight));
 
@@ -40,6 +55,7 @@ export function useAnchoredPopoverPosition(
   popoverRef: RefObject<HTMLElement | null>,
   isOpen: boolean,
   remeasureDeps: unknown[] = [],
+  options: AnchoredPopoverPositionOptions = {},
 ): Position {
   const [position, setPosition] = useState<Position>({
     top: 0,
@@ -64,6 +80,7 @@ export function useAnchoredPopoverPosition(
         rect,
         popover.offsetWidth,
         popover.offsetHeight,
+        options,
       );
       setPosition({ top, right, ready: true });
     }
@@ -76,7 +93,7 @@ export function useAnchoredPopoverPosition(
       window.removeEventListener('resize', update);
       window.removeEventListener('scroll', update, true);
     };
-  }, [anchorRef, isOpen, popoverRef, ...remeasureDeps]);
+  }, [anchorRef, isOpen, options.align, options.placement, popoverRef, ...remeasureDeps]);
 
   useEffect(() => {
     if (!isOpen) {
