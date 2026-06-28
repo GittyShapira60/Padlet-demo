@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../features/auth/context/AuthProvider';
 import { NotificationBell } from '../../../features/notification';
 import { BarChart3, LogOut } from '../../icons';
@@ -17,6 +18,8 @@ export default function AppHeader({
   onLogoClick,
 }: AppHeaderProps) {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
   const username = user?.username ?? 'משתמש';
   const initial = username.charAt(0).toUpperCase();
 
@@ -48,10 +51,12 @@ export default function AppHeader({
         </div>
 
         <nav className={styles.actions}>
-          <button type="button" className={styles.stats}>
-            <BarChart3 size={17} strokeWidth={1.5} />
-            סטטיסטיקות
-          </button>
+          {pathname === '/' && (
+            <button type="button" className={styles.stats} onClick={() => navigate('/stats')}>
+              <BarChart3 size={17} strokeWidth={1.5} />
+              סטטיסטיקות
+            </button>
+          )}
 
           <span className={styles.greeting}>שלום, {username}</span>
 

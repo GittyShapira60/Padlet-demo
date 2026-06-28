@@ -1,0 +1,466 @@
+.page {
+  min-height: 100vh;
+  background: #f8f9fb;
+  font-family: inherit;
+}
+
+/* ── Hero ─────────────────────────────────────────────── */
+
+.hero {
+  background: linear-gradient(135deg, #8b5cf6 0%, #d452b7 40%, #f59032 100%);
+  padding: 22px 48px 26px;
+  position: relative;
+  text-align: right;
+}
+
+.backBtn {
+  position: absolute;
+  top: 20px;
+  left: 32px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.heroTitle {
+  color: #fff;
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.heroSub {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 15px;
+  margin: 0;
+}
+
+/* ── Content ──────────────────────────────────────────── */
+
+.content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.loading,
+.error {
+  text-align: center;
+  color: #6b7280;
+  padding: 48px 0;
+  font-size: 15px;
+}
+.error {
+  color: #ef4444;
+}
+
+/* ── Summary cards ────────────────────────────────────── */
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.summaryCard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+}
+
+/* text group — first in DOM so it sits on the RIGHT in RTL */
+.summaryText {
+  display: flex;
+  flex-direction: column;
+}
+
+.summaryValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111;
+  line-height: 1.1;
+}
+
+.summaryLabel {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* icon box — second in DOM so it sits on the LEFT in RTL */
+.summaryIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Generic card ─────────────────────────────────────── */
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-direction: row-reverse;
+}
+
+.chartTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+.chartIcon {
+  display: flex;
+  align-items: center;
+}
+
+.empty {
+  color: #9ca3af;
+  font-size: 14px;
+  text-align: center;
+  padding: 24px 0 8px;
+  margin: 0;
+}
+
+/* ── Charts side-by-side grid ─────────────────────────── */
+
+.chartsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+/* ── Bar chart layout ─────────────────────────────────── */
+
+/*
+  Heights:
+    barValue label  → 18 px (top of each bar column)
+    bar area        → 162 px
+    barDate label   → 24 px (bottom)
+    total chartArea → 204 px
+
+  The gridLayer starts at top:18px so it lines up with the bar area.
+  The yAxis has the same 162 px height, offset by margin-top:18px.
+*/
+
+.chartWrapper {
+  display: flex;
+  direction: ltr; /* keep Y-axis on the left regardless of page RTL */
+  gap: 4px;
+}
+
+.yAxis {
+  position: relative;
+  width: 32px;
+  height: 162px;     /* matches bar area height */
+  margin-top: 18px;  /* skip barValue label */
+  margin-bottom: 24px; /* skip barDate label */
+  flex-shrink: 0;
+}
+
+.yTick {
+  position: absolute;
+  right: 0;
+  font-size: 11px;
+  color: #9ca3af;
+  line-height: 1;
+  transform: translateY(50%);
+  padding-right: 4px;
+  user-select: none;
+}
+
+.chartArea {
+  flex: 1;
+  position: relative;
+  height: 204px; /* 18 + 162 + 24 */
+  min-width: 0;
+}
+
+.gridLayer {
+  position: absolute;
+  top: 18px;     /* below barValue */
+  bottom: 24px;  /* above barDate */
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.gridLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.barsRow {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: 6px;
+  padding: 0 2px;
+  direction: ltr;
+}
+
+/* ── Individual bar column ────────────────────────────── */
+
+.barCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-width: 0;
+}
+
+.barValue {
+  height: 18px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.barTrack {
+  flex: 1;
+  width: 68%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 0;
+}
+
+.barFill {
+  border-radius: 4px 4px 0 0;
+  min-height: 3px;
+  transition: height 0.4s ease;
+}
+
+.barDate {
+  height: 24px;
+  font-size: 11px;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ── Per-padlet dropdown ──────────────────────────────── */
+
+.padletSelectSub {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: -12px 0 12px;
+  text-align: right;
+}
+
+.padletSelect {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #374151;
+  background: #fff;
+  cursor: pointer;
+  text-align: right;
+  direction: rtl;
+}
+.padletSelect:focus {
+  outline: none;
+  border-color: #f59032;
+}
+
+/* ── Progress list (post types / layouts) ─────────────── */
+
+.progressList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.progressItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row-reverse;
+}
+
+.progressLabel {
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.typeIcon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.progressStats {
+  font-size: 12px;
+  color: #9ca3af;
+  direction: ltr;
+}
+
+.progressTrack {
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 99px;
+  overflow: hidden;
+  direction: rtl;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+/* ── Most visited ─────────────────────────────────────── */
+
+.mostVisitedList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mostVisitedItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mostVisitedHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row-reverse;
+}
+
+.mostVisitedTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  flex-direction: row-reverse;
+}
+
+.medal {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.rankNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: #f3f4f6;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.mostVisitedMeta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #6b7280;
+  flex-direction: row-reverse;
+}
+
+.dot {
+  color: #d1d5db;
+}
+
+.mostVisitedBarWrap {
+  height: 10px;
+  background: #eff6ff;
+  border-radius: 99px;
+  overflow: hidden;
+  direction: rtl;
+}
+
+.mostVisitedFill {
+  height: 100%;
+  background: linear-gradient(to left, #93c5fd, #3b82f6);
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.mostVisitedFooter {
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: right;
+}
+
+/* ── Responsive ───────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 32px 20px 40px;
+  }
+  .heroTitle {
+    font-size: 30px;
+  }
+  .summaryGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

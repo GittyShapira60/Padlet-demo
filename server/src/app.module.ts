@@ -9,6 +9,7 @@ import { ParticipantsModule } from './participants/participants.module';
 import { PostsModule } from './posts/posts.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ReactionModule } from './reaction/reaction.module';
+import { StatsModule } from './stats/stats.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -25,6 +26,7 @@ import { UsersModule } from './users/users.module';
     ParticipantsModule,
     PostsModule,
     ReactionModule,
+    StatsModule,
     UsersModule,
   ],
 })
