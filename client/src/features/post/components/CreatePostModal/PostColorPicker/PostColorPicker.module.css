@@ -43,15 +43,20 @@
   transform: scale(1.05);
 }
 
-.swatchSelected,
-.swatchSelected:hover,
-.swatchSelected:focus {
-  border-color: #ffffff;
-}
-
 .swatchSelected {
+  position: relative;
+  z-index: 1;
   transform: scale(1.1);
+  border-color: #ffffff;
   box-shadow:
     0 0 0 2px var(--color-brand-pink),
     0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.swatchSelected:hover,
+.swatchSelected:focus,
+.swatchSelected:focus-visible,
+.swatchSelected:active {
+  transform: scale(1.1);
+  border-color: #ffffff;
 }
