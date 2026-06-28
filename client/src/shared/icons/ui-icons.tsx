@@ -6,7 +6,6 @@ import {
   Bell as LucideBell,
   Calendar as LucideCalendar,
   Copy as LucideCopy,
-  ExternalLink as LucideExternalLink,
   LayoutDashboard as LucideLayoutDashboard,
   Lock as LucideLock,
   LogOut as LucideLogOut,
