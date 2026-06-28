@@ -97,7 +97,6 @@ export default function PadletPostCard({
             className={styles.linkAnchor}
             onClick={(e) => e.stopPropagation()}
           >
-            <ExternalLink size={13} strokeWidth={2} aria-hidden="true" />
             <span className={styles.linkUrl}>{post.subject}</span>
           </a>
         </div>
