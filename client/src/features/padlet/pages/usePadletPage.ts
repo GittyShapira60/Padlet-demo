@@ -4,6 +4,7 @@ import { useAuth } from '../../auth/context/AuthProvider';
 import type { Post, PostLayout } from '../../post/interfaces/post';
 import { deletePost, updatePostLayout } from '../../post/services/post-service';
 import type { Padlet } from '../interfaces/padlet';
+import { getSocket } from '../../../shared/services/socket.service';
 import {
   PadletPermission,
   type PadletPermission as PadletPermissionType,
@@ -101,6 +102,46 @@ export function usePadletPage() {
 
     return () => {
       isMounted = false;
+    };
+  }, [padletId]);
+
+  useEffect(() => {
+    if (!padletId) return;
+
+    const socket = getSocket();
+    if (!socket) return;
+
+    socket.emit('padlet:join', padletId);
+
+    const handlePostCreated = (post: Post) => {
+      setPosts((prev: Post[]) => {
+        if (prev.some((p: Post) => p.id === post.id)) return prev;
+        setPadlet((curr: Padlet | null) => curr ? { ...curr, postCount: curr.postCount + 1 } : curr);
+        return [...prev, post];
+      });
+    };
+
+    const handlePostUpdated = (post: Post) => {
+      setPosts((prev: Post[]) => prev.map((p: Post) => (p.id === post.id ? post : p)));
+    };
+
+    const handlePostDeleted = ({ postId }: { postId: string }) => {
+      setPosts((prev: Post[]) => {
+        const next = prev.filter((p: Post) => p.id !== postId);
+        setPadlet((curr: Padlet | null) => curr ? { ...curr, postCount: next.length } : curr);
+        return next;
+      });
+    };
+
+    socket.on('post:created', handlePostCreated);
+    socket.on('post:updated', handlePostUpdated);
+    socket.on('post:deleted', handlePostDeleted);
+
+    return () => {
+      socket.emit('padlet:leave', padletId);
+      socket.off('post:created', handlePostCreated);
+      socket.off('post:updated', handlePostUpdated);
+      socket.off('post:deleted', handlePostDeleted);
     };
   }, [padletId]);
 

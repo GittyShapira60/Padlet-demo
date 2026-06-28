@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Padlet, PadletBoards } from '../interfaces/padlet';
 import { copyPadlet, deletePadlet, getPadletBoards, leavePadlet } from '../services/padlet-service';
 import type { CopyPadletOptions } from '../services/padlet-service';
+import { getSocket } from '../../../shared/services/socket.service';
 
 const EMPTY_BOARDS: PadletBoards = { mine: [], shared: [] };
 
@@ -25,6 +26,16 @@ export function usePadlets() {
 
   useEffect(() => {
     void loadPadlets();
+  }, [loadPadlets]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    socket.on('padlet:shared', () => void loadPadlets());
+    return () => {
+      socket.off('padlet:shared');
+    };
   }, [loadPadlets]);
 
   const addPadlet = useCallback((padlet: Padlet) => {

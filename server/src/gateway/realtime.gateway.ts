@@ -1,6 +1,7 @@
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
@@ -13,7 +14,7 @@ interface AccessTokenPayload extends JwtPayload {
 }
 
 @WebSocketGateway({ cors: { origin: '*' } })
-export class NotificationGateway
+export class RealtimeGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
@@ -37,7 +38,30 @@ export class NotificationGateway
     // socket.io handles room cleanup automatically
   }
 
+  /** Client joins the padlet room to receive real-time post/reaction updates. */
+  @SubscribeMessage('padlet:join')
+  handleJoinPadlet(client: Socket, padletId: string): void {
+    void client.join(`padlet:${padletId}`);
+  }
+
+  /** Client leaves the padlet room on page exit. */
+  @SubscribeMessage('padlet:leave')
+  handleLeavePadlet(client: Socket, padletId: string): void {
+    void client.leave(`padlet:${padletId}`);
+  }
+
+  /** Send a notification event to a specific user. */
   notifyUser(userId: string, payload: unknown): void {
     this.server.to(`user:${userId}`).emit('notification', payload);
+  }
+
+  /** Broadcast any event to all users currently viewing a padlet. */
+  broadcastToPadlet(padletId: string, event: string, payload: unknown): void {
+    this.server.to(`padlet:${padletId}`).emit(event, payload);
+  }
+
+  /** Send a targeted event to a specific user (e.g. padlet:shared). */
+  emitToUser(userId: string, event: string, payload: unknown): void {
+    this.server.to(`user:${userId}`).emit(event, payload);
   }
 }

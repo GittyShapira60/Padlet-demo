@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { type NotificationType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { NotificationResponseDto } from './dto/notification-response.dto';
-import { NotificationGateway } from './notification.gateway';
+import { RealtimeGateway } from '../gateway/realtime.gateway';
 
 export interface CreateNotificationParams {
   userId: bigint;
@@ -16,7 +16,7 @@ export interface CreateNotificationParams {
 export class NotificationService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly gateway: NotificationGateway,
+    private readonly gateway: RealtimeGateway,
   ) {}
 
   async create(params: CreateNotificationParams): Promise<void> {

@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { NotificationType, PadletPermission } from '@prisma/client';
+import { RealtimeGateway } from '../gateway/realtime.gateway';
 import { NotificationService } from '../notification/notification.service';
 import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -30,6 +31,7 @@ export class ParticipantsService {
     private readonly prisma: PrismaService,
     private readonly padletAccess: PadletAccessService,
     private readonly notificationService: NotificationService,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   async getParticipants(
@@ -107,6 +109,10 @@ export class ParticipantsService {
       type: NotificationType.padlet_share,
       actorUsername,
       padletId,
+    });
+
+    this.realtimeGateway.emitToUser(inviteeId.toString(), 'padlet:shared', {
+      padletId: padletId.toString(),
     });
 
     return this.toParticipantResponse(invitee.id, participant);

@@ -11,6 +11,7 @@ import {
   type PollOption,
   type PollVote,
 } from '@prisma/client';
+import { RealtimeGateway } from '../gateway/realtime.gateway';
 import { NotificationService } from '../notification/notification.service';
 import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -75,6 +76,7 @@ export class PostsService {
     private readonly prisma: PrismaService,
     private readonly padletAccess: PadletAccessService,
     private readonly notificationService: NotificationService,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   async createPost(
@@ -150,9 +152,10 @@ export class PostsService {
 
     void this.notifyPadletMembers(padletId, authorId, actorUsername, post.post_id);
 
-    // טעינה מחדש עם נתוני הסקר
     const postWithPoll = await this.findPostWithPoll(post.post_id);
-    return this.toPostResponse(postWithPoll, authorId);
+    const postResponse = this.toPostResponse(postWithPoll, authorId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:created', postResponse);
+    return postResponse;
   }
 
   private async notifyPadletMembers(
@@ -270,7 +273,9 @@ export class PostsService {
     await this.touchPadlet(padletId, now);
 
     const postWithPoll = await this.findPostWithPoll(postId);
-    return this.toPostResponse(postWithPoll, requesterId);
+    const postResponse = this.toPostResponse(postWithPoll, requesterId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    return postResponse;
   }
 
   async updatePostLayout(
@@ -343,6 +348,7 @@ export class PostsService {
 
     await this.touchPadlet(padletId, now);
 
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:deleted', { postId: postIdRaw });
     return this.getPadletPosts(padletId, requesterId);
   }
 
