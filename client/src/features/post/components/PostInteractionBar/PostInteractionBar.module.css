@@ -1,0 +1,32 @@
+.bar {
+  direction: rtl;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding-top: 0.55rem;
+  margin-top: 0.55rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.reactionsWrap {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-start;
+}
+
+.commentCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.count {
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1;
+}

@@ -12,7 +12,9 @@ function getDefaultLayout(index: number): PostLayout {
 }
 
 export default function FreeWallPostsLayout({
+  padletId,
   posts,
+  canComment,
   canEditPost,
   canDragPost,
   onEditPost,
@@ -35,7 +37,9 @@ export default function FreeWallPostsLayout({
           >
             <BoardPostCard
               post={post}
+              padletId={padletId}
               canManage={canEditPost(post)}
+              canComment={canComment}
               onEditPost={onEditPost}
               onDeletePost={onDeletePost}
             />
