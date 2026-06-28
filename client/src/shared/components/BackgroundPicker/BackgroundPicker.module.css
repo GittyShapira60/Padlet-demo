@@ -40,7 +40,7 @@
 .swatch {
   aspect-ratio: 1;
   border: 2px solid transparent;
-  border-radius: 50%;
+  border-radius: 8px;
   cursor: pointer;
   padding: 0;
   outline: none;

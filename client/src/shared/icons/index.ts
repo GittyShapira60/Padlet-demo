@@ -13,6 +13,7 @@ export {
   Calendar,
 
   Copy,
+  ExternalLink,
 
   LayoutDashboard,
 

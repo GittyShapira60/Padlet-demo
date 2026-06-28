@@ -147,6 +147,7 @@ export class PadletsService {
           where: Object.keys(postWhere).length ? postWhere : undefined,
           include: {
             user: true,
+            attachment: true,
             poll: {
               include: {
                 poll_options: {
@@ -202,6 +203,7 @@ export class PadletsService {
 
     await this.padletAccess.assertCanDeletePadlet(requesterId, padletId);
 
+    await this.prisma.postAttachment.deleteMany({ where: { post: { padlet_id: padletId } } });
     await this.prisma.post.deleteMany({ where: { padlet_id: padletId } });
     await this.prisma.participant.deleteMany({ where: { padlet_id: padletId } });
     await this.prisma.padlet.delete({ where: { padlet_id: padletId } });

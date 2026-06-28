@@ -1,18 +1,21 @@
-import { useRef, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import {
   PostContentTab as PostContentTabValues,
   type PostContentTab,
 } from '../../../enums/post-content-tab';
+import { BACKGROUND_COLOR_LIGHT } from '../../../../../shared/constants/background-colors';
 import PollFormSection from '../PollFormSection/PollFormSection';
 import styles from './CreatePostContentArea.module.css';
 
 interface CreatePostContentAreaProps {
   activeTab: PostContentTab;
   textContent: string;
+  description: string;
   selectedFile: File | null;
   selectedColor: string;
-  existingImageName?: string | null;
+  existingImageUrl?: string | null;
   onTextChange: (value: string) => void;
+  onDescriptionChange: (value: string) => void;
   onFileChange: (file: File | null) => void;
   // poll
   pollAnswers: { id: number; value: string }[];
@@ -26,10 +29,12 @@ interface CreatePostContentAreaProps {
 export default function CreatePostContentArea({
   activeTab,
   textContent,
+  description,
   selectedFile,
   selectedColor,
-  existingImageName,
+  existingImageUrl,
   onTextChange,
+  onDescriptionChange,
   onFileChange,
   pollAnswers,
   onPollQuestionChange,
@@ -39,6 +44,17 @@ export default function CreatePostContentArea({
   maxPollAnswers,
 }: CreatePostContentAreaProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedFile) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(selectedFile);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [selectedFile]);
 
   function handleFileInputChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
@@ -60,19 +76,21 @@ export default function CreatePostContentArea({
           placeholder="מה אתה חושב/ת?"
           value={textContent}
           onChange={(event) => onTextChange(event.target.value)}
-          style={{ backgroundColor: selectedColor }}
+          style={{ backgroundColor: BACKGROUND_COLOR_LIGHT[selectedColor] ?? selectedColor }}
         />
       </div>
     );
   }
 
   if (activeTab === PostContentTabValues.Image) {
+    const displayUrl = previewUrl ?? existingImageUrl ?? null;
+
     return (
       <div className={styles.area}>
         <button
           type="button"
           className={styles.fileDrop}
-          style={{ backgroundColor: selectedColor }}
+          style={{ backgroundColor: displayUrl ? 'transparent' : BACKGROUND_COLOR_LIGHT[selectedColor] ?? selectedColor }}
           onClick={() => fileInputRef.current?.click()}
         >
           <input
@@ -82,11 +100,10 @@ export default function CreatePostContentArea({
             className={styles.hiddenInput}
             onChange={handleFileInputChange}
           />
-          {selectedFile || existingImageName ? (
-            <div className={styles.fileSelected}>
-              <span className={styles.fileIcon}>📄</span>
-              <p className={styles.fileName}>{selectedFile?.name ?? existingImageName}</p>
-              <span className={styles.fileReplace}>לחץ להחלפת קובץ</span>
+          {displayUrl ? (
+            <div className={styles.imagePreview}>
+              <img src={displayUrl} alt="תצוגה מקדימה" className={styles.previewImg} />
+              <span className={styles.fileReplace}>לחץ להחלפת תמונה</span>
             </div>
           ) : (
             <>
@@ -95,6 +112,13 @@ export default function CreatePostContentArea({
             </>
           )}
         </button>
+        <input
+          className={styles.descriptionInput}
+          type="text"
+          placeholder="תיאור (אופציונלי)"
+          value={description}
+          onChange={(event) => onDescriptionChange(event.target.value)}
+        />
       </div>
     );
   }
@@ -108,7 +132,14 @@ export default function CreatePostContentArea({
           placeholder="הדבק או הקלד קישור כאן... 🔗"
           value={textContent}
           onChange={(event) => onTextChange(event.target.value)}
-          style={{ backgroundColor: selectedColor }}
+          style={{ backgroundColor: BACKGROUND_COLOR_LIGHT[selectedColor] ?? selectedColor }}
+        />
+        <input
+          className={styles.descriptionInput}
+          type="text"
+          placeholder="תיאור (אופציונלי)"
+          value={description}
+          onChange={(event) => onDescriptionChange(event.target.value)}
         />
       </div>
     );
