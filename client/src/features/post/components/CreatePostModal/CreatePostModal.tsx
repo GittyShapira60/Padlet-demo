@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { Post } from '../../interfaces/post';
+import { CREATE_POST_MODAL_TEXTS } from './CreatePostModal.consts';
 import CreatePostContentArea from './CreatePostContentArea/CreatePostContentArea';
 import CreatePostModalTabs from './CreatePostModalTabs/CreatePostModalTabs';
 import styles from './CreatePostModal.module.css';
@@ -57,7 +58,9 @@ export default function CreatePostModal({
       >
         <header className={styles.header}>
           <h2 className={styles.title}>
-            {isEditMode ? 'עריכת פוסט' : 'פוסט חדש'}
+            {isEditMode
+              ? CREATE_POST_MODAL_TEXTS.title.edit
+              : CREATE_POST_MODAL_TEXTS.title.create}
           </h2>
           <button type="button" className={styles.closeBtn} onClick={onClose}>
             &times;
@@ -96,11 +99,15 @@ export default function CreatePostModal({
             disabled={isLoading || !canSubmit}
           >
             {isLoading
-              ? isEditMode ? 'שומרת...' : 'מוסיף...'
-              : isEditMode ? 'שמירה' : 'הוסף פוסט'}
+              ? isEditMode
+                ? CREATE_POST_MODAL_TEXTS.submitting.edit
+                : CREATE_POST_MODAL_TEXTS.submitting.create
+              : isEditMode
+                ? CREATE_POST_MODAL_TEXTS.submit.edit
+                : CREATE_POST_MODAL_TEXTS.submit.create}
           </button>
           <button type="button" className={styles.cancelBtn} onClick={onClose} disabled={isLoading}>
-            ביטול
+            {CREATE_POST_MODAL_TEXTS.cancel}
           </button>
         </div>
       </div>

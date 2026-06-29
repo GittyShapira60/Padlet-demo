@@ -4,10 +4,14 @@ import {
   ArrowRight as LucideArrowRight,
   BarChart3 as LucideBarChart3,
   Bell as LucideBell,
+  Brain as LucideBrain,
   Calendar as LucideCalendar,
   Copy as LucideCopy,
   ExternalLink as LucideExternalLink,
+  Image as LucideImage,
   LayoutDashboard as LucideLayoutDashboard,
+  LayoutGrid as LucideLayoutGrid,
+  Link as LucideLink,
   Lock as LucideLock,
   LogOut as LucideLogOut,
   MessageCircle as LucideMessageCircle,
@@ -18,7 +22,9 @@ import {
   Search as LucideSearch,
   Smile as LucideSmile,
   SmilePlus as LucideSmilePlus,
+  Square as LucideSquare,
   Trash2 as LucideTrash2,
+  Type as LucideType,
   Users as LucideUsers,
   type LucideProps,
 } from 'lucide-react';
@@ -38,11 +44,13 @@ export const ArrowRight = createUiIcon(LucideArrowRight);
 export const LogOut = createUiIcon(LucideLogOut);
 export const Bell = createUiIcon(LucideBell);
 export const BarChart3 = createUiIcon(LucideBarChart3);
+export const Brain = createUiIcon(LucideBrain);
 export const Plus = createUiIcon(LucidePlus);
 export const Share2 = createUiIcon(LucideShare2);
 export const Search = createUiIcon(LucideSearch);
 export const Smile = createUiIcon(LucideSmile);
 export const SmilePlus = createUiIcon(LucideSmilePlus);
+export const Square = createUiIcon(LucideSquare);
 export const MessageCircle = createUiIcon(LucideMessageCircle);
 export const MoreVertical = createUiIcon(LucideMoreVertical);
 export const Copy = createUiIcon(LucideCopy);
@@ -52,4 +60,8 @@ export const Users = createUiIcon(LucideUsers);
 export const Lock = createUiIcon(LucideLock);
 export const Calendar = createUiIcon(LucideCalendar);
 export const LayoutDashboard = createUiIcon(LucideLayoutDashboard);
+export const LayoutGrid = createUiIcon(LucideLayoutGrid);
 export const ExternalLink = createUiIcon(LucideExternalLink);
+export const Image = createUiIcon(LucideImage);
+export const Link = createUiIcon(LucideLink);
+export const Type = createUiIcon(LucideType);
