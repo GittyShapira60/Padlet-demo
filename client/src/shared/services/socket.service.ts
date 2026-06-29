@@ -9,7 +9,7 @@ function getBaseUrl(): string {
 }
 
 export function connectSocket(): Socket {
-  if (socket?.connected) return socket;
+  if (socket) return socket;
 
   socket = io(getBaseUrl(), {
     auth: { token: getAuthData()?.token },
