@@ -50,12 +50,13 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     const socket = connectSocket();
 
-    socket.on('notification', (incoming: Notification) => {
+    const handleNotification = (incoming: Notification) => {
       setNotifications((prev) => [incoming, ...prev]);
-    });
+    };
+    socket.on('notification', handleNotification);
 
     return () => {
-      socket.off('notification');
+      socket.off('notification', handleNotification);
     };
   }, [isLoggedIn]);
 

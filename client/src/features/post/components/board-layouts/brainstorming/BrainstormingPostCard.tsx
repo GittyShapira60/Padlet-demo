@@ -1,6 +1,6 @@
 import { BACKGROUND_COLOR_LIGHT } from '../../../../../shared/constants/background-colors';
 import { formatRelativeTime } from '../../../../../shared/utils/format-relative-time';
-import { Pencil, Trash2 } from '../../../../../shared/icons';
+import { ExternalLink, Pencil, Trash2 } from '../../../../../shared/icons';
 import { useAuth } from '../../../../auth/context/AuthProvider';
 import type { Post } from '../../../interfaces/post';
 import { PostComments } from '../../../../comment';
@@ -85,12 +85,33 @@ export default function BrainstormingPostCard({
         </div>
       </header>
 
-      <div className={`${cardStyles.content} ${cardStyles.bubbleContent}`}>
-        {post.title ? <h3 className={cardStyles.title}>{post.title}</h3> : null}
-        {post.subject ? (
-          <p className={cardStyles.subject}>{post.subject}</p>
-        ) : null}
-      </div>
+      {post.postType === 'image' ? (
+        <div className={`${cardStyles.imageContent} ${cardStyles.bubbleContent}`}>
+          {(post.description ?? post.title) ? <p className={cardStyles.imageDescription}>{post.description ?? post.title}</p> : null}
+          <img src={post.imageUrl ?? ''} alt={post.description ?? post.title ?? 'תמונה'} className={cardStyles.postImage} />
+        </div>
+      ) : post.postType === 'link' ? (
+        <div className={`${cardStyles.content} ${cardStyles.bubbleContent}`}>
+          {(post.description ?? post.title) ? <p className={cardStyles.linkDescription}>{post.description ?? post.title}</p> : null}
+          <a
+            href={post.subject ?? '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cardStyles.linkAnchor}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExternalLink size={13} strokeWidth={2} aria-hidden="true" />
+            <span className={cardStyles.linkUrl}>{post.subject}</span>
+          </a>
+        </div>
+      ) : (
+        <div className={`${cardStyles.content} ${cardStyles.bubbleContent}`}>
+          {post.title ? <h3 className={cardStyles.title}>{post.title}</h3> : null}
+          {post.subject ? (
+            <p className={cardStyles.subject}>{post.subject}</p>
+          ) : null}
+        </div>
+      )}
 
       <PostInteractionBar
         postId={post.id}

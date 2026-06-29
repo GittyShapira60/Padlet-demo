@@ -28,6 +28,9 @@
   --color-button-hover: rgba(15, 23, 42, 0.06);
   --color-button-active: rgba(15, 23, 42, 0.1);
 
+  --z-modal: 99999;
+  --z-popover-on-modal: 100000;
+
   --font-family: system-ui, -apple-system, Arial, sans-serif;
 
   font-family: var(--font-family);

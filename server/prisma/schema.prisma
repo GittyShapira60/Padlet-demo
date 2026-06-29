@@ -83,8 +83,10 @@ model Post {
   padlet_id    BigInt
   user_id      BigInt
   content_kind PostContentKind @default(none)
+  post_type    String?         @db.VarChar(20)
   title        String?         @db.VarChar(255)
   subject      String?
+  description  String?
   color        String?         @db.VarChar(32)
   data_layout  Json?
   created_at   DateTime        @db.Timestamptz()

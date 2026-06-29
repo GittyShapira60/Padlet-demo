@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PadletBoardType, PadletPermission, type Padlet } from '@prisma/client';
+import { RealtimeGateway } from '../gateway/realtime.gateway';
 import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PostsService, type PostResponseDto, type PostWithAuthor } from '../posts/posts.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -44,6 +45,7 @@ export class PadletsService {
     private readonly prisma: PrismaService,
     private readonly postsService: PostsService,
     private readonly padletAccess: PadletAccessService,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   async getBoards(userId: string): Promise<PadletBoardsResponseDto> {
@@ -112,7 +114,9 @@ export class PadletsService {
       include: { _count: { select: { posts: true } } },
     });
 
-    return this.toPadletResponse(updated, !access.isOwner);
+    const response = this.toPadletResponse(updated, !access.isOwner);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'padlet:updated', response);
+    return response;
   }
 
   async getPadletDetail(
@@ -147,6 +151,7 @@ export class PadletsService {
           where: Object.keys(postWhere).length ? postWhere : undefined,
           include: {
             user: true,
+            attachment: true,
             poll: {
               include: {
                 poll_options: {
@@ -193,6 +198,9 @@ export class PadletsService {
       select: { default_permission: true },
     });
 
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'padlet:permission-changed', {
+      defaultPermission: updated.default_permission,
+    });
     return { defaultPermission: updated.default_permission };
   }
 
@@ -202,6 +210,11 @@ export class PadletsService {
 
     await this.padletAccess.assertCanDeletePadlet(requesterId, padletId);
 
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'padlet:deleted', {});
+
+    await this.prisma.postAttachment.deleteMany({ where: { post: { padlet_id: padletId } } });
+    await this.prisma.post.deleteMany({ where: { padlet_id: padletId } });
+    await this.prisma.participant.deleteMany({ where: { padlet_id: padletId } });
     await this.prisma.padlet.delete({ where: { padlet_id: padletId } });
   }
 
