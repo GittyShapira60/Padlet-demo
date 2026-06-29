@@ -1,3 +1,5 @@
+@import '@fontsource-variable/rubik';
+
 :root {
   --color-brand-orange: #ff8c42;
   --color-brand-pink: #f04e98;
@@ -30,8 +32,7 @@
 
   --z-modal: 99999;
   --z-popover-on-modal: 100000;
-
-  --font-family: system-ui, -apple-system, Arial, sans-serif;
+  --font-family: 'Rubik Variable', system-ui, -apple-system, Arial, sans-serif;
 
   font-family: var(--font-family);
   line-height: 1.5;
