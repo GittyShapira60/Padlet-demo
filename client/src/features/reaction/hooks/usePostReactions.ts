@@ -127,9 +127,7 @@ export function usePostReactions({
           ...current,
           [postId]: view,
         }));
-      } catch {
-        // Keep current UI state on failure.
-      }
+      } catch {}
     },
     [padletId],
   );
@@ -142,9 +140,7 @@ export function usePostReactions({
           ...current,
           [postId]: view,
         }));
-      } catch {
-        // Keep current UI state on failure.
-      }
+      } catch {}
     },
     [padletId],
   );

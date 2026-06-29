@@ -250,7 +250,6 @@ export class PostsService {
       include: { user: true },
     });
 
-    // Update image attachment
     if (dto.content_kind === 'image' && dto.image_data) {
       await this.prisma.postAttachment.upsert({
         where: { post_id: postId },
@@ -263,7 +262,6 @@ export class PostsService {
       });
     }
 
-    // Update poll
     if (dto.content_kind === 'poll' && dto.content) {
       const existingPoll = await this.prisma.poll.findUnique({
         where: { post_id: postId },

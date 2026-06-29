@@ -39,11 +39,8 @@ export class RealtimeGateway
     }
   }
 
-  handleDisconnect(_client: Socket): void {
-    // socket.io handles room cleanup automatically
-  }
+  handleDisconnect(_client: Socket): void {}
 
-  /** Client joins the padlet room to receive real-time post/reaction updates. */
   @SubscribeMessage('padlet:join')
   async handleJoinPadlet(client: Socket, padletId: string): Promise<void> {
     const userId = client.data.userId as string | undefined;
@@ -53,28 +50,22 @@ export class RealtimeGateway
     try {
       await this.padletAccess.assertCanView(BigInt(userId), BigInt(padletId));
       void client.join(`padlet:${padletId}`);
-    } catch {
-      // User lacks view permission — silently reject the room join.
-    }
+    } catch {}
   }
 
-  /** Client leaves the padlet room on page exit. */
   @SubscribeMessage('padlet:leave')
   handleLeavePadlet(client: Socket, padletId: string): void {
     void client.leave(`padlet:${padletId}`);
   }
 
-  /** Send a notification event to a specific user. */
   notifyUser(userId: string, payload: unknown): void {
     this.server.to(`user:${userId}`).emit('notification', payload);
   }
 
-  /** Broadcast any event to all users currently viewing a padlet. */
   broadcastToPadlet(padletId: string, event: string, payload: unknown): void {
     this.server.to(`padlet:${padletId}`).emit(event, payload);
   }
 
-  /** Send a targeted event to a specific user (e.g. padlet:shared). */
   emitToUser(userId: string, event: string, payload: unknown): void {
     this.server.to(`user:${userId}`).emit(event, payload);
   }

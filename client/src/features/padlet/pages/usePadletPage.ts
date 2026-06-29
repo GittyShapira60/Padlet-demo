@@ -248,7 +248,6 @@ export function usePadletPage() {
 
     try {
       await deletePost(padletId, postPendingDelete.id);
-      // socket 'post:deleted' event handles the state update
       setPostPendingDelete(null);
     } catch {
       setError('מחיקת הפוסט נכשלה, נסי שוב');
