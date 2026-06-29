@@ -26,7 +26,7 @@ function computePosition(
   const spaceBelow = window.innerHeight - anchorRect.bottom - VIEWPORT_PADDING;
   const openAbove =
     placement === 'above'
-      ? true
+      ? spaceAbove >= height + ANCHOR_GAP || spaceAbove >= spaceBelow
       : placement === 'below'
         ? false
         : spaceAbove >= height + ANCHOR_GAP || spaceAbove >= spaceBelow;

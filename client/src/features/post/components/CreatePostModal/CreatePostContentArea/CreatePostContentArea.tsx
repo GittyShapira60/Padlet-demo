@@ -1,4 +1,4 @@
-import { useEffect,useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import {
   EmojiPickerPopover,
   type EmojiDefinition,
@@ -65,9 +65,16 @@ export default function CreatePostContentArea({
   const [pickerOpen, setPickerOpen] = useState(false);
 
   function handleEmojiSelect(emoji: EmojiDefinition) {
-    onTextChange(textContent + emoji.glyph);
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart ?? textContent.length;
+    const end = el.selectionEnd ?? textContent.length;
+    onTextChange(textContent.slice(0, start) + emoji.glyph + textContent.slice(end));
     setPickerOpen(false);
-    textareaRef.current?.focus();
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(start + emoji.glyph.length, start + emoji.glyph.length);
+    });
   }
 
   function handleFileInputChange(event: ChangeEvent<HTMLInputElement>) {
@@ -80,7 +87,7 @@ export default function CreatePostContentArea({
       <>
         <div
           className={styles.textBox}
-          style={{ backgroundColor: selectedColor }}
+          style={{ backgroundColor: BACKGROUND_COLOR_LIGHT[selectedColor] ?? selectedColor }}
         >
           <textarea
             ref={textareaRef}
