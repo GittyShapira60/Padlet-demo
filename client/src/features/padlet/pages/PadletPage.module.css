@@ -9,7 +9,7 @@
 .titleRow {
   display: flex;
   align-items: center;
-  padding: 1rem 1.5rem 0.5rem;
+  padding: 1rem 10rem 0.5rem;
 }
 
 .filterCenter {
@@ -26,6 +26,11 @@
   color: #ffffff;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   line-height: 1.25;
+  min-width: 0;
+  flex-shrink: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .menuWrapper {
