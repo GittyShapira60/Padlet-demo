@@ -54,7 +54,7 @@ export default function AppHeader({
           </button>
 
           <span className={styles.greeting}>
-            שלום, <bdi dir="auto">{username}</bdi>
+            שלום, <bdi>{username}</bdi>
           </span>
 
           <NotificationBell />
