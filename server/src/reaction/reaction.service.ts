@@ -3,6 +3,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { NotificationType } from '@prisma/client';
+import { RealtimeGateway } from '../gateway/realtime.gateway';
 import { NotificationService } from '../notification/notification.service';
 import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -35,6 +36,7 @@ export class ReactionService {
     private readonly prisma: PrismaService,
     private readonly padletAccess: PadletAccessService,
     private readonly notificationService: NotificationService,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   async getPadletReactions(
@@ -177,7 +179,12 @@ export class ReactionService {
       }
     }
 
-    return this.getPostReactions(userId, padletIdRaw, postIdRaw);
+    const view = await this.getPostReactions(userId, padletIdRaw, postIdRaw);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'reaction:updated', {
+      postId: postIdRaw,
+      summaries: view.summaries,
+    });
+    return view;
   }
 
   async removePostReaction(
@@ -198,7 +205,12 @@ export class ReactionService {
       },
     });
 
-    return this.getPostReactions(userId, padletIdRaw, postIdRaw);
+    const view = await this.getPostReactions(userId, padletIdRaw, postIdRaw);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'reaction:updated', {
+      postId: postIdRaw,
+      summaries: view.summaries,
+    });
+    return view;
   }
 
   private toPostReactionsView(

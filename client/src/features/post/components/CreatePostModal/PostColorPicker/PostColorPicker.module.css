@@ -24,7 +24,7 @@
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: none;
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
@@ -34,12 +34,12 @@
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
-.swatch:hover,
-.swatch:focus,
-.swatch:focus-visible,
-.swatch:active {
+.swatch:not(.swatchSelected):hover,
+.swatch:not(.swatchSelected):focus,
+.swatch:not(.swatchSelected):focus-visible,
+.swatch:not(.swatchSelected):active {
   outline: none;
-  border-color: rgba(0, 0, 0, 0.05);
+  box-shadow: none;
   transform: scale(1.05);
 }
 
@@ -47,7 +47,6 @@
   position: relative;
   z-index: 1;
   transform: scale(1.1);
-  border-color: #ffffff;
   box-shadow:
     0 0 0 2px var(--color-brand-pink),
     0 4px 10px rgba(0, 0, 0, 0.15);
@@ -58,5 +57,4 @@
 .swatchSelected:focus-visible,
 .swatchSelected:active {
   transform: scale(1.1);
-  border-color: #ffffff;
 }
