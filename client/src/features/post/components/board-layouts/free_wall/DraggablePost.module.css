@@ -1,6 +1,7 @@
 .wrapper {
   position: absolute;
   touch-action: none;
+  transition: top 0.25s ease, right 0.25s ease;
 }
 
 .draggable {
@@ -9,4 +10,9 @@
 
 .draggable:active {
   cursor: grabbing;
+}
+
+.dragging {
+  transition: none;
+  z-index: 100;
 }

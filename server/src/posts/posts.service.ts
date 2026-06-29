@@ -72,7 +72,7 @@ export type PostWithAuthor = Prisma.PostGetPayload<{
   };
 }>;
 
-const FREE_WALL_COLUMNS = 3;
+const FREE_WALL_COLUMNS = 5;
 const GRID_COLUMNS = 4;
 
 @Injectable()
@@ -369,6 +369,7 @@ export class PostsService {
     const padlet = await this.padletAccess.assertCanView(requesterId, padletId);
     const now = new Date();
 
+    await this.prisma.comment.deleteMany({ where: { post_id: postId } });
     await this.prisma.post.delete({ where: { post_id: postId } });
 
     if (padlet.boardType !== PadletBoardType.free_wall) {
@@ -573,8 +574,8 @@ export class PostsService {
       case PadletBoardType.free_wall:
       default:
         return {
-          x: 6 + (index % FREE_WALL_COLUMNS) * 20,
-          y: 2 + Math.floor(index / FREE_WALL_COLUMNS) * 16,
+          x: 3 + (index % FREE_WALL_COLUMNS) * 18,
+          y: 2 + Math.floor(index / FREE_WALL_COLUMNS) * 38,
         };
     }
   }

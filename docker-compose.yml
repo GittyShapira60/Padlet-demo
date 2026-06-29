@@ -47,7 +47,7 @@ services:
       timeout: 5s
       retries: 12
       start_period: 60s
-    command: sh -c "npm install && npx prisma db push && npm run start:dev"
+    command: sh -c "npm install && npx prisma db push --accept-data-loss && npm run start:dev"
 
   client:
     build: ./client
