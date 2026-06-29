@@ -6,7 +6,7 @@ import {
   updateComment,
 } from '../services/comment-service';
 import type { Comment } from '../types/comment';
-import { getSocket } from '../../../shared/services/socket.service';
+import { connectSocket } from '../../../shared/services/socket.service';
 
 const ERROR_MESSAGES = {
   load: 'טעינת התגובות נכשלה',
@@ -55,8 +55,8 @@ export function usePostComments(
   }, [enabled, padletId, postId]);
 
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket || !enabled) return;
+    const socket = connectSocket();
+    if (!enabled) return;
 
     const handleCreated = (data: { postId: string; comment: Comment }) => {
       if (data.postId !== postId) return;

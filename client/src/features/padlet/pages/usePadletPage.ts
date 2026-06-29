@@ -120,9 +120,9 @@ export function usePadletPage() {
     const handlePostCreated = (post: Post) => {
       setPosts((prev: Post[]) => {
         if (prev.some((p: Post) => p.id === post.id)) return prev;
+        setPadlet((curr: Padlet | null) => curr ? { ...curr, postCount: curr.postCount + 1 } : curr);
         return [...prev, post];
       });
-      setPadlet((curr: Padlet | null) => curr ? { ...curr, postCount: curr.postCount + 1 } : curr);
     };
 
     const handlePostUpdated = (post: Post) => {
@@ -170,7 +170,7 @@ export function usePadletPage() {
       socket.off('permission:changed', handlePermissionChanged);
       socket.off('padlet:permission-changed', handleDefaultPermissionChanged);
     };
-  }, [padletId]);
+  }, [padletId, navigate]);
 
   const handleBack = useCallback(() => {
     navigate('/');
@@ -240,27 +240,22 @@ export function usePadletPage() {
   }, [isDeletingPost]);
 
   const handleConfirmDeletePost = useCallback(async () => {
-    if (!padletId || !padlet || !postPendingDelete) {
+    if (!padletId || !postPendingDelete) {
       return;
     }
 
     setIsDeletingPost(true);
 
     try {
-      const remainingPosts = await deletePost(padletId, postPendingDelete.id);
-      setPosts(remainingPosts);
-      setPadlet((current) =>
-        current
-          ? { ...current, postCount: remainingPosts.length }
-          : current,
-      );
+      await deletePost(padletId, postPendingDelete.id);
+      // socket 'post:deleted' event handles the state update
       setPostPendingDelete(null);
     } catch {
       setError('מחיקת הפוסט נכשלה, נסי שוב');
     } finally {
       setIsDeletingPost(false);
     }
-  }, [padlet, padletId, postPendingDelete]);
+  }, [padletId, postPendingDelete]);
 
   const handleLayoutChange = useCallback(
     async (postId: string, layout: PostLayout) => {
