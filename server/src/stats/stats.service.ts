@@ -199,7 +199,10 @@ export class StatsService {
   private groupByDate(dates: Date[]): DayCount[] {
     const counts = new Map<string, number>();
     for (const date of dates) {
-      const key = date.toISOString().split('T')[0];
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const key = `${y}-${m}-${d}`;
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
     return Array.from(counts.entries())
