@@ -6,8 +6,8 @@ import styles from './FreeWallPostsLayout.module.css';
 
 function getDefaultLayout(index: number): PostLayout {
   return {
-    x: 6 + (index % 3) * 28,
-    y: 8 + Math.floor(index / 3) * 22,
+    x: 4 + (index % 3) * 24,
+    y: 2 + Math.floor(index / 3) * 14,
   };
 }
 
@@ -21,15 +21,19 @@ export default function FreeWallPostsLayout({
   onDeletePost,
   onLayoutChange,
 }: BoardLayoutProps) {
+  const allLayouts = posts.map((post, index) => post.layout ?? getDefaultLayout(index));
+
   return (
     <div className={styles.canvas}>
       {posts.map((post, index) => {
-        const layout = post.layout ?? getDefaultLayout(index);
+        const layout = allLayouts[index];
+        const otherLayouts = allLayouts.filter((_, i) => i !== index);
 
         return (
           <DraggablePost
             key={post.id}
             layout={layout}
+            otherLayouts={otherLayouts}
             canDrag={canDragPost(post)}
             onLayoutChange={(nextLayout) =>
               onLayoutChange?.(post.id, nextLayout)

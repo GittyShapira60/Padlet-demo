@@ -573,8 +573,8 @@ export class PostsService {
       case PadletBoardType.free_wall:
       default:
         return {
-          x: 8 + (index % FREE_WALL_COLUMNS) * 26,
-          y: 12 + Math.floor(index / FREE_WALL_COLUMNS) * 20,
+          x: 6 + (index % FREE_WALL_COLUMNS) * 20,
+          y: 2 + Math.floor(index / FREE_WALL_COLUMNS) * 16,
         };
     }
   }
