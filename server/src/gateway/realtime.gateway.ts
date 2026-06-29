@@ -50,7 +50,7 @@ export class RealtimeGateway
     try {
       await this.padletAccess.assertCanView(BigInt(userId), BigInt(padletId));
       void client.join(`padlet:${padletId}`);
-    } catch {}
+    } catch { /* noop */ }
   }
 
   @SubscribeMessage('padlet:leave')

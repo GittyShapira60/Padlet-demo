@@ -127,7 +127,7 @@ export function usePostReactions({
           ...current,
           [postId]: view,
         }));
-      } catch {}
+      } catch { /* noop */ }
     },
     [padletId],
   );
@@ -140,7 +140,7 @@ export function usePostReactions({
           ...current,
           [postId]: view,
         }));
-      } catch {}
+      } catch { /* noop */ }
     },
     [padletId],
   );
