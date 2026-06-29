@@ -6,6 +6,7 @@ import {
   updateComment,
 } from '../services/comment-service';
 import type { Comment } from '../types/comment';
+import { connectSocket } from '../../../shared/services/socket.service';
 
 const ERROR_MESSAGES = {
   load: 'טעינת התגובות נכשלה',
@@ -53,11 +54,45 @@ export function usePostComments(
     };
   }, [enabled, padletId, postId]);
 
+  useEffect(() => {
+    const socket = connectSocket();
+    if (!enabled) return;
+
+    const handleCreated = (data: { postId: string; comment: Comment }) => {
+      if (data.postId !== postId) return;
+      setComments((current) => {
+        if (current.some((c) => c.id === data.comment.id)) return current;
+        return [...current, data.comment];
+      });
+    };
+
+    const handleUpdated = (data: { postId: string; comment: Comment }) => {
+      if (data.postId !== postId) return;
+      setComments((current) =>
+        current.map((c) => (c.id === data.comment.id ? data.comment : c)),
+      );
+    };
+
+    const handleDeleted = (data: { postId: string; commentId: string }) => {
+      if (data.postId !== postId) return;
+      setComments((current) => current.filter((c) => c.id !== data.commentId));
+    };
+
+    socket.on('comment:created', handleCreated);
+    socket.on('comment:updated', handleUpdated);
+    socket.on('comment:deleted', handleDeleted);
+
+    return () => {
+      socket.off('comment:created', handleCreated);
+      socket.off('comment:updated', handleUpdated);
+      socket.off('comment:deleted', handleDeleted);
+    };
+  }, [enabled, postId]);
+
   const sendComment = useCallback(
     async (body: string) => {
       try {
-        const comment = await createComment(padletId, postId, body);
-        setComments((current) => [...current, comment]);
+        await createComment(padletId, postId, body);
         setError('');
       } catch {
         setError(ERROR_MESSAGES.send);
@@ -71,9 +106,6 @@ export function usePostComments(
     async (commentId: string) => {
       try {
         await deleteComment(padletId, postId, commentId);
-        setComments((current) =>
-          current.filter((comment) => comment.id !== commentId),
-        );
         setError('');
       } catch {
         setError(ERROR_MESSAGES.delete);
@@ -86,12 +118,7 @@ export function usePostComments(
   const editComment = useCallback(
     async (commentId: string, body: string) => {
       try {
-        const updated = await updateComment(padletId, postId, commentId, body);
-        setComments((current) =>
-          current.map((comment) =>
-            comment.id === commentId ? updated : comment,
-          ),
-        );
+        await updateComment(padletId, postId, commentId, body);
         setError('');
       } catch {
         setError(ERROR_MESSAGES.edit);
