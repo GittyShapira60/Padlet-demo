@@ -2,7 +2,7 @@ import { BACKGROUND_COLOR_GRADIENTS } from '../../../shared/constants/background
 import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../../../App';
-import { MoreVertical, Pencil, Share2 } from '../../../shared/icons';
+import { Settings, Pencil, Share2 } from '../../../shared/icons';
 
 function PadletMenuButton({ onEdit, onShare }: { onEdit: () => void; onShare: () => void }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +17,7 @@ function PadletMenuButton({ onEdit, onShare }: { onEdit: () => void; onShare: ()
   return (
     <div ref={ref} className={styles.menuWrapper}>
       <button type="button" className={styles.menuBtn} aria-label="אפשרויות" onClick={() => setIsOpen((prev: boolean) => !prev)}>
-        <MoreVertical size={17} strokeWidth={1.5} />
+        <Settings size={17} strokeWidth={1.5} />
       </button>
       {isOpen ? (
         <div className={styles.dropdown}>

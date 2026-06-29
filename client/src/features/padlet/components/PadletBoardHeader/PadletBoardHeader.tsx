@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MoreVertical, Pencil, Share2 } from '../../../../shared/icons';
+import { Settings, Pencil, Share2 } from '../../../../shared/icons';
 import styles from './PadletBoardHeader.module.css';
 
 interface PadletBoardHeaderProps {
@@ -42,7 +42,7 @@ export default function PadletBoardHeader({
         aria-label="אפשרויות נוספות"
         onClick={() => setIsOpen((prev: boolean) => !prev)}
       >
-        <MoreVertical size={18} strokeWidth={2} aria-hidden="true" />
+        <Settings size={18} strokeWidth={2} aria-hidden="true" />
       </button>
 
       {isOpen ? (

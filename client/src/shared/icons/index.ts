@@ -10,6 +10,7 @@ export {
   LogOut,
   MoreVertical,
   Pencil,
+  Settings,
   Plus,
   Share2,
   Search,
