@@ -161,6 +161,11 @@ export class ParticipantsService {
 
     await this.touchPadlet(padletId);
 
+    this.realtimeGateway.emitToUser(participantUserId.toString(), 'permission:changed', {
+      padletId: padletId.toString(),
+      permission: dto.permission,
+    });
+
     return this.toParticipantResponse(
       updatedParticipant.user.id,
       updatedParticipant,

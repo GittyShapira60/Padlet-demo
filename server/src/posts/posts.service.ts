@@ -313,7 +313,9 @@ export class PostsService {
     await this.touchPadlet(padletId, now);
 
     const postWithPoll = await this.findPostWithPoll(postId);
-   return this.toPostResponse(postWithPoll, requesterId);
+    const postResponse = this.toPostResponse(postWithPoll, requesterId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    return postResponse;
   }
 
   async deletePost(
@@ -382,7 +384,9 @@ export class PostsService {
     });
 
     const postWithPoll = await this.findPostWithPoll(postId);
-    return this.toPostResponse(postWithPoll, voterId);
+    const postResponse = this.toPostResponse(postWithPoll, voterId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    return postResponse;
   }
 
   toPostResponse(post: PostWithAuthor, requesterId?: bigint): PostResponseDto {
