@@ -53,7 +53,9 @@ export default function AppHeader({
             סטטיסטיקות
           </button>
 
-          <span className={styles.greeting}>שלום, {username}</span>
+          <span className={styles.greeting}>
+            שלום, <bdi dir="auto">{username}</bdi>
+          </span>
 
           <NotificationBell />
 
