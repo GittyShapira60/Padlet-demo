@@ -1,6 +1,6 @@
 import { BACKGROUND_COLOR_LIGHT } from '../../../../shared/constants/background-colors';
 import { formatRelativeTime } from '../../../../shared/utils/format-relative-time';
-import { Pencil, Trash2 } from '../../../../shared/icons';
+import { ExternalLink, Pencil, Trash2 } from '../../../../shared/icons';
 import { useAuth } from '../../../auth/context/AuthProvider';
 import type { Post } from '../../interfaces/post';
 import { PostComments } from '../../../comment';
@@ -82,6 +82,25 @@ export default function PadletPostCard({
 
       {post.poll ? (
         <PollView postId={post.id} poll={post.poll} accentColor={post.color ?? '#7c3aed'} />
+      ) : post.postType === 'image' ? (
+        <div className={styles.imageContent}>
+          {(post.description ?? post.title) ? <p className={styles.imageDescription}>{post.description ?? post.title}</p> : null}
+          <img src={post.imageUrl ?? ''} alt={post.description ?? post.title ?? 'תמונה'} className={styles.postImage} />
+        </div>
+      ) : post.postType === 'link' ? (
+        <div className={styles.content}>
+          {(post.description ?? post.title) ? <p className={styles.linkDescription}>{post.description ?? post.title}</p> : null}
+          <a
+            href={post.subject ?? '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.linkAnchor}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExternalLink size={13} strokeWidth={2} aria-hidden="true" />
+            <span className={styles.linkUrl}>{post.subject}</span>
+          </a>
+        </div>
       ) : (
         <div className={styles.content}>
           {post.title ? <h3 className={styles.title}>{post.title}</h3> : null}

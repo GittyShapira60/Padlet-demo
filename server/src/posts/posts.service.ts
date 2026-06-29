@@ -38,16 +38,21 @@ export interface PollResponseDto {
   userVotedOptionId: string | null;
 }
 
+export type PostType = 'text' | 'image' | 'link' | 'poll';
+
 export interface PostResponseDto {
   id: string;
   padletId: string;
   authorUsername: string;
+  postType: PostType;
   title: string | null;
   subject: string | null;
+  description: string | null;
   color: string | null;
   layout: PostLayoutDto | null;
   createdAt: string;
   poll: PollResponseDto | null;
+  imageUrl: string | null;
 }
 
 type PollWithOptionsAndVotes = Poll & {
@@ -58,6 +63,7 @@ type PollWithOptionsAndVotes = Poll & {
 export type PostWithAuthor = Prisma.PostGetPayload<{
   include: {
     user: true;
+    attachment: true;
     poll: {
       include: {
         poll_options: { include: { poll_votes: true } };
@@ -103,8 +109,10 @@ export class PostsService {
           padlet_id: padletId,
           user_id: authorId,
           content_kind: contentKind,
+          post_type: dto.content_kind,
           title,
           subject,
+          description: dto.description ?? null,
           color: dto.color ?? null,
           data_layout: this.toJsonLayout(
             this.buildLayout(access.boardType, existingCount),
@@ -114,6 +122,7 @@ export class PostsService {
         },
         include: {
           user: true,
+          attachment: true,
           poll: {
             include: {
               poll_options: { include: { poll_votes: true }, orderBy: { sort_order: 'asc' } },
@@ -122,6 +131,16 @@ export class PostsService {
           },
         },
       });
+
+      if (dto.content_kind === 'image' && dto.image_data) {
+        await tx.postAttachment.create({
+          data: {
+            post_id: created.post_id,
+            attachment_type: 'picture',
+            attachment_data: dto.image_data,
+          },
+        });
+      }
 
       if (
         dto.content_kind === 'poll' &&
@@ -221,15 +240,30 @@ export class PostsService {
       where: { post_id: postId },
       data: {
         content_kind: contentKind,
+        post_type: dto.content_kind,
         title,
         subject,
+        description: dto.description ?? null,
         color: dto.color ?? null,
         updated_at: now,
       },
       include: { user: true },
     });
 
-    // עדכון הסקר
+    // Update image attachment
+    if (dto.content_kind === 'image' && dto.image_data) {
+      await this.prisma.postAttachment.upsert({
+        where: { post_id: postId },
+        create: {
+          post_id: postId,
+          attachment_type: 'picture',
+          attachment_data: dto.image_data,
+        },
+        update: { attachment_data: dto.image_data },
+      });
+    }
+
+    // Update poll
     if (dto.content_kind === 'poll' && dto.content) {
       const existingPoll = await this.prisma.poll.findUnique({
         where: { post_id: postId },
@@ -413,18 +447,28 @@ export class PostsService {
       };
     }
 
+    const postType: PostType =
+      (post.post_type as PostType | null) ??
+      (post.poll ? 'poll'
+        : post.attachment ? 'image'
+        : post.content_kind === 'attachment' ? 'link'
+        : 'text');
+
     return {
       id: post.post_id.toString(),
       padletId: post.padlet_id.toString(),
       authorUsername: post.user.username,
+      postType,
       title: post.title,
       subject: post.subject,
+      description: post.description ?? null,
       color: post.color,
       layout: post.data_layout
         ? (post.data_layout as unknown as PostLayoutDto)
         : null,
       createdAt: post.created_at.toISOString(),
       poll: pollData,
+      imageUrl: post.attachment?.attachment_data ?? null,
     };
   }
 
@@ -435,6 +479,7 @@ export class PostsService {
       where: { post_id: postId },
       include: {
         user: true,
+        attachment: true,
         poll: {
           include: {
             poll_options: {
@@ -462,6 +507,7 @@ export class PostsService {
       where: { post_id: postId, padlet_id: padletId },
       include: {
         user: true,
+        attachment: true,
         poll: {
           include: {
             poll_options: { include: { poll_votes: true }, orderBy: { sort_order: 'asc' } },
@@ -483,6 +529,7 @@ export class PostsService {
       where: { padlet_id: padletId },
       include: {
         user: true,
+        attachment: true,
         poll: {
           include: {
             poll_options: { include: { poll_votes: true }, orderBy: { sort_order: 'asc' } },
@@ -553,9 +600,9 @@ export class PostsService {
   } {
     switch (dto.content_kind) {
       case 'image':
-        return { contentKind: PostContentKind.attachment, title: 'תמונה', subject: dto.image_file_name ?? null };
+        return { contentKind: PostContentKind.attachment, title: null, subject: dto.image_file_name ?? null };
       case 'link':
-        return { contentKind: PostContentKind.attachment, title: 'קישור', subject: dto.content ?? null };
+        return { contentKind: PostContentKind.attachment, title: null, subject: dto.content ?? null };
       case 'poll':
         return { contentKind: PostContentKind.poll, title: dto.content ?? null, subject: 'סקר' };
       case 'text':
