@@ -4,6 +4,7 @@ import { useAuth } from '../../auth/context/AuthProvider';
 import type { Post, PostLayout } from '../../post/interfaces/post';
 import { deletePost, updatePostLayout } from '../../post/services/post-service';
 import type { Padlet } from '../interfaces/padlet';
+import { connectSocket } from '../../../shared/services/socket.service';
 import {
   PadletPermission,
   type PadletPermission as PadletPermissionType,
@@ -104,6 +105,73 @@ export function usePadletPage() {
     };
   }, [padletId]);
 
+  useEffect(() => {
+    if (!padletId) return;
+
+    const socket = connectSocket();
+
+    const joinPadlet = () => socket.emit('padlet:join', padletId);
+    if (socket.connected) {
+      joinPadlet();
+    } else {
+      socket.once('connect', joinPadlet);
+    }
+
+    const handlePostCreated = (post: Post) => {
+      setPosts((prev: Post[]) => {
+        if (prev.some((p: Post) => p.id === post.id)) return prev;
+        setPadlet((curr: Padlet | null) => curr ? { ...curr, postCount: curr.postCount + 1 } : curr);
+        return [...prev, post];
+      });
+    };
+
+    const handlePostUpdated = (post: Post) => {
+      setPosts((prev: Post[]) => prev.map((p: Post) => (p.id === post.id ? post : p)));
+    };
+
+    const handlePostDeleted = ({ postId }: { postId: string }) => {
+      setPosts((prev: Post[]) => prev.filter((p: Post) => p.id !== postId));
+      setPadlet((curr: Padlet | null) => curr ? { ...curr, postCount: Math.max(0, curr.postCount - 1) } : curr);
+    };
+
+    const handlePadletUpdated = (data: Padlet) => {
+      setPadlet((curr: Padlet | null) => curr ? { ...curr, ...data } : curr);
+    };
+
+    const handlePadletDeleted = () => {
+      navigate('/');
+    };
+
+    const handlePermissionChanged = ({ padletId: eventPadletId, permission }: { padletId: string; permission: string }) => {
+      if (eventPadletId !== padletId) return;
+      setCurrentUserPermission(mapApiPermission(permission));
+    };
+
+    const handleDefaultPermissionChanged = ({ defaultPermission }: { defaultPermission: string | null }) => {
+      setDefaultPermission(defaultPermission ? mapApiPermission(defaultPermission) : PadletPermission.None);
+    };
+
+    socket.on('post:created', handlePostCreated);
+    socket.on('post:updated', handlePostUpdated);
+    socket.on('post:deleted', handlePostDeleted);
+    socket.on('padlet:updated', handlePadletUpdated);
+    socket.on('padlet:deleted', handlePadletDeleted);
+    socket.on('permission:changed', handlePermissionChanged);
+    socket.on('padlet:permission-changed', handleDefaultPermissionChanged);
+
+    return () => {
+      socket.off('connect', joinPadlet);
+      socket.emit('padlet:leave', padletId);
+      socket.off('post:created', handlePostCreated);
+      socket.off('post:updated', handlePostUpdated);
+      socket.off('post:deleted', handlePostDeleted);
+      socket.off('padlet:updated', handlePadletUpdated);
+      socket.off('padlet:deleted', handlePadletDeleted);
+      socket.off('permission:changed', handlePermissionChanged);
+      socket.off('padlet:permission-changed', handleDefaultPermissionChanged);
+    };
+  }, [padletId, navigate]);
+
   const handleBack = useCallback(() => {
     navigate('/');
   }, [navigate]);
@@ -172,33 +240,31 @@ export function usePadletPage() {
   }, [isDeletingPost]);
 
   const handleConfirmDeletePost = useCallback(async () => {
-    if (!padletId || !padlet || !postPendingDelete) {
+    if (!padletId || !postPendingDelete) {
       return;
     }
 
     setIsDeletingPost(true);
 
     try {
-      const remainingPosts = await deletePost(padletId, postPendingDelete.id);
-      setPosts(remainingPosts);
-      setPadlet((current) =>
-        current
-          ? { ...current, postCount: remainingPosts.length }
-          : current,
-      );
+      await deletePost(padletId, postPendingDelete.id);
       setPostPendingDelete(null);
     } catch {
       setError('מחיקת הפוסט נכשלה, נסי שוב');
     } finally {
       setIsDeletingPost(false);
     }
-  }, [padlet, padletId, postPendingDelete]);
+  }, [padletId, postPendingDelete]);
 
   const handleLayoutChange = useCallback(
     async (postId: string, layout: PostLayout) => {
       if (!padletId) {
         return;
       }
+
+      setPosts((current: Post[]) =>
+        current.map((item: Post) => (item.id === postId ? { ...item, layout } : item)),
+      );
 
       try {
         const updatedPost = await updatePostLayout(padletId, postId, layout);

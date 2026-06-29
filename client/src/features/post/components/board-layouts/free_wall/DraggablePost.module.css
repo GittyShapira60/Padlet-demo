@@ -5,8 +5,14 @@
 
 .draggable {
   cursor: grab;
+  transition: top 0.25s ease, right 0.25s ease;
 }
 
 .draggable:active {
   cursor: grabbing;
+}
+
+.dragging {
+  transition: none;
+  z-index: 100;
 }

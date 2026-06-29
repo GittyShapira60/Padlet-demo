@@ -1,6 +1,8 @@
 .canvas {
   position: relative;
   min-height: calc(100vh - 11rem);
+  padding-bottom: 8rem;
+  overflow-x: clip;
 }
 
 .post {

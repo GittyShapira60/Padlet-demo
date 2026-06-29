@@ -11,6 +11,7 @@ import {
   type PollOption,
   type PollVote,
 } from '@prisma/client';
+import { RealtimeGateway } from '../gateway/realtime.gateway';
 import { NotificationService } from '../notification/notification.service';
 import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -72,7 +73,7 @@ export type PostWithAuthor = Prisma.PostGetPayload<{
   };
 }>;
 
-const FREE_WALL_COLUMNS = 3;
+const FREE_WALL_COLUMNS = 5;
 const GRID_COLUMNS = 4;
 
 @Injectable()
@@ -81,6 +82,7 @@ export class PostsService {
     private readonly prisma: PrismaService,
     private readonly padletAccess: PadletAccessService,
     private readonly notificationService: NotificationService,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   async createPost(
@@ -169,9 +171,10 @@ export class PostsService {
 
     void this.notifyPadletMembers(padletId, authorId, actorUsername, post.post_id);
 
-    // טעינה מחדש עם נתוני הסקר
     const postWithPoll = await this.findPostWithPoll(post.post_id);
-    return this.toPostResponse(postWithPoll, authorId);
+    const postResponse = this.toPostResponse(postWithPoll, authorId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:created', postResponse);
+    return postResponse;
   }
 
   private async notifyPadletMembers(
@@ -247,7 +250,6 @@ export class PostsService {
       include: { user: true },
     });
 
-    // Update image attachment
     if (dto.content_kind === 'image' && dto.image_data) {
       await this.prisma.postAttachment.upsert({
         where: { post_id: postId },
@@ -260,7 +262,6 @@ export class PostsService {
       });
     }
 
-    // Update poll
     if (dto.content_kind === 'poll' && dto.content) {
       const existingPoll = await this.prisma.poll.findUnique({
         where: { post_id: postId },
@@ -304,7 +305,9 @@ export class PostsService {
     await this.touchPadlet(padletId, now);
 
     const postWithPoll = await this.findPostWithPoll(postId);
-    return this.toPostResponse(postWithPoll, requesterId);
+    const postResponse = this.toPostResponse(postWithPoll, requesterId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    return postResponse;
   }
 
   async updatePostLayout(
@@ -342,7 +345,9 @@ export class PostsService {
     await this.touchPadlet(padletId, now);
 
     const postWithPoll = await this.findPostWithPoll(postId);
-   return this.toPostResponse(postWithPoll, requesterId);
+    const postResponse = this.toPostResponse(postWithPoll, requesterId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    return postResponse;
   }
 
   async deletePost(
@@ -369,7 +374,10 @@ export class PostsService {
     const padlet = await this.padletAccess.assertCanView(requesterId, padletId);
     const now = new Date();
 
-    await this.prisma.post.delete({ where: { post_id: postId } });
+    await this.prisma.$transaction([
+      this.prisma.comment.deleteMany({ where: { post_id: postId } }),
+      this.prisma.post.delete({ where: { post_id: postId } }),
+    ]);
 
     if (padlet.boardType !== PadletBoardType.free_wall) {
       await this.reindexPostLayouts(padletId, padlet.boardType);
@@ -377,7 +385,40 @@ export class PostsService {
 
     await this.touchPadlet(padletId, now);
 
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:deleted', { postId: postIdRaw });
     return this.getPadletPosts(padletId, requesterId);
+  }
+
+  async deletePoll(
+    userId: string,
+    padletIdRaw: string,
+    postIdRaw: string,
+  ): Promise<PostResponseDto> {
+    const requesterId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+    const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
+
+    const existingPost = await this.findPostForUser(requesterId, padletId, postId);
+
+    await this.padletAccess.assertCanDeletePost(requesterId, padletId, existingPost.user_id);
+
+    if (!existingPost.poll) throw new NotFoundException('הסקר לא נמצא');
+
+    const now = new Date();
+    await this.prisma.$transaction([
+      this.prisma.poll.delete({ where: { post_id: postId } }),
+      this.prisma.post.update({
+        where: { post_id: postId },
+        data: { content_kind: PostContentKind.none, post_type: null, title: null, subject: null, updated_at: now },
+      }),
+    ]);
+
+    await this.touchPadlet(padletId, now);
+
+    const postWithPoll = await this.findPostWithPoll(postId);
+    const postResponse = this.toPostResponse(postWithPoll, requesterId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    return postResponse;
   }
 
   async votePoll(
@@ -410,7 +451,9 @@ export class PostsService {
     });
 
     const postWithPoll = await this.findPostWithPoll(postId);
-    return this.toPostResponse(postWithPoll, voterId);
+    const postResponse = this.toPostResponse(postWithPoll, voterId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    return postResponse;
   }
 
   toPostResponse(post: PostWithAuthor, requesterId?: bigint): PostResponseDto {
@@ -573,8 +616,8 @@ export class PostsService {
       case PadletBoardType.free_wall:
       default:
         return {
-          x: 8 + (index % FREE_WALL_COLUMNS) * 26,
-          y: 12 + Math.floor(index / FREE_WALL_COLUMNS) * 20,
+          x: 3 + (index % FREE_WALL_COLUMNS) * 18,
+          y: 2 + Math.floor(index / FREE_WALL_COLUMNS) * 38,
         };
     }
   }
