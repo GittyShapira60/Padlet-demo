@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import AppHeader from './shared/layout/AppHeader/AppHeader';
+import { resolveBackgroundStyle } from './shared/constants/background-colors';
 import styles from './App.module.css';
 
 export interface AppOutletContext {
@@ -19,7 +20,10 @@ function App() {
   }, [navigate]);
 
   return (
-    <div className={styles.app}>
+    <div
+      className={styles.app}
+      style={headerBackground ? { ...resolveBackgroundStyle(headerBackground), backgroundAttachment: 'fixed' } : undefined}
+    >
       <AppHeader
         centerSlot={headerCenterSlot}
         background={headerBackground}
