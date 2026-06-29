@@ -26,7 +26,7 @@ export default function BrainstormingPostsLayout({
   return (
     <div className={styles.canvas}>
       {posts.map((post, index) => {
-        const layout = getDefaultLayout(index);
+        const layout = post.layout ?? getDefaultLayout(index);
         const tilt = TILTS[index % TILTS.length];
 
         return (

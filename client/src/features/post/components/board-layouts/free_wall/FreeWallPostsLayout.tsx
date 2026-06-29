@@ -5,10 +5,13 @@ import type { BoardLayoutProps } from '../board-layout-props';
 import DraggablePost from './DraggablePost';
 import styles from './FreeWallPostsLayout.module.css';
 
+// Keep in sync with FREE_WALL_COLUMNS and default layout formula in posts.service.ts
+const FREE_WALL_COLUMNS = 3;
+
 function getDefaultLayout(index: number): PostLayout {
   return {
-    x: 4 + (index % 3) * 24,
-    y: 2 + Math.floor(index / 3) * 14,
+    x: 8 + (index % FREE_WALL_COLUMNS) * 26,
+    y: 12 + Math.floor(index / FREE_WALL_COLUMNS) * 20,
   };
 }
 
@@ -37,27 +40,24 @@ export default function FreeWallPostsLayout({
     return layout;
   });
 
-  const handlePreviewSwap = (postIndex: number, targetLayout: PostLayout | null) => {
-    if (targetLayout === null) {
+  const handlePreviewSwap = (postIndex: number, targetId: string | null) => {
+    if (targetId === null) {
       setPreviewSwap(null);
       return;
     }
-    const targetIndex = allLayouts.findIndex(
-      (l) => l.x === targetLayout.x && l.y === targetLayout.y,
-    );
+    const targetIndex = posts.findIndex((p) => p.id === targetId);
     if (targetIndex !== -1) {
       setPreviewSwap({ dragIndex: postIndex, targetIndex });
     }
   };
 
-  const handleSwap = (postIndex: number, targetLayout: PostLayout) => {
-    const targetIndex = allLayouts.findIndex(
-      (l) => l.x === targetLayout.x && l.y === targetLayout.y,
-    );
+  const handleSwap = (postIndex: number, targetId: string) => {
+    const targetIndex = posts.findIndex((p) => p.id === targetId);
     setPreviewSwap(null);
     if (targetIndex === -1 || !onLayoutChange) return;
 
     const thisLayout = allLayouts[postIndex];
+    const targetLayout = allLayouts[targetIndex];
     onLayoutChange(posts[postIndex].id, targetLayout);
     onLayoutChange(posts[targetIndex].id, thisLayout);
   };
@@ -66,16 +66,18 @@ export default function FreeWallPostsLayout({
     <div className={styles.canvas}>
       {posts.map((post, index) => {
         const layout = effectiveLayouts[index];
-        const otherLayouts = allLayouts.filter((_, i) => i !== index);
+        const otherPosts = posts
+          .map((p, i) => ({ id: p.id, layout: effectiveLayouts[i] }))
+          .filter((_, i) => i !== index);
 
         return (
           <DraggablePost
             key={post.id}
             layout={layout}
-            otherLayouts={otherLayouts}
+            otherPosts={otherPosts}
             canDrag={canDragPost(post)}
-            onSwapWith={(targetLayout) => handleSwap(index, targetLayout)}
-            onPreviewSwap={(targetLayout) => handlePreviewSwap(index, targetLayout)}
+            onSwapWith={(targetId) => handleSwap(index, targetId)}
+            onPreviewSwap={(targetId) => handlePreviewSwap(index, targetId)}
           >
             <BoardPostCard
               post={post}

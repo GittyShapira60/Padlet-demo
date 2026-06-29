@@ -2,12 +2,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PostLayout } from '../../../interfaces/post';
 import styles from './DraggablePost.module.css';
 
+interface OtherPost {
+  id: string;
+  layout: PostLayout;
+}
+
 interface DraggablePostProps {
   layout: PostLayout;
   canDrag: boolean;
-  otherLayouts?: PostLayout[];
-  onSwapWith: (targetLayout: PostLayout) => void;
-  onPreviewSwap: (targetLayout: PostLayout | null) => void;
+  otherPosts?: OtherPost[];
+  onSwapWith: (targetId: string) => void;
+  onPreviewSwap: (targetId: string | null) => void;
   className?: string;
   children: React.ReactNode;
 }
@@ -32,16 +37,10 @@ function computeOverlapRatio(
   return (iW * iH) / (w * h);
 }
 
-function sameLayout(a: PostLayout | null, b: PostLayout | null): boolean {
-  if (a === b) return true;
-  if (!a || !b) return false;
-  return a.x === b.x && a.y === b.y;
-}
-
 export default function DraggablePost({
   layout,
   canDrag,
-  otherLayouts,
+  otherPosts,
   onSwapWith,
   onPreviewSwap,
   className,
@@ -54,7 +53,7 @@ export default function DraggablePost({
   const dragStart = useRef({ clientX: 0, clientY: 0, layout });
   const isDragging = useRef(false);
   const dragCardSize = useRef({ wPct: 0, hPct: 0 });
-  const activePreviewTarget = useRef<PostLayout | null>(null);
+  const activePreviewTarget = useRef<string | null>(null);
 
   useEffect(() => {
     setLocalLayout(layout);
@@ -103,23 +102,25 @@ export default function DraggablePost({
       const newY = clamp(dragStart.current.layout.y + deltaY, 0, 88);
       setLocalLayout({ x: newX, y: newY });
 
-      const others = otherLayouts ?? [];
+      const others = otherPosts ?? [];
       const { wPct, hPct } = dragCardSize.current;
 
-      let bestTarget: PostLayout | null = null;
+      let bestTarget: string | null = null;
+      let bestRatio = 0;
       for (const other of others) {
-        if (computeOverlapRatio(newX, newY, other.x, other.y, wPct, hPct) >= 0.5) {
-          bestTarget = other;
-          break;
+        const ratio = computeOverlapRatio(newX, newY, other.layout.x, other.layout.y, wPct, hPct);
+        if (ratio >= 0.5 && ratio > bestRatio) {
+          bestTarget = other.id;
+          bestRatio = ratio;
         }
       }
 
-      if (!sameLayout(bestTarget, activePreviewTarget.current)) {
+      if (bestTarget !== activePreviewTarget.current) {
         activePreviewTarget.current = bestTarget;
         onPreviewSwap(bestTarget);
       }
     },
-    [otherLayouts, onPreviewSwap],
+    [otherPosts, onPreviewSwap],
   );
 
   const finishDrag = useCallback(
@@ -130,18 +131,21 @@ export default function DraggablePost({
       setActiveDrag(false);
       event.currentTarget.releasePointerCapture(event.pointerId);
 
-      const target = activePreviewTarget.current;
+      const targetId = activePreviewTarget.current;
       activePreviewTarget.current = null;
       onPreviewSwap(null);
 
-      if (target) {
-        setLocalLayout(target);
-        onSwapWith(target);
+      if (targetId) {
+        const targetPost = (otherPosts ?? []).find((p) => p.id === targetId);
+        if (targetPost) {
+          setLocalLayout(targetPost.layout);
+        }
+        onSwapWith(targetId);
       } else {
         setLocalLayout(dragStart.current.layout);
       }
     },
-    [onSwapWith, onPreviewSwap],
+    [onSwapWith, onPreviewSwap, otherPosts],
   );
 
   const wrapperClassName = [

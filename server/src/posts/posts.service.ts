@@ -374,8 +374,10 @@ export class PostsService {
     const padlet = await this.padletAccess.assertCanView(requesterId, padletId);
     const now = new Date();
 
-    await this.prisma.comment.deleteMany({ where: { post_id: postId } });
-    await this.prisma.post.delete({ where: { post_id: postId } });
+    await this.prisma.$transaction([
+      this.prisma.comment.deleteMany({ where: { post_id: postId } }),
+      this.prisma.post.delete({ where: { post_id: postId } }),
+    ]);
 
     if (padlet.boardType !== PadletBoardType.free_wall) {
       await this.reindexPostLayouts(padletId, padlet.boardType);
