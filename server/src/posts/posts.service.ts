@@ -400,22 +400,25 @@ export class PostsService {
 
     const existingPost = await this.findPostForUser(requesterId, padletId, postId);
 
-    await this.padletAccess.assertCanEditPost(requesterId, padletId, existingPost.user_id);
+    await this.padletAccess.assertCanDeletePost(requesterId, padletId, existingPost.user_id);
 
-    const poll = await this.prisma.poll.findUnique({ where: { post_id: postId } });
-    if (!poll) throw new NotFoundException('הסקר לא נמצא');
+    if (!existingPost.poll) throw new NotFoundException('הסקר לא נמצא');
 
     const now = new Date();
-    await this.prisma.poll.delete({ where: { poll_id: poll.poll_id } });
-    await this.prisma.post.update({
-      where: { post_id: postId },
-      data: { content_kind: PostContentKind.none, title: null, subject: null, updated_at: now },
-    });
+    await this.prisma.$transaction([
+      this.prisma.poll.delete({ where: { post_id: postId } }),
+      this.prisma.post.update({
+        where: { post_id: postId },
+        data: { content_kind: PostContentKind.none, post_type: null, title: null, subject: null, updated_at: now },
+      }),
+    ]);
 
     await this.touchPadlet(padletId, now);
 
     const postWithPoll = await this.findPostWithPoll(postId);
-    return this.toPostResponse(postWithPoll, requesterId);
+    const postResponse = this.toPostResponse(postWithPoll, requesterId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    return postResponse;
   }
 
   async votePoll(
