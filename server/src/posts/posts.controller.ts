@@ -65,6 +65,16 @@ export class PostsController {
     return this.postsService.deletePost(user.id, padletId, postId);
   }
 
+  @Delete(':postId/poll')
+  @ApiOperation({ summary: 'Delete the poll attached to a post' })
+  deletePoll(
+    @CurrentUser() user: AuthUserDto,
+    @Param('padletId') padletId: string,
+    @Param('postId') postId: string,
+  ) {
+    return this.postsService.deletePoll(user.id, padletId, postId);
+  }
+
   @Post(':postId/vote')
   @ApiOperation({ summary: 'Vote on a poll option' })
   votePoll(

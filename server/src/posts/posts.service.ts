@@ -389,6 +389,38 @@ export class PostsService {
     return this.getPadletPosts(padletId, requesterId);
   }
 
+  async deletePoll(
+    userId: string,
+    padletIdRaw: string,
+    postIdRaw: string,
+  ): Promise<PostResponseDto> {
+    const requesterId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+    const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
+
+    const existingPost = await this.findPostForUser(requesterId, padletId, postId);
+
+    await this.padletAccess.assertCanDeletePost(requesterId, padletId, existingPost.user_id);
+
+    if (!existingPost.poll) throw new NotFoundException('הסקר לא נמצא');
+
+    const now = new Date();
+    await this.prisma.$transaction([
+      this.prisma.poll.delete({ where: { post_id: postId } }),
+      this.prisma.post.update({
+        where: { post_id: postId },
+        data: { content_kind: PostContentKind.none, post_type: null, title: null, subject: null, updated_at: now },
+      }),
+    ]);
+
+    await this.touchPadlet(padletId, now);
+
+    const postWithPoll = await this.findPostWithPoll(postId);
+    const postResponse = this.toPostResponse(postWithPoll, requesterId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    return postResponse;
+  }
+
   async votePoll(
     userId: string,
     padletIdRaw: string,
