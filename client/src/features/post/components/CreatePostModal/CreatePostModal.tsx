@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { Post } from '../../interfaces/post';
+import { CREATE_POST_MODAL_TEXTS } from './CreatePostModal.consts';
 import CreatePostContentArea from './CreatePostContentArea/CreatePostContentArea';
 import CreatePostModalTabs from './CreatePostModalTabs/CreatePostModalTabs';
 import styles from './CreatePostModal.module.css';
@@ -49,6 +50,12 @@ export default function CreatePostModal({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
+  const mode = isEditMode ? 'edit' : 'create';
+  const modalTitle = CREATE_POST_MODAL_TEXTS.title[mode];
+  const submitLabel = isLoading
+    ? CREATE_POST_MODAL_TEXTS.submitting[mode]
+    : CREATE_POST_MODAL_TEXTS.submit[mode];
+
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div
@@ -56,9 +63,7 @@ export default function CreatePostModal({
         onClick={(event) => event.stopPropagation()}
       >
         <header className={styles.header}>
-          <h2 className={styles.title}>
-            {isEditMode ? 'עריכת פוסט' : 'פוסט חדש'}
-          </h2>
+          <h2 className={styles.title}>{modalTitle}</h2>
           <button type="button" className={styles.closeBtn} onClick={onClose}>
             &times;
           </button>
@@ -95,12 +100,10 @@ export default function CreatePostModal({
             onClick={() => void handleSubmit()}
             disabled={isLoading || !canSubmit}
           >
-            {isLoading
-              ? isEditMode ? 'שומרת...' : 'מוסיף...'
-              : isEditMode ? 'שמירה' : 'הוסף פוסט'}
+            {submitLabel}
           </button>
           <button type="button" className={styles.cancelBtn} onClick={onClose} disabled={isLoading}>
-            ביטול
+            {CREATE_POST_MODAL_TEXTS.cancel}
           </button>
         </div>
       </div>
