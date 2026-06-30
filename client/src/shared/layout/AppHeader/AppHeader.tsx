@@ -53,10 +53,6 @@ export default function AppHeader({
             סטטיסטיקות
           </button>
 
-          <span className={styles.greeting}>
-            שלום, <bdi>{username}</bdi>
-          </span>
-
           <NotificationBell />
 
           <button type="button" className={styles.logout} onClick={logout}>

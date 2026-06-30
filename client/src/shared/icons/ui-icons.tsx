@@ -13,6 +13,7 @@ import {
   MessageCircle as LucideMessageCircle,
   MoreVertical as LucideMoreVertical,
   Pencil as LucidePencil,
+  Settings as LucideSettings,
   Plus as LucidePlus,
   Share2 as LucideShare2,
   Search as LucideSearch,
@@ -52,4 +53,5 @@ export const Users = createUiIcon(LucideUsers);
 export const Lock = createUiIcon(LucideLock);
 export const Calendar = createUiIcon(LucideCalendar);
 export const LayoutDashboard = createUiIcon(LucideLayoutDashboard);
+export const Settings = createUiIcon(LucideSettings);
 export const ExternalLink = createUiIcon(LucideExternalLink);

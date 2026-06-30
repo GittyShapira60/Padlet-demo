@@ -2,7 +2,7 @@ import { resolveBackgroundStyle } from '../../../shared/constants/background-col
 import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../../../App';
-import { LogOut, MoreVertical, Pencil, Share2 } from '../../../shared/icons';
+import { LogOut, Settings, Pencil, Share2 } from '../../../shared/icons';
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
 import PostFilterBar from '../../post/components/PostFilterBar/PostFilterBar';
@@ -123,7 +123,7 @@ function PadletBoardBody({
               aria-label="אפשרויות"
               onClick={() => setIsMenuOpen((prev: boolean) => !prev)}
             >
-              <MoreVertical size={20} strokeWidth={2} aria-hidden="true" />
+              <Settings size={20} strokeWidth={2} aria-hidden="true" />
             </button>
             {isMenuOpen ? (
               <div className={styles.dropdown}>
