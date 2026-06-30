@@ -75,6 +75,16 @@ function PadletBoardBody({
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
     if (padlet) {
       setHeaderBackground(padlet.background ?? null);
     }
