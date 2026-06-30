@@ -17,6 +17,7 @@ import {
   MessageCircle as LucideMessageCircle,
   MoreVertical as LucideMoreVertical,
   Pencil as LucidePencil,
+  Settings as LucideSettings,
   Plus as LucidePlus,
   Share2 as LucideShare2,
   Search as LucideSearch,
@@ -61,6 +62,7 @@ export const Lock = createUiIcon(LucideLock);
 export const Calendar = createUiIcon(LucideCalendar);
 export const LayoutDashboard = createUiIcon(LucideLayoutDashboard);
 export const LayoutGrid = createUiIcon(LucideLayoutGrid);
+export const Settings = createUiIcon(LucideSettings);
 export const ExternalLink = createUiIcon(LucideExternalLink);
 export const Image = createUiIcon(LucideImage);
 export const Link = createUiIcon(LucideLink);

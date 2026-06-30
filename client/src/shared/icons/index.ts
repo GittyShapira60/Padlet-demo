@@ -34,7 +34,7 @@ export {
   MoreVertical,
 
   Pencil,
-
+  Settings,
   Plus,
 
   Share2,

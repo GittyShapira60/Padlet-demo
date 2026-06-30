@@ -56,6 +56,20 @@ export default function EditPadletModal({
         </div>
 
         <div className={styles.field}>
+          <label className={styles.label} htmlFor="edit-padlet-description">
+            תיאור
+          </label>
+          <textarea
+            id="edit-padlet-description"
+            className={styles.textarea}
+            placeholder="תאר את מטרת הלוח..."
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            rows={2}
+          />
+        </div>
+
+        <div className={styles.field}>
           <span className={styles.label}>רקע</span>
           <BackgroundPicker
             activeTab={bgTab}
@@ -68,20 +82,6 @@ export default function EditPadletModal({
         <div className={styles.field}>
           <span className={styles.label}>סוג לוח</span>
           <BoardTypePicker value={boardType} onChange={setBoardType} />
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="edit-padlet-description">
-            תיאור
-          </label>
-          <textarea
-            id="edit-padlet-description"
-            className={styles.textarea}
-            placeholder="תאר את מטרת הלוח..."
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            rows={2}
-          />
         </div>
 
         {error ? <p className={styles.error}>{error}</p> : null}

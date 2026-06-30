@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import { useAuth } from '../../../features/auth/context/AuthProvider';
 import { NotificationBell } from '../../../features/notification';
 import { BarChart3, LogOut } from '../../icons';
-import { resolveBackgroundStyle } from '../../constants/background-colors';
 import styles from './AppHeader.module.css';
 
 interface AppHeaderProps {
@@ -23,7 +22,6 @@ export default function AppHeader({
   return (
     <header
       className={`${styles.header} ${background ? styles.noBorder : ''}`}
-      style={background ? { ...resolveBackgroundStyle(background), backgroundAttachment: 'fixed' } : undefined}
     >
       <div className={styles.inner}>
         <div className={styles.rightGroup}>
@@ -52,10 +50,6 @@ export default function AppHeader({
             <BarChart3 size={17} strokeWidth={1.5} />
             סטטיסטיקות
           </button>
-
-          <span className={styles.greeting}>
-            שלום, <bdi>{username}</bdi>
-          </span>
 
           <NotificationBell />
 
