@@ -9,9 +9,7 @@
 .titleRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 1rem 1.5rem 0.5rem;
+  padding: 1rem clamp(1.5rem, 8vw, 10rem) 0.5rem;
 }
 
 .boardTitle {
@@ -22,6 +20,11 @@
   color: #ffffff;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   line-height: 1.25;
+  min-width: 0;
+  flex-shrink: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .menuWrapper {
@@ -36,7 +39,7 @@
   outline: none;
   padding: 0.35rem;
   background: transparent;
-  color: #ffffff;
+  color: #64748b;
   cursor: pointer;
   transition: opacity 0.15s ease;
 }

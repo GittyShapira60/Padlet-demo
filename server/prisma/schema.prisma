@@ -92,7 +92,7 @@ model Post {
   created_at   DateTime        @db.Timestamptz()
   updated_at   DateTime        @db.Timestamptz()
 
-  padlet         Padlet          @relation(fields: [padlet_id], references: [padlet_id])
+  padlet         Padlet          @relation(fields: [padlet_id], references: [padlet_id], onDelete: Cascade)
   user           User            @relation(fields: [user_id], references: [id])
   attachment     PostAttachment?
   poll           Poll?
@@ -114,7 +114,7 @@ model Poll {
   post_id BigInt @unique
   question String
 
-  post         Post         @relation(fields: [post_id], references: [post_id])
+  post         Post         @relation(fields: [post_id], references: [post_id], onDelete: Cascade)
   poll_options PollOption[]
   poll_votes   PollVote[]
 }
@@ -125,7 +125,7 @@ model PollOption {
   label      String
   sort_order Int      @db.SmallInt
 
-  poll       Poll       @relation(fields: [poll_id], references: [poll_id])
+  poll       Poll       @relation(fields: [poll_id], references: [poll_id], onDelete: Cascade)
   poll_votes PollVote[]
 
   @@unique([poll_id, sort_order])
@@ -136,9 +136,9 @@ model PollVote {
   user_id   BigInt
   option_id BigInt
 
-  poll   Poll       @relation(fields: [poll_id], references: [poll_id])
+  poll   Poll       @relation(fields: [poll_id], references: [poll_id], onDelete: Cascade)
   user   User       @relation(fields: [user_id], references: [id])
-  option PollOption @relation(fields: [option_id], references: [option_id])
+  option PollOption @relation(fields: [option_id], references: [option_id], onDelete: Cascade)
 
   @@id([poll_id, user_id])
 }
@@ -148,7 +148,7 @@ model Participant {
   user_id    BigInt
   permission PadletPermission
 
-  padlet Padlet @relation(fields: [padlet_id], references: [padlet_id])
+  padlet Padlet @relation(fields: [padlet_id], references: [padlet_id], onDelete: Cascade)
   user   User   @relation(fields: [user_id], references: [id])
 
   @@id([padlet_id, user_id])
@@ -162,7 +162,7 @@ model Comment {
   created_at DateTime @db.Timestamptz()
   updated_at DateTime? @db.Timestamptz()
 
-  post Post @relation(fields: [post_id], references: [post_id])
+  post Post @relation(fields: [post_id], references: [post_id], onDelete: Cascade)
   user User @relation(fields: [user_id], references: [id])
 }
 
@@ -171,7 +171,7 @@ model PostReaction {
   user_id       BigInt
   reaction_code String @db.VarChar(32)
 
-  post Post @relation(fields: [post_id], references: [post_id])
+  post Post @relation(fields: [post_id], references: [post_id], onDelete: Cascade)
   user User @relation(fields: [user_id], references: [id])
 
   @@id([post_id, user_id, reaction_code])

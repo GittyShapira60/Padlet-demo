@@ -262,6 +262,10 @@ export function usePadletPage() {
         return;
       }
 
+      setPosts((current: Post[]) =>
+        current.map((item: Post) => (item.id === postId ? { ...item, layout } : item)),
+      );
+
       try {
         const updatedPost = await updatePostLayout(padletId, postId, layout);
         setPosts((current) =>

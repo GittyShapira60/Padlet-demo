@@ -11,7 +11,9 @@ export default function HomeHero({ username }: HomeHeroProps) {
       <div className={styles.content}>
         <h2 className={styles.title}>
           <Hand className={styles.icon} size={26} />
-          !שלום, {username}
+          <span>
+            שלום, <bdi>{username}</bdi>!
+          </span>
         </h2>
         <p className={styles.subtitle}>הלוחות השיתופיים שלך</p>
       </div>
