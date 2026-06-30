@@ -607,8 +607,15 @@ export class PostsService {
 
   buildLayout(boardType: PadletBoardType, index: number): PostLayoutDto {
     switch (boardType) {
-      case PadletBoardType.brainstorming:
-        return { x: 6 + (index % 3) * 30, y: 8 + index * 14 };
+      case PadletBoardType.brainstorming: {
+        const columns = 4;
+        const col = index % columns;
+        const row = Math.floor(index / columns);
+        return {
+          x: 2 + col * 24,
+          y: 2 + row * 22,
+        };
+      }
       case PadletBoardType.grid:
         return { x: index % GRID_COLUMNS, y: Math.floor(index / GRID_COLUMNS) };
       case PadletBoardType.timeline:

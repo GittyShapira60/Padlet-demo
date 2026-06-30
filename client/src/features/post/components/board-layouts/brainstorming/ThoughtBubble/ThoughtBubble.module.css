@@ -1,157 +1,132 @@
 .bubblePost {
   display: inline-block;
-  width: fit-content;
-  max-width: min(360px, 92vw);
-  min-width: 0;
-  filter: drop-shadow(0 3px 10px rgba(15, 23, 42, 0.12));
-  transition: transform 0.2s ease, filter 0.2s ease;
-}
-
-.bubblePost:hover {
-  transform: translateY(-2px);
-  filter: drop-shadow(0 6px 16px rgba(15, 23, 42, 0.16));
-}
-
-.bubbleWrapper {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: fit-content;
-  max-width: min(360px, 92vw);
-  min-width: 0;
-  min-height: 0;
-  box-sizing: border-box;
-  /* fixed “safe margin” from the cloud border */
-  padding: 4.75rem 2.75rem 5.75rem 2.55rem;
+  min-width: 160px;
+  max-width: 220px;
 }
 
-.bubbleBg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.bubbleBg svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.postContentSafeZone {
+.bubble {
   position: relative;
-  z-index: 2;
-  flex: 0 1 auto;
   display: flex;
   flex-direction: column;
-  /* content controls bubble size; bubble stays responsive via max-width */
-  width: clamp(160px, 22ch, 260px);
-  max-width: calc(92vw - 5.3rem);
   min-width: 0;
-  box-sizing: border-box;
-  overflow: visible;
-  direction: rtl;
-  text-align: center;
+  margin-bottom: 8px;
+  padding: 0.85rem 0.9rem 0.8rem;
+  border-radius: 20px;
+  background: var(--bubble-color, #ffffff);
   color: #1e293b;
+  direction: rtl;
+  text-align: right;
+  overflow: visible;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Buttons — top-left corner inside the cloud safe zone */
-.bubbleActions {
+.bubble::after {
+  content: '';
   position: absolute;
-  top: 0.35rem;
-  left: 0.15rem;
-  z-index: 3;
-  display: flex;
-  gap: 0.25rem;
-  opacity: 0;
+  bottom: -8px;
+  left: 1.15rem;
+  width: 0;
+  height: 0;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-top: 10px solid var(--bubble-color, #ffffff);
   pointer-events: none;
-  transition: opacity 0.2s ease;
 }
 
-.bubblePost:hover .bubbleActions,
-.bubblePost:focus-within .bubbleActions {
-  opacity: 1;
-  pointer-events: auto;
+.bubblePost:hover .bubble {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 }
 
-.bubbleActions :global(.padlet-post-actions) {
-  position: static;
-  top: auto;
-  left: auto;
-  opacity: 1;
-  pointer-events: auto;
+.content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
 }
 
-.hasActions .textBody {
-  padding-top: 2.35rem;
+.content :global([class*='header']) {
+  margin-bottom: 0.5rem;
 }
 
-.textBody {
+.content :global([class*='content']) {
   flex: 1 1 auto;
-  min-width: 0;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 1.35rem 0.8rem 1.1rem;
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-
-.textBody :global([class*='content']) {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  background: transparent;
-  overflow-x: hidden;
+  min-height: 0;
+  max-height: 7.5rem;
   overflow-y: auto;
-  max-height: 7.25rem;
-  white-space: normal;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
   word-break: break-word;
-  overflow-wrap: break-word;
+  padding-inline-end: 0.15rem;
+  text-align: right;
 }
 
-.textBody :global([class*='content'])::-webkit-scrollbar {
+.content :global([class*='content'])::-webkit-scrollbar {
   width: 4px;
 }
 
-.textBody :global([class*='content'])::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.35);
+.content :global([class*='content'])::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.45);
   border-radius: 999px;
 }
 
-.textBody :global([class*='title']),
-.textBody :global([class*='subject']) {
+.content :global([class*='bubbleContent']) {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  text-align: right;
+}
+
+.content :global([class*='title']),
+.content :global([class*='subject']) {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  text-align: right;
   white-space: normal;
   word-break: break-word;
   overflow-wrap: break-word;
 }
 
-.bubbleFooter {
+.footer {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 0.5rem;
   width: 100%;
   min-width: 0;
-  padding: 0.35rem 0.25rem 0.95rem;
+  margin-top: 0.35rem;
+  padding-top: 0.15rem;
   direction: rtl;
 }
 
-.bubbleFooter :global([class*='author']) {
-  margin: 0;
-  flex: 0 0 auto;
-  min-width: 0;
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: break-word;
+.footer :global(.padlet-post-actions) {
+  position: static;
+  inset: auto;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.footer :global([class*='actionBtn']) {
+  height: 1.5rem;
+  padding: 0 0.25rem;
+  border-radius: 6px;
+  background: transparent;
+  color: #64748b;
+  backdrop-filter: none;
+}
+
+.footer :global([class*='actionBtn']):hover {
+  background: rgba(15, 23, 42, 0.08);
+  color: #334155;
+}
+
+.footer :global([class*='deleteBtn']) {
+  color: #64748b;
 }

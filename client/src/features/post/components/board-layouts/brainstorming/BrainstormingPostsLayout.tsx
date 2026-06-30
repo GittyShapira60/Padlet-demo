@@ -1,19 +1,8 @@
-import type { PostLayout } from '../../../interfaces/post';
 import type { BoardLayoutProps } from '../board-layout-props';
 import BrainstormingPostCard from './BrainstormingPostCard';
+import { getBrainstormTilt } from './brainstorming-layout';
 import styles from './BrainstormingPostsLayout.module.css';
-
-const TILTS = [-4.5, 3, -2.5, 4, -3.5, 2, -5, 1.5];
-
-function getDefaultLayout(index: number): PostLayout {
-  const column = index % 2;
-  const row = Math.floor(index / 2);
-
-  return {
-    x: 6 + column * 48 + (row % 2 === 0 ? 2 : -2),
-    y: 4 + row * 32 + (column % 2 === 0 ? 4 : 0),
-  };
-}
+import { useBrainstormMasonry } from './useBrainstormMasonry';
 
 export default function BrainstormingPostsLayout({
   padletId,
@@ -23,21 +12,39 @@ export default function BrainstormingPostsLayout({
   onEditPost,
   onDeletePost,
 }: BoardLayoutProps) {
+  const { containerRef, setItemRef, layout } = useBrainstormMasonry(posts.length);
+
   return (
-    <div className={styles.canvas}>
+    <div
+      ref={containerRef}
+      className={styles.canvas}
+      style={layout ? { height: layout.height } : undefined}
+    >
       {posts.map((post, index) => {
-        const layout = post.layout ?? getDefaultLayout(index);
-        const tilt = TILTS[index % TILTS.length];
+        const tilt = getBrainstormTilt(index);
+        const position = layout?.positions[index];
 
         return (
           <div
             key={post.id}
+            ref={(el) => setItemRef(index, el)}
             className={styles.post}
-            style={{
-              top: `${layout.y}%`,
-              right: `${layout.x}%`,
-              transform: `rotate(${tilt}deg)`,
-            }}
+            style={
+              position
+                ? {
+                    top: position.top,
+                    right: position.right,
+                    width: position.width,
+                    transform: `rotate(${tilt}deg)`,
+                    visibility: 'visible',
+                  }
+                : {
+                    top: 0,
+                    right: 0,
+                    transform: `rotate(${tilt}deg)`,
+                    visibility: 'hidden',
+                  }
+            }
           >
             <BrainstormingPostCard
               post={post}

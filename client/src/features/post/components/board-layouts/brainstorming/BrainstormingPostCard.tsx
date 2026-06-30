@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { BACKGROUND_COLOR_LIGHT } from '../../../../../shared/constants/background-colors';
 import { formatRelativeTime } from '../../../../../shared/utils/format-relative-time';
-import { ExternalLink, Pencil, Trash2 } from '../../../../../shared/icons';
+import { ExternalLink } from '../../../../../shared/icons';
 import { useAuth } from '../../../../auth/context/AuthProvider';
 import type { Post } from '../../../interfaces/post';
 import { PostComments } from '../../../../comment';
@@ -18,44 +19,10 @@ interface BrainstormingPostCardProps {
   onDelete?: (post: Post) => void;
 }
 
-function PostActions({
-  post,
-  onEdit,
-  onDelete,
-}: {
-  post: Post;
-  onEdit?: (post: Post) => void;
-  onDelete?: (post: Post) => void;
-}) {
-  return (
-    <div
-      className={`${cardStyles.actions} ${cardStyles.actionsInline} padlet-post-actions`}
-    >
-      <button
-        type="button"
-        className={cardStyles.actionBtn}
-        onClick={() => onEdit?.(post)}
-      >
-        <Pencil size={14} />
-      </button>
-      <button
-        type="button"
-        className={`${cardStyles.actionBtn} ${cardStyles.deleteBtn}`}
-        onClick={() => onDelete?.(post)}
-      >
-        <Trash2 size={14} />
-      </button>
-    </div>
-  );
-}
-
 export default function BrainstormingPostCard({
   post,
   padletId,
-  canManage = false,
   canComment = false,
-  onEdit,
-  onDelete,
 }: BrainstormingPostCardProps) {
   const { user } = useAuth();
   const { comments, error, sendComment, removeComment, editComment } = usePostComments(
@@ -63,18 +30,12 @@ export default function BrainstormingPostCard({
     post.id,
     canComment,
   );
+  const [commentsOpen, setCommentsOpen] = useState(false);
   const background = BACKGROUND_COLOR_LIGHT[post.color ?? ''] ?? post.color ?? '#ffffff';
   const authorInitial = post.authorUsername.charAt(0).toUpperCase();
 
   return (
-    <ThoughtBubble
-      color={background}
-      footer={
-        canManage ? (
-          <PostActions post={post} onEdit={onEdit} onDelete={onDelete} />
-        ) : null
-      }
-    >
+    <ThoughtBubble color={background}>
       <header className={cardStyles.header}>
         <div className={cardStyles.authorMeta}>
           <span className={cardStyles.avatar}>{authorInitial}</span>
@@ -117,14 +78,18 @@ export default function BrainstormingPostCard({
         postId={post.id}
         commentCount={comments.length}
         showCommentCount={canComment}
+        onCommentToggle={() => setCommentsOpen((open) => !open)}
+        commentsExpanded={commentsOpen}
       />
 
-      {canComment ? (
+      {canComment && commentsOpen ? (
         <PostComments
           comments={comments}
           error={error}
           currentUsername={user?.username}
           canComment={canComment}
+          scrollableList
+          compactScrollableList
           onSendComment={sendComment}
           onDeleteComment={removeComment}
           onEditComment={editComment}
