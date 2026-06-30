@@ -1,4 +1,3 @@
-import { resolveBackgroundStyle } from '../../../shared/constants/background-colors';
 import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../../../App';
@@ -103,10 +102,7 @@ function PadletBoardBody({
     capabilities.canEditPadlet || capabilities.canShare || isShared;
 
   return (
-    <div
-      className={styles.page}
-      style={{ ...resolveBackgroundStyle(padlet?.background ?? null), backgroundAttachment: 'fixed' }}
-    >
+    <div className={styles.page}>
       <div className={styles.titleRow}>
         <h1 className={styles.boardTitle}>{title}</h1>
         <PostFilterBar
