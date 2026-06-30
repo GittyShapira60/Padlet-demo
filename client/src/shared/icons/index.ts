@@ -17,13 +17,13 @@ export {
   Copy,
   ExternalLink,
 
-  Image,
+  ImageIcon,
 
   LayoutDashboard,
 
   LayoutGrid,
 
-  Link,
+  LinkIcon,
 
   Lock,
 

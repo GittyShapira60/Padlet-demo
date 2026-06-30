@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import { BarChart3, Image, Link, Type } from '@/shared/icons';
+import { BarChart3, ImageIcon, LinkIcon, Type } from '@/shared/icons';
 import {
   PostContentTab as PostContentTabValues,
   type PostContentTab,
@@ -10,8 +10,8 @@ type TabIcon = ComponentType<{ size?: number | string; className?: string }>;
 
 const TABS: { id: PostContentTab; label: string; icon: TabIcon }[] = [
   { id: PostContentTabValues.Text, label: 'טקסט', icon: Type },
-  { id: PostContentTabValues.Image, label: 'תמונה', icon: Image },
-  { id: PostContentTabValues.Link, label: 'לינק', icon: Link },
+  { id: PostContentTabValues.Image, label: 'תמונה', icon: ImageIcon },
+  { id: PostContentTabValues.Link, label: 'לינק', icon: LinkIcon },
   { id: PostContentTabValues.Poll, label: 'סקר', icon: BarChart3 },
 ];
 

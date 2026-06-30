@@ -50,6 +50,12 @@ export default function CreatePostModal({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
+  const mode = isEditMode ? 'edit' : 'create';
+  const modalTitle = CREATE_POST_MODAL_TEXTS.title[mode];
+  const submitLabel = isLoading
+    ? CREATE_POST_MODAL_TEXTS.submitting[mode]
+    : CREATE_POST_MODAL_TEXTS.submit[mode];
+
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div
@@ -57,11 +63,7 @@ export default function CreatePostModal({
         onClick={(event) => event.stopPropagation()}
       >
         <header className={styles.header}>
-          <h2 className={styles.title}>
-            {isEditMode
-              ? CREATE_POST_MODAL_TEXTS.title.edit
-              : CREATE_POST_MODAL_TEXTS.title.create}
-          </h2>
+          <h2 className={styles.title}>{modalTitle}</h2>
           <button type="button" className={styles.closeBtn} onClick={onClose}>
             &times;
           </button>
@@ -98,13 +100,7 @@ export default function CreatePostModal({
             onClick={() => void handleSubmit()}
             disabled={isLoading || !canSubmit}
           >
-            {isLoading
-              ? isEditMode
-                ? CREATE_POST_MODAL_TEXTS.submitting.edit
-                : CREATE_POST_MODAL_TEXTS.submitting.create
-              : isEditMode
-                ? CREATE_POST_MODAL_TEXTS.submit.edit
-                : CREATE_POST_MODAL_TEXTS.submit.create}
+            {submitLabel}
           </button>
           <button type="button" className={styles.cancelBtn} onClick={onClose} disabled={isLoading}>
             {CREATE_POST_MODAL_TEXTS.cancel}

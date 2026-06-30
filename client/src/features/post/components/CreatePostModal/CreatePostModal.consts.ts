@@ -9,7 +9,7 @@ export const CREATE_POST_MODAL_TEXTS = {
   },
   submitting: {
     create: 'מוסיף...',
-    edit: 'שומרת...',
+    edit: 'שומר...',
   },
   cancel: 'ביטול',
 } as const;
