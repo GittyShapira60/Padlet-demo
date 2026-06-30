@@ -3,16 +3,16 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--header-btn-bg, rgba(0, 0, 0, 0.18));
   backdrop-filter: blur(8px);
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--header-btn-border, rgba(255, 255, 255, 0.15));
   direction: rtl;
 }
 
 .icon {
   flex-shrink: 0;
-  color: #ffffff;
+  color: var(--header-icon-color, #ffffff);
   opacity: 0.85;
 }
 
@@ -20,7 +20,7 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #ffffff;
+  color: var(--header-icon-color, #ffffff);
   font: inherit;
   font-size: 0.8125rem;
   width: 140px;
@@ -28,31 +28,39 @@
 }
 
 .input::placeholder {
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--header-icon-color, #ffffff);
+  opacity: 0.6;
 }
 
 .input:not(:last-child) {
-  border-left: 1px solid rgba(255, 255, 255, 0.3);
+  border-left: 1px solid var(--header-btn-border, rgba(255, 255, 255, 0.3));
   padding-left: 0.5rem;
   margin-left: 0.25rem;
 }
 
 .clearBtn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   width: 20px;
   height: 20px;
+  margin-left: 1.25rem;
   border: none;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
-  color: #ffffff;
+  background: transparent;
+  color: var(--header-icon-color, #ffffff);
   cursor: pointer;
-  transition: background 0.15s ease;
-  padding: 0;
 }
 
-.clearBtn:hover {
-  background: rgba(255, 255, 255, 0.4);
+.clearBtn::before {
+  content: '';
+  position: absolute;
+  left: -0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 14px;
+  background: #000000;
 }
