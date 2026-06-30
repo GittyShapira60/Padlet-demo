@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import AppHeader from './shared/layout/AppHeader/AppHeader';
@@ -19,11 +19,16 @@ function App() {
     navigate('/');
   }, [navigate]);
 
+  const appStyle = useMemo(
+    () =>
+      headerBackground
+        ? { ...resolveBackgroundStyle(headerBackground), backgroundAttachment: 'fixed' as const }
+        : undefined,
+    [headerBackground],
+  );
+
   return (
-    <div
-      className={styles.app}
-      style={headerBackground ? { ...resolveBackgroundStyle(headerBackground), backgroundAttachment: 'fixed' } : undefined}
-    >
+    <div className={styles.app} style={appStyle}>
       <AppHeader
         centerSlot={headerCenterSlot}
         background={headerBackground}
