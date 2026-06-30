@@ -1,37 +1,8 @@
-import { BACKGROUND_COLOR_GRADIENTS } from '../../../shared/constants/background-colors';
+import { resolveBackgroundStyle } from '../../../shared/constants/background-colors';
 import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../../../App';
-import { Settings, Pencil, Share2 } from '../../../shared/icons';
-
-function PadletMenuButton({ onEdit, onShare }: { onEdit: () => void; onShare: () => void }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-  return (
-    <div ref={ref} className={styles.menuWrapper}>
-      <button type="button" className={styles.menuBtn} aria-label="אפשרויות" onClick={() => setIsOpen((prev: boolean) => !prev)}>
-        <Settings size={17} strokeWidth={1.5} />
-      </button>
-      {isOpen ? (
-        <div className={styles.dropdown}>
-          <button type="button" className={styles.dropdownItem} onClick={() => { setIsOpen(false); onEdit(); }}>
-            <Pencil size={15} strokeWidth={2} aria-hidden="true" /> עריכה
-          </button>
-          <button type="button" className={styles.dropdownItem} onClick={() => { setIsOpen(false); onShare(); }}>
-            <Share2 size={15} strokeWidth={2} aria-hidden="true" /> שיתוף
-          </button>
-        </div>
-      ) : null}
-    </div>
-  );
-}
+import { LogOut, Settings, Pencil, Share2 } from '../../../shared/icons';
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
 import PostFilterBar from '../../post/components/PostFilterBar/PostFilterBar';
@@ -41,104 +12,166 @@ import ConfirmDialog from '../../../shared/components/ConfirmDialog/ConfirmDialo
 import { PollProvider } from '../../post/context/PollContext';
 import EditPadletModal from '../components/EditPadletModal/EditPadletModal';
 import SharePadletModal from '../components/SharePadletModal/SharePadletModal';
+import {
+  PadletCapabilitiesProvider,
+  usePadletCapabilities,
+} from '../context/PadletCapabilitiesContext';
+import { PadletPermission } from '../enums/padlet-permission';
 import { PADLET_PAGE_TEXTS } from './PadletPage.consts';
 import styles from './PadletPage.module.css';
 import { usePadletPage } from './usePadletPage';
 
-export default function PadletPage() {
-  const { setHeaderBackground, setHeaderActionSlot } = useOutletContext<AppOutletContext>();
-  const {
-    padlet,
-    filteredPosts,
-    filterSearch,
-    setFilterSearch,
-    filterAuthor,
-    setFilterAuthor,
-    isLoading,
-    error,
-    isCreatePostOpen,
-    isShareOpen,
-    isEditOpen,
-    postToEdit,
-    currentUsername,
-    handleBack,
-    handleCreatePost,
-    handleClosePostModal,
-    handleOpenShare,
-    handleCloseShare,
-    handleOpenEdit,
-    handleCloseEdit,
-    handlePadletUpdated,
-    handlePostSaved,
-    handleEditPost,
-    handleRequestDeletePost,
-    handleCancelDeletePost,
-    handleConfirmDeletePost,
-    postPendingDelete,
-    isDeletingPost,
-    handleLayoutChange,
-  } = usePadletPage();
+type PadletPageState = ReturnType<typeof usePadletPage>;
+
+interface PadletBoardBodyProps extends PadletPageState {
+  padletId: string;
+  boardType: NonNullable<PadletPageState['padlet']>['boardType'];
+  title: string;
+  isShared: boolean;
+}
+
+function PadletBoardBody({
+  padletId,
+  boardType,
+  title,
+  isShared,
+  padlet,
+  filteredPosts,
+  filterSearch,
+  setFilterSearch,
+  filterAuthor,
+  setFilterAuthor,
+  isCreatePostOpen,
+  isShareOpen,
+  isEditOpen,
+  postToEdit,
+  postPendingDelete,
+  isDeletingPost,
+  isLeaveOpen,
+  isLeavingPadlet,
+  currentUsername,
+  defaultPermission,
+  setDefaultPermission,
+  handleCreatePost,
+  handleClosePostModal,
+  handleOpenShare,
+  handleCloseShare,
+  handleOpenEdit,
+  handleCloseEdit,
+  handlePadletUpdated,
+  handlePostSaved,
+  handleEditPost,
+  handleRequestDeletePost,
+  handleCancelDeletePost,
+  handleConfirmDeletePost,
+  handleLayoutChange,
+  handleOpenLeave,
+  handleCancelLeave,
+  handleConfirmLeave,
+}: PadletBoardBodyProps) {
+  const capabilities = usePadletCapabilities();
+  const { setHeaderBackground } = useOutletContext<AppOutletContext>();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (padlet) {
-      setHeaderActionSlot(
-        <PadletMenuButton onEdit={handleOpenEdit} onShare={handleOpenShare} />
-      );
-    }
-    return () => setHeaderActionSlot(null);
-  }, [padlet, handleOpenEdit, handleOpenShare, setHeaderActionSlot]);
-
-  useEffect(() => {
-    if (padlet) {
-      setHeaderBackground(BACKGROUND_COLOR_GRADIENTS[padlet.background ?? ''] ?? padlet.background ?? null);
+      setHeaderBackground(padlet.background ?? null);
     }
     return () => {
       setHeaderBackground(null);
     };
   }, [padlet, setHeaderBackground]);
 
-  if (isLoading) {
-    return <p className={styles.status}>{PADLET_PAGE_TEXTS.loading}</p>;
-  }
+  useEffect(() => {
+    if (!capabilities.canShare && isShareOpen) {
+      handleCloseShare();
+    }
+  }, [capabilities.canShare, handleCloseShare, isShareOpen]);
 
-  if (error || !padlet) {
-    return (
-      <div className={styles.error}>
-        <p className={styles.errorText}>{error || PADLET_PAGE_TEXTS.boardNotFound}</p>
-        <button type="button" className={styles.backOnly} onClick={handleBack}>
-          {PADLET_PAGE_TEXTS.backToHome}
-        </button>
-      </div>
-    );
-  }
+  const showMenu =
+    capabilities.canEditPadlet || capabilities.canShare || isShared;
 
   return (
     <div
       className={styles.page}
-      style={{ background: BACKGROUND_COLOR_GRADIENTS[padlet.background ?? ''] ?? padlet.background ?? '#f3f4f6', backgroundAttachment: 'fixed' }}
+      style={{ ...resolveBackgroundStyle(padlet?.background ?? null), backgroundAttachment: 'fixed' }}
     >
       <div className={styles.titleRow}>
-        <h1 className={styles.boardTitle}>{padlet.title}</h1>
-        <div className={styles.filterCenter}>
-          <PostFilterBar
-            search={filterSearch}
-            author={filterAuthor}
-            onSearchChange={setFilterSearch}
-            onAuthorChange={setFilterAuthor}
-          />
-        </div>
+        <h1 className={styles.boardTitle}>{title}</h1>
+        <PostFilterBar
+          search={filterSearch}
+          author={filterAuthor}
+          onSearchChange={setFilterSearch}
+          onAuthorChange={setFilterAuthor}
+        />
+        {showMenu ? (
+          <div className={styles.menuWrapper} ref={menuRef}>
+            <button
+              type="button"
+              className={styles.menuBtn}
+              aria-label="אפשרויות"
+              onClick={() => setIsMenuOpen((prev: boolean) => !prev)}
+            >
+              <Settings size={20} strokeWidth={2} aria-hidden="true" />
+            </button>
+            {isMenuOpen ? (
+              <div className={styles.dropdown}>
+                {capabilities.canEditPadlet ? (
+                  <button
+                    type="button"
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      handleOpenEdit();
+                    }}
+                  >
+                    <Pencil size={15} strokeWidth={2} aria-hidden="true" />
+                    עריכה
+                  </button>
+                ) : null}
+                {capabilities.canShare ? (
+                  <button
+                    type="button"
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      handleOpenShare();
+                    }}
+                  >
+                    <Share2 size={15} strokeWidth={2} aria-hidden="true" />
+                    שיתוף
+                  </button>
+                ) : null}
+                {isShared ? (
+                  <button
+                    type="button"
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      handleOpenLeave();
+                    }}
+                  >
+                    <LogOut size={15} strokeWidth={2} aria-hidden="true" />
+                    עזוב לוח
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
-      <PollProvider padletId={padlet.id} onVoteSuccess={handlePostSaved}>
+      <PollProvider padletId={padletId} onVoteSuccess={handlePostSaved}>
         <PostReactionsProvider
-          padletId={padlet.id}
-          postIds={filteredPosts.map((post: { id: string }) => post.id)}
-          canReact={Boolean(currentUsername)}
+          padletId={padletId}
+          postIds={filteredPosts.map((post) => post.id)}
+          canReact={capabilities.canReact}
         >
           <PadletPostsLayer
-            boardType={padlet.boardType}
+            padletId={padletId}
+            boardType={boardType}
             posts={filteredPosts}
-            currentUsername={currentUsername}
             onEditPost={handleEditPost}
             onDeletePost={(post) => void handleRequestDeletePost(post)}
             onLayoutChange={(postId, layout) =>
@@ -148,13 +181,21 @@ export default function PadletPage() {
         </PostReactionsProvider>
       </PollProvider>
 
-      <CreatePostFab onClick={handleCreatePost} />
-
-      {isShareOpen ? (
-        <SharePadletModal padletId={padlet.id} currentUsername={currentUsername} onClose={handleCloseShare} />
+      {capabilities.canCreatePost ? (
+        <CreatePostFab onClick={handleCreatePost} />
       ) : null}
 
-      {isEditOpen ? (
+      {isShareOpen ? (
+        <SharePadletModal
+          padletId={padletId}
+          currentUsername={currentUsername}
+          initialDefaultPermission={defaultPermission ?? PadletPermission.Viewer}
+          onDefaultPermissionChange={setDefaultPermission}
+          onClose={handleCloseShare}
+        />
+      ) : null}
+
+      {isEditOpen && padlet ? (
         <EditPadletModal
           padlet={padlet}
           onClose={handleCloseEdit}
@@ -163,21 +204,83 @@ export default function PadletPage() {
       ) : null}
 
       {isCreatePostOpen ? (
-        <CreatePostModal padletId={padlet.id} postToEdit={postToEdit} onClose={handleClosePostModal} onSubmit={handlePostSaved} />
+        <CreatePostModal
+          padletId={padletId}
+          postToEdit={postToEdit}
+          onClose={handleClosePostModal}
+          onSubmit={handlePostSaved}
+        />
       ) : null}
 
       {postPendingDelete ? (
         <ConfirmDialog
-          title="מחיקת פוסט"
-          description="האם את בטוחה שברצונך למחוק את הפוסט?"
-          confirmLabel="מחק"
-          pendingLabel="מוחק..."
+          title={PADLET_PAGE_TEXTS.deletePost.title}
+          description={PADLET_PAGE_TEXTS.deletePost.description}
+          confirmLabel={PADLET_PAGE_TEXTS.deletePost.confirmLabel}
+          pendingLabel={PADLET_PAGE_TEXTS.deletePost.pendingLabel}
           isPending={isDeletingPost}
           tone="danger"
           onConfirm={() => void handleConfirmDeletePost()}
           onCancel={handleCancelDeletePost}
         />
       ) : null}
+
+      {isLeaveOpen ? (
+        <ConfirmDialog
+          title={PADLET_PAGE_TEXTS.leaveBoard.title}
+          description={PADLET_PAGE_TEXTS.leaveBoard.description(title)}
+          confirmLabel={PADLET_PAGE_TEXTS.leaveBoard.confirmLabel}
+          pendingLabel={PADLET_PAGE_TEXTS.leaveBoard.pendingLabel}
+          tone="danger"
+          isPending={isLeavingPadlet}
+          onConfirm={() => void handleConfirmLeave()}
+          onCancel={handleCancelLeave}
+        />
+      ) : null}
     </div>
+  );
+}
+
+export default function PadletPage() {
+  const page = usePadletPage();
+  const {
+    padlet,
+    isLoading,
+    error,
+    currentUsername,
+    currentUserPermission,
+    handleBack,
+  } = page;
+
+  if (isLoading) {
+    return <p className={styles.status}>{PADLET_PAGE_TEXTS.loading}</p>;
+  }
+
+  if (error || !padlet || !currentUserPermission) {
+    return (
+      <div className={styles.error}>
+        <p className={styles.errorText}>
+          {error || PADLET_PAGE_TEXTS.boardNotFound}
+        </p>
+        <button type="button" className={styles.backOnly} onClick={handleBack}>
+          {PADLET_PAGE_TEXTS.backToHome}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <PadletCapabilitiesProvider
+      permission={currentUserPermission}
+      currentUsername={currentUsername}
+    >
+      <PadletBoardBody
+        {...page}
+        padletId={padlet.id}
+        boardType={padlet.boardType}
+        title={padlet.title}
+        isShared={padlet.isShared}
+      />
+    </PadletCapabilitiesProvider>
   );
 }

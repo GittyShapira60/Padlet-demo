@@ -3,8 +3,10 @@ import type { BoardLayoutProps } from '../board-layout-props';
 import styles from './GridPostsLayout.module.css';
 
 export default function GridPostsLayout({
+  padletId,
   posts,
-  currentUsername,
+  canComment,
+  canEditPost,
   onEditPost,
   onDeletePost,
 }: BoardLayoutProps) {
@@ -14,7 +16,9 @@ export default function GridPostsLayout({
         <div key={post.id} className={styles.item}>
           <BoardPostCard
             post={post}
-            currentUsername={currentUsername}
+            padletId={padletId}
+            canManage={canEditPost(post)}
+            canComment={canComment}
             onEditPost={onEditPost}
             onDeletePost={onDeletePost}
           />

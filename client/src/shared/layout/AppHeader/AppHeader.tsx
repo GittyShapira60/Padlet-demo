@@ -2,18 +2,17 @@ import type { ReactNode } from 'react';
 import { useAuth } from '../../../features/auth/context/AuthProvider';
 import { NotificationBell } from '../../../features/notification';
 import { BarChart3, LogOut } from '../../icons';
+import { resolveBackgroundStyle } from '../../constants/background-colors';
 import styles from './AppHeader.module.css';
 
 interface AppHeaderProps {
   centerSlot?: ReactNode;
-  actionSlot?: ReactNode;
   background?: string | null;
   onLogoClick?: () => void;
 }
 
 export default function AppHeader({
   centerSlot,
-  actionSlot,
   background,
   onLogoClick,
 }: AppHeaderProps) {
@@ -24,7 +23,7 @@ export default function AppHeader({
   return (
     <header
       className={`${styles.header} ${background ? styles.noBorder : ''}`}
-      style={background ? { background, backgroundAttachment: 'fixed' } : undefined}
+      style={background ? { ...resolveBackgroundStyle(background), backgroundAttachment: 'fixed' } : undefined}
     >
       <div className={styles.inner}>
         <div className={styles.rightGroup}>
@@ -49,7 +48,6 @@ export default function AppHeader({
         </div>
 
         <nav className={styles.actions}>
-          {actionSlot ?? null}
           <button type="button" className={styles.stats}>
             <BarChart3 size={17} strokeWidth={1.5} />
             סטטיסטיקות

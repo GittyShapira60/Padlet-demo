@@ -14,6 +14,8 @@ export default function EmojiPickerPopover({
   anchorRef,
   catalogMode,
   selectedCode = null,
+  placement = 'auto',
+  align = 'anchor-end',
   onSelect,
 }: EmojiPickerPopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -36,6 +38,7 @@ export default function EmojiPickerPopover({
     popoverRef,
     isOpen,
     [activeCategory, searchQuery, visibleEmojis.length, activeCategoryLabel, isLoading],
+    { placement, align },
   );
 
   useEffect(() => {

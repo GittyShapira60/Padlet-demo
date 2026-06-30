@@ -38,3 +38,47 @@ export const BACKGROUND_COLOR_LIGHT: Record<string, string> = {
 };
 
 export type BackgroundColor = (typeof BACKGROUND_COLORS)[number];
+
+/** Wallpaper images for the images tab in the background picker. Served from /public for stable (unhashed) URLs. */
+export const BACKGROUND_IMAGES: string[] = [
+  '/wallpapers/p1.jpg',
+  '/wallpapers/p2.jpg',
+  '/wallpapers/p3.jpg',
+  '/wallpapers/p4.jpg',
+  '/wallpapers/p5.jpg',
+  '/wallpapers/p6.jpg',
+  '/wallpapers/p7.jpg',
+  '/wallpapers/p8.jpeg',
+  '/wallpapers/p9.jpg',
+  '/wallpapers/p10.jpg',
+  '/wallpapers/p11.avif',
+  '/wallpapers/p12.jpg',
+  '/wallpapers/p13.webp',
+  '/wallpapers/p14.jpg',
+  '/wallpapers/p15.webp',
+];
+
+/** Gradient wallpapers for the patterns tab in the background picker. */
+export const BACKGROUND_GRADIENTS = [
+  'linear-gradient(135deg, #1e3c72 0%, #2a5298 35%, #38b2ac 70%, #81e6d9 100%)',
+  'linear-gradient(135deg, #f953c6 0%, #ff6b35 40%, #f7931e 70%, #ffcc02 100%)',
+  'linear-gradient(135deg, #6a0dad 0%, #c0392b 33%, #e67e22 66%, #f1c40f 100%)',
+  'linear-gradient(135deg, #1a237e 0%, #0097a7 35%, #4caf50 65%, #cddc39 100%)',
+  'linear-gradient(135deg, #134e5e 0%, #2ecc71 40%, #a8e063 75%, #f9d423 100%)',
+  'linear-gradient(135deg, #00b4db 0%, #48dbfb 35%, #f78ca0 70%, #f9748f 100%)',
+  'linear-gradient(135deg, #fccb90 0%, #d57eeb 40%, #a18cd1 70%, #fbc2eb 100%)',
+  'linear-gradient(135deg, #c0392b 0%, #8e44ad 35%, #2980b9 65%, #1abc9c 100%)',
+] as const;
+
+export type BackgroundGradient = (typeof BACKGROUND_GRADIENTS)[number];
+
+export function resolveBackgroundStyle(
+  value: string | null | undefined,
+  defaultBg = '#f3f4f6',
+): Record<string, string> {
+  if (!value) return { background: defaultBg };
+  if (value.startsWith('/') || value.startsWith('http')) {
+    return { backgroundImage: `url(${value})`, backgroundSize: 'cover', backgroundPosition: 'center' };
+  }
+  return { background: BACKGROUND_COLOR_GRADIENTS[value] ?? value };
+}

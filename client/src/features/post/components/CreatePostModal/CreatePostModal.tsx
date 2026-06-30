@@ -27,6 +27,8 @@ export default function CreatePostModal({
     setTextContent,
     selectedFile,
     setSelectedFile,
+    description,
+    setDescription,
     selectedColor,
     setSelectedColor,
     pollAnswers,
@@ -67,10 +69,12 @@ export default function CreatePostModal({
         <CreatePostContentArea
           activeTab={activeTab}
           textContent={textContent}
+          description={description}
           selectedFile={selectedFile}
           selectedColor={selectedColor}
-          existingImageName={postToEdit?.subject ?? null}
+          existingImageUrl={postToEdit?.imageUrl ?? null}
           onTextChange={setTextContent}
+          onDescriptionChange={setDescription}
           onFileChange={setSelectedFile}
           pollAnswers={pollAnswers}
           onPollQuestionChange={setTextContent}

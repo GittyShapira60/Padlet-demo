@@ -3,23 +3,27 @@ import type { Post } from '../../interfaces/post';
 
 interface BoardPostCardProps {
   post: Post;
-  currentUsername?: string;
+  padletId: string;
+  canManage: boolean;
+  canComment: boolean;
   onEditPost?: (post: Post) => void;
   onDeletePost?: (post: Post) => void;
 }
 
 export default function BoardPostCard({
   post,
-  currentUsername,
+  padletId,
+  canManage,
+  canComment,
   onEditPost,
   onDeletePost,
 }: BoardPostCardProps) {
-  const canManage = currentUsername === post.authorUsername;
-
   return (
     <PadletPostCard
       post={post}
+      padletId={padletId}
       canManage={canManage}
+      canComment={canComment}
       onEdit={onEditPost}
       onDelete={onDeletePost}
     />

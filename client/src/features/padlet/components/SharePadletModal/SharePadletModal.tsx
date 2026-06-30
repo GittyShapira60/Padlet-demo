@@ -6,12 +6,15 @@ import ShareLinkField from './ShareLinkField/ShareLinkField';
 import SharePadletModalHeader from './SharePadletModalHeader/SharePadletModalHeader';
 import common from './shareModalCommon.module.css';
 import styles from './SharePadletModal.module.css';
+import type { PadletPermission } from '../../enums/padlet-permission';
 import { useSharePadletModal } from '../../hooks/useSharePadletModal';
 
 interface SharePadletModalProps {
   padletId: string;
   onClose: () => void;
   currentUsername?: string;
+  initialDefaultPermission: PadletPermission;
+  onDefaultPermissionChange?: (permission: PadletPermission) => void;
 }
 
 const TITLE = 'הרשאות';
@@ -20,11 +23,13 @@ export default function SharePadletModal({
   padletId,
   onClose,
   currentUsername,
+  initialDefaultPermission,
+  onDefaultPermissionChange,
 }: SharePadletModalProps) {
   const {
     shareUrl,
     linkPermission,
-    setLinkPermission,
+    handleLinkPermissionChange,
     collaboratorMinimum,
     permissionHint,
     searchQuery,
@@ -43,7 +48,12 @@ export default function SharePadletModal({
     clearInviteError,
     reportCopyError,
     resetModalForm,
-  } = useSharePadletModal({ padletId, currentUsername });
+  } = useSharePadletModal({
+    padletId,
+    currentUsername,
+    initialDefaultPermission,
+    onDefaultPermissionChange,
+  });
 
   function handleClose() {
     resetModalForm();
@@ -62,7 +72,7 @@ export default function SharePadletModal({
 
         <LinkPermissionRow
           linkPermission={linkPermission}
-          onChange={setLinkPermission}
+          onChange={(permission) => void handleLinkPermissionChange(permission)}
         />
 
         <p className={common.hint}>{permissionHint}</p>

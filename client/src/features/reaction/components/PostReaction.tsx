@@ -10,9 +10,10 @@ import styles from './PostReaction.module.css';
 
 interface PostReactionProps {
   postId: string;
+  variant?: 'default' | 'inline';
 }
 
-export default function PostReaction({ postId }: PostReactionProps) {
+export default function PostReaction({ postId, variant = 'default' }: PostReactionProps) {
   const anchorRef = useRef<HTMLDivElement>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const { canReact, getPostReactions, setReaction, removeReaction } =
@@ -49,7 +50,10 @@ export default function PostReaction({ postId }: PostReactionProps) {
   );
 
   return (
-    <div ref={anchorRef} className={styles.bar}>
+    <div
+      ref={anchorRef}
+      className={`${styles.bar} ${variant === 'inline' ? styles.barInline : ''}`}
+    >
       {visibleSummaries.map((summary) => (
         <ReactionPill
           key={summary.reactionCode}
@@ -68,7 +72,7 @@ export default function PostReaction({ postId }: PostReactionProps) {
           className={styles.addBtn}
           onClick={handleOpenPicker}
         >
-          <SmilePlus size={19} strokeWidth={1.5} />
+          <SmilePlus size={16} strokeWidth={1.5} />
         </button>
       ) : null}
 

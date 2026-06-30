@@ -1,5 +1,4 @@
 import {
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -11,9 +10,10 @@ import {
   type Poll,
   type PollOption,
   type PollVote,
-  type Post,
 } from '@prisma/client';
+import { RealtimeGateway } from '../gateway/realtime.gateway';
 import { NotificationService } from '../notification/notification.service';
+import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostContentInputDto } from './dto/post-content-input.dto';
@@ -38,16 +38,21 @@ export interface PollResponseDto {
   userVotedOptionId: string | null;
 }
 
+export type PostType = 'text' | 'image' | 'link' | 'poll';
+
 export interface PostResponseDto {
   id: string;
   padletId: string;
   authorUsername: string;
+  postType: PostType;
   title: string | null;
   subject: string | null;
+  description: string | null;
   color: string | null;
   layout: PostLayoutDto | null;
   createdAt: string;
   poll: PollResponseDto | null;
+  imageUrl: string | null;
 }
 
 type PollWithOptionsAndVotes = Poll & {
@@ -58,6 +63,7 @@ type PollWithOptionsAndVotes = Poll & {
 export type PostWithAuthor = Prisma.PostGetPayload<{
   include: {
     user: true;
+    attachment: true;
     poll: {
       include: {
         poll_options: { include: { poll_votes: true } };
@@ -67,14 +73,16 @@ export type PostWithAuthor = Prisma.PostGetPayload<{
   };
 }>;
 
-const FREE_WALL_COLUMNS = 3;
+const FREE_WALL_COLUMNS = 5;
 const GRID_COLUMNS = 4;
 
 @Injectable()
 export class PostsService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly padletAccess: PadletAccessService,
     private readonly notificationService: NotificationService,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   async createPost(
@@ -86,7 +94,7 @@ export class PostsService {
     const authorId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
 
-    const padlet = await this.getAccessiblePadlet(authorId, padletId);
+    const access = await this.padletAccess.assertCanCreatePost(authorId, padletId);
 
     const existingCount = await this.prisma.post.count({
       where: { padlet_id: padletId },
@@ -101,17 +109,20 @@ export class PostsService {
           padlet_id: padletId,
           user_id: authorId,
           content_kind: contentKind,
+          post_type: dto.content_kind,
           title,
           subject,
+          description: dto.description ?? null,
           color: dto.color ?? null,
           data_layout: this.toJsonLayout(
-            this.buildLayout(padlet.board_type, existingCount),
+            this.buildLayout(access.boardType, existingCount),
           ),
           created_at: now,
           updated_at: now,
         },
         include: {
           user: true,
+          attachment: true,
           poll: {
             include: {
               poll_options: { include: { poll_votes: true }, orderBy: { sort_order: 'asc' } },
@@ -120,6 +131,16 @@ export class PostsService {
           },
         },
       });
+
+      if (dto.content_kind === 'image' && dto.image_data) {
+        await tx.postAttachment.create({
+          data: {
+            post_id: created.post_id,
+            attachment_type: 'picture',
+            attachment_data: dto.image_data,
+          },
+        });
+      }
 
       if (
         dto.content_kind === 'poll' &&
@@ -150,9 +171,10 @@ export class PostsService {
 
     void this.notifyPadletMembers(padletId, authorId, actorUsername, post.post_id);
 
-    // טעינה מחדש עם נתוני הסקר
     const postWithPoll = await this.findPostWithPoll(post.post_id);
-    return this.toPostResponse(postWithPoll, authorId);
+    const postResponse = this.toPostResponse(postWithPoll, authorId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:created', postResponse);
+    return postResponse;
   }
 
   private async notifyPadletMembers(
@@ -199,8 +221,17 @@ export class PostsService {
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
     const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
 
-    const existingPost = await this.findPostForUser(requesterId, padletId, postId);
-    this.assertPostAuthor(existingPost, requesterId);
+    const existingPost = await this.findPostForUser(
+      requesterId,
+      padletId,
+      postId,
+    );
+
+    await this.padletAccess.assertCanEditPost(
+      requesterId,
+      padletId,
+      existingPost.user_id,
+    );
 
     const { contentKind, title, subject } = this.mapPostContent(dto);
     const now = new Date();
@@ -209,15 +240,28 @@ export class PostsService {
       where: { post_id: postId },
       data: {
         content_kind: contentKind,
+        post_type: dto.content_kind,
         title,
         subject,
+        description: dto.description ?? null,
         color: dto.color ?? null,
         updated_at: now,
       },
       include: { user: true },
     });
 
-    // עדכון הסקר
+    if (dto.content_kind === 'image' && dto.image_data) {
+      await this.prisma.postAttachment.upsert({
+        where: { post_id: postId },
+        create: {
+          post_id: postId,
+          attachment_type: 'picture',
+          attachment_data: dto.image_data,
+        },
+        update: { attachment_data: dto.image_data },
+      });
+    }
+
     if (dto.content_kind === 'poll' && dto.content) {
       const existingPoll = await this.prisma.poll.findUnique({
         where: { post_id: postId },
@@ -261,7 +305,9 @@ export class PostsService {
     await this.touchPadlet(padletId, now);
 
     const postWithPoll = await this.findPostWithPoll(postId);
-    return this.toPostResponse(postWithPoll, requesterId);
+    const postResponse = this.toPostResponse(postWithPoll, requesterId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    return postResponse;
   }
 
   async updatePostLayout(
@@ -274,8 +320,17 @@ export class PostsService {
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
     const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
 
-    const existingPost = await this.findPostForUser(requesterId, padletId, postId);
-    this.assertPostAuthor(existingPost, requesterId);
+    const existingPost = await this.findPostForUser(
+      requesterId,
+      padletId,
+      postId,
+    );
+
+    await this.padletAccess.assertCanEditPost(
+      requesterId,
+      padletId,
+      existingPost.user_id,
+    );
 
     const now = new Date();
 
@@ -290,7 +345,9 @@ export class PostsService {
     await this.touchPadlet(padletId, now);
 
     const postWithPoll = await this.findPostWithPoll(postId);
-   return this.toPostResponse(postWithPoll, requesterId);
+    const postResponse = this.toPostResponse(postWithPoll, requesterId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    return postResponse;
   }
 
   async deletePost(
@@ -302,21 +359,66 @@ export class PostsService {
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
     const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
 
-    const existingPost = await this.findPostForUser(requesterId, padletId, postId);
-    this.assertPostAuthor(existingPost, requesterId);
+    const existingPost = await this.findPostForUser(
+      requesterId,
+      padletId,
+      postId,
+    );
 
-    const padlet = await this.getAccessiblePadlet(requesterId, padletId);
+    await this.padletAccess.assertCanDeletePost(
+      requesterId,
+      padletId,
+      existingPost.user_id,
+    );
+
+    const padlet = await this.padletAccess.assertCanView(requesterId, padletId);
     const now = new Date();
 
-    await this.prisma.post.delete({ where: { post_id: postId } });
+    await this.prisma.$transaction([
+      this.prisma.comment.deleteMany({ where: { post_id: postId } }),
+      this.prisma.post.delete({ where: { post_id: postId } }),
+    ]);
 
-    if (padlet.board_type !== PadletBoardType.free_wall) {
-      await this.reindexPostLayouts(padletId, padlet.board_type);
+    if (padlet.boardType !== PadletBoardType.free_wall) {
+      await this.reindexPostLayouts(padletId, padlet.boardType);
     }
 
     await this.touchPadlet(padletId, now);
 
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:deleted', { postId: postIdRaw });
     return this.getPadletPosts(padletId, requesterId);
+  }
+
+  async deletePoll(
+    userId: string,
+    padletIdRaw: string,
+    postIdRaw: string,
+  ): Promise<PostResponseDto> {
+    const requesterId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+    const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
+
+    const existingPost = await this.findPostForUser(requesterId, padletId, postId);
+
+    await this.padletAccess.assertCanDeletePost(requesterId, padletId, existingPost.user_id);
+
+    if (!existingPost.poll) throw new NotFoundException('הסקר לא נמצא');
+
+    const now = new Date();
+    await this.prisma.$transaction([
+      this.prisma.poll.delete({ where: { post_id: postId } }),
+      this.prisma.post.update({
+        where: { post_id: postId },
+        data: { content_kind: PostContentKind.none, post_type: null, title: null, subject: null, updated_at: now },
+      }),
+    ]);
+
+    await this.touchPadlet(padletId, now);
+
+    const postWithPoll = await this.findPostWithPoll(postId);
+    const postResponse = this.toPostResponse(postWithPoll, requesterId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    return postResponse;
   }
 
   async votePoll(
@@ -330,7 +432,7 @@ export class PostsService {
     const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
     const optionId = this.parseId(optionIdRaw, 'אפשרות לא נמצאה');
 
-    await this.getAccessiblePadlet(voterId, padletId);
+    await this.padletAccess.assertCanReact(voterId, padletId);
 
     const poll = await this.prisma.poll.findFirst({
       where: { post_id: postId, post: { padlet_id: padletId } },
@@ -348,8 +450,10 @@ export class PostsService {
       update: { option_id: optionId },
     });
 
-    const postWithPoll = await this.findPostWithPoll(postId, voterId);
-    return this.toPostResponse(postWithPoll, voterId);
+    const postWithPoll = await this.findPostWithPoll(postId);
+    const postResponse = this.toPostResponse(postWithPoll, voterId);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    return postResponse;
   }
 
   toPostResponse(post: PostWithAuthor, requesterId?: bigint): PostResponseDto {
@@ -376,29 +480,39 @@ export class PostsService {
       };
     }
 
+    const postType: PostType =
+      (post.post_type as PostType | null) ??
+      (post.poll ? 'poll'
+        : post.attachment ? 'image'
+        : post.content_kind === 'attachment' ? 'link'
+        : 'text');
+
     return {
       id: post.post_id.toString(),
       padletId: post.padlet_id.toString(),
       authorUsername: post.user.username,
+      postType,
       title: post.title,
       subject: post.subject,
+      description: post.description ?? null,
       color: post.color,
       layout: post.data_layout
         ? (post.data_layout as unknown as PostLayoutDto)
         : null,
       createdAt: post.created_at.toISOString(),
       poll: pollData,
+      imageUrl: post.attachment?.attachment_data ?? null,
     };
   }
 
   private async findPostWithPoll(
     postId: bigint,
-    requesterId?: bigint,
   ): Promise<PostWithAuthor> {
     const post = await this.prisma.post.findUnique({
       where: { post_id: postId },
       include: {
         user: true,
+        attachment: true,
         poll: {
           include: {
             poll_options: {
@@ -415,33 +529,18 @@ export class PostsService {
     return post as PostWithAuthor;
   }
 
-  private async getAccessiblePadlet(userId: bigint, padletId: bigint) {
-    const padlet = await this.prisma.padlet.findFirst({
-      where: {
-        padlet_id: padletId,
-        OR: [
-          { user_id: userId },
-          { participants: { some: { user_id: userId } } },
-        ],
-      },
-      select: { padlet_id: true, board_type: true },
-    });
-
-    if (!padlet) throw new NotFoundException('הלוח לא נמצא');
-    return padlet;
-  }
-
   private async findPostForUser(
     userId: bigint,
     padletId: bigint,
     postId: bigint,
   ): Promise<PostWithAuthor> {
-    await this.getAccessiblePadlet(userId, padletId);
+    await this.padletAccess.assertCanView(userId, padletId);
 
     const post = await this.prisma.post.findFirst({
       where: { post_id: postId, padlet_id: padletId },
       include: {
         user: true,
+        attachment: true,
         poll: {
           include: {
             poll_options: { include: { poll_votes: true }, orderBy: { sort_order: 'asc' } },
@@ -463,6 +562,7 @@ export class PostsService {
       where: { padlet_id: padletId },
       include: {
         user: true,
+        attachment: true,
         poll: {
           include: {
             poll_options: { include: { poll_votes: true }, orderBy: { sort_order: 'asc' } },
@@ -474,12 +574,6 @@ export class PostsService {
     });
 
     return posts.map((post) => this.toPostResponse(post as PostWithAuthor, requesterId));
-  }
-
-  private assertPostAuthor(post: Post, requesterId: bigint): void {
-    if (post.user_id !== requesterId) {
-      throw new ForbiddenException('אין הרשאה לערוך או למחוק פוסט זה');
-    }
   }
 
   private async touchPadlet(padletId: bigint, updatedAt: Date): Promise<void> {
@@ -522,8 +616,8 @@ export class PostsService {
       case PadletBoardType.free_wall:
       default:
         return {
-          x: 8 + (index % FREE_WALL_COLUMNS) * 26,
-          y: 12 + Math.floor(index / FREE_WALL_COLUMNS) * 20,
+          x: 3 + (index % FREE_WALL_COLUMNS) * 18,
+          y: 2 + Math.floor(index / FREE_WALL_COLUMNS) * 38,
         };
     }
   }
@@ -539,9 +633,9 @@ export class PostsService {
   } {
     switch (dto.content_kind) {
       case 'image':
-        return { contentKind: PostContentKind.attachment, title: 'תמונה', subject: dto.image_file_name ?? null };
+        return { contentKind: PostContentKind.attachment, title: null, subject: dto.image_file_name ?? null };
       case 'link':
-        return { contentKind: PostContentKind.attachment, title: 'קישור', subject: dto.content ?? null };
+        return { contentKind: PostContentKind.attachment, title: null, subject: dto.content ?? null };
       case 'poll':
         return { contentKind: PostContentKind.poll, title: dto.content ?? null, subject: 'סקר' };
       case 'text':

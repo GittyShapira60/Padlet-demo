@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as express from 'express';
 import { AppModule } from './app.module';
 import { ExceptionsFilter } from './common/filters/exception.filter';
 
@@ -16,6 +17,9 @@ async function bootstrap() {
     'http://localhost:5173',
   );
   const swaggerEnabled = configService.get<boolean>('swaggerEnabled', true);
+
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
   app.setGlobalPrefix(apiPrefix);
   app.enableCors({
