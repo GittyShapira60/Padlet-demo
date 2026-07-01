@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthProvider';
 import type { Post, PostLayout } from '../../post/interfaces/post';
@@ -11,6 +11,7 @@ import {
 } from '../enums/padlet-permission';
 import { getPadletDetail, leavePadlet } from '../services/padlet-service';
 import { mapApiPermission } from '../utils/padlet-capabilities';
+import { recordVisit, updateVisitDuration } from '../../stats/services/stats-service';
 
 export function usePadletPage() {
   const { padletId } = useParams<{ padletId: string }>();
@@ -34,6 +35,10 @@ export function usePadletPage() {
   const [isLeavingPadlet, setIsLeavingPadlet] = useState(false);
   const [filterSearch, setFilterSearch] = useState('');
   const [filterAuthor, setFilterAuthor] = useState('');
+  const [visitId, setVisitId] = useState<string | null>(null);
+
+  const visitIdRef = useRef<string | null>(null);
+  const visitStartRef = useRef<number | null>(null);
 
   const currentUsername = user?.username;
 
@@ -82,6 +87,13 @@ export function usePadletPage() {
         setPadlet(detail.padlet);
         setPosts(detail.posts);
         setCurrentUserPermission(mapApiPermission(detail.currentUserPermission));
+
+        const visitResult = await recordVisit(currentPadletId).catch(() => null);
+        if (visitResult && isMounted) {
+          visitIdRef.current = visitResult.visitId;
+          visitStartRef.current = Date.now();
+          setVisitId(visitResult.visitId);
+        }
         setDefaultPermission(
           detail.defaultPermission
             ? mapApiPermission(detail.defaultPermission)
@@ -102,6 +114,13 @@ export function usePadletPage() {
 
     return () => {
       isMounted = false;
+      if (visitIdRef.current && visitStartRef.current) {
+        const elapsed = Math.round((Date.now() - visitStartRef.current) / 1000);
+        void updateVisitDuration(visitIdRef.current, elapsed).catch(() => {});
+        visitIdRef.current = null;
+        visitStartRef.current = null;
+        setVisitId(null);
+      }
     };
   }, [padletId]);
 
@@ -314,6 +333,7 @@ export function usePadletPage() {
     setFilterSearch,
     filterAuthor,
     setFilterAuthor,
+    visitId,
     isLoading,
     error,
     isCreatePostOpen,
