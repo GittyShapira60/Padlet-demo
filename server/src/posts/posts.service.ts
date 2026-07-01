@@ -167,6 +167,8 @@ export class PostsService {
       return created;
     });
 
+    await this.recordPostVisit(padletId, authorId, dto.visit_id, now).catch(() => {});
+
     await this.touchPadlet(padletId, now);
 
     void this.notifyPadletMembers(padletId, authorId, actorUsername, post.post_id);
@@ -650,5 +652,38 @@ export class PostsService {
     } catch {
       throw new NotFoundException(errorMessage);
     }
+  }
+
+  private safeParseId(raw: string | undefined): bigint | null {
+    if (!raw) return null;
+    try {
+      return BigInt(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  private async recordPostVisit(
+    padletId: bigint,
+    authorId: bigint,
+    visitIdRaw: string | undefined,
+    now: Date,
+  ): Promise<void> {
+    const entryVisitId = this.safeParseId(visitIdRaw);
+
+    if (entryVisitId !== null) {
+      const entryVisit = await this.prisma.padletVisit.findFirst({
+        where: { visit_id: entryVisitId, padlet_id: padletId, user_id: authorId },
+      });
+      if (entryVisit) {
+        // הכניסה כבר נספרה כביקור - יצירת פוסט באותה כניסה לא מוסיפה ביקור נוסף
+        return;
+      }
+    }
+
+    // אין כניסה תקפה מקושרת (למשל recordVisit נכשל) - רשת ביטחון, רושמים ביקור
+    await this.prisma.padletVisit.create({
+      data: { padlet_id: padletId, user_id: authorId, visited_at: now },
+    });
   }
 }

@@ -4,6 +4,7 @@ import ProtectedRoute from './shared/routing/ProtectedRoute/ProtectedRoute';
 import AuthPage from './features/auth/pages/AuthPage';
 import HomePage from './features/home/pages/HomePage';
 import PadletPage from './features/padlet/pages/PadletPage';
+import StatsPage from './features/stats/pages/StatsPage';
 import { AuthProvider } from './features/auth/context/AuthProvider';
 import { NotificationProvider } from './features/notification';
 
@@ -24,6 +25,7 @@ export default function AppRouter() {
             >
               <Route index element={<HomePage />} />
               <Route path="padlets/:padletId" element={<PadletPage />} />
+              <Route path="stats" element={<StatsPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

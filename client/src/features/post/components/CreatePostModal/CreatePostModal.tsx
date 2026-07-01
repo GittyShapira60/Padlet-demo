@@ -10,6 +10,7 @@ import { useCreatePostModal, MAX_POLL_ANSWERS } from './useCreatePostModal';
 interface CreatePostModalProps {
   padletId: string;
   postToEdit?: Post | null;
+  visitId?: string | null;
   onClose: () => void;
   onSubmit?: (post: Post) => void;
 }
@@ -17,6 +18,7 @@ interface CreatePostModalProps {
 export default function CreatePostModal({
   padletId,
   postToEdit,
+  visitId,
   onClose,
   onSubmit,
 }: CreatePostModalProps) {
@@ -40,7 +42,7 @@ export default function CreatePostModal({
     error,
     canSubmit,
     handleSubmit,
-  } = useCreatePostModal({ padletId, postToEdit, onClose, onSubmit });
+  } = useCreatePostModal({ padletId, postToEdit, visitId, onClose, onSubmit });
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {

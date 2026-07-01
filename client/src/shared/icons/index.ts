@@ -15,7 +15,6 @@ export {
   Calendar,
 
   Copy,
-  ExternalLink,
 
   ImageIcon,
 

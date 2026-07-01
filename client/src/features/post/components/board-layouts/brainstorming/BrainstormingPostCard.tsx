@@ -1,6 +1,6 @@
 import { BACKGROUND_COLOR_LIGHT } from '../../../../../shared/constants/background-colors';
 import { formatRelativeTime } from '../../../../../shared/utils/format-relative-time';
-import { ExternalLink, Pencil, Trash2 } from '../../../../../shared/icons';
+import { Pencil, Trash2 } from '../../../../../shared/icons';
 import { useAuth } from '../../../../auth/context/AuthProvider';
 import type { Post } from '../../../interfaces/post';
 import { PostComments } from '../../../../comment';
@@ -100,7 +100,6 @@ export default function BrainstormingPostCard({
             className={cardStyles.linkAnchor}
             onClick={(e) => e.stopPropagation()}
           >
-            <ExternalLink size={13} strokeWidth={2} aria-hidden="true" />
             <span className={cardStyles.linkUrl}>{post.subject}</span>
           </a>
         </div>
