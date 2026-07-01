@@ -89,11 +89,11 @@ function PadletBoardBody({
     capabilities.canEditPadlet || capabilities.canShare || isShared;
   const hasPosts = (padlet?.postCount ?? 0) > 0;
 
-  const pageVars = useMemo<CSSProperties>(
+  const pageVars = useMemo(
     () =>
-      isLightBackground(padlet?.background)
+      (isLightBackground(padlet?.background)
         ? { '--title-color': '#334155' }
-        : { '--title-color': '#ffffff' },
+        : { '--title-color': '#ffffff' }) as CSSProperties,
     [padlet?.background],
   );
 
