@@ -37,10 +37,11 @@
   position: absolute;
   top: calc(100% + 0.5rem);
   left: 0;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--header-btn-bg, rgba(255, 255, 255, 0.22));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--header-btn-border, rgba(255, 255, 255, 0.4));
   border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   min-width: 130px;
   z-index: 100;
   overflow: hidden;
@@ -54,7 +55,7 @@
   padding: 0.65rem 1rem;
   border: none;
   background: transparent;
-  color: #334155;
+  color: var(--header-icon-color, #334155);
   font: inherit;
   font-size: 0.875rem;
   cursor: pointer;
@@ -64,7 +65,7 @@
 }
 
 .dropdownItem:hover {
-  background: #f1f5f9;
+  background: var(--header-btn-bg, rgba(0, 0, 0, 0.06));
 }
 
 .searchPopover {

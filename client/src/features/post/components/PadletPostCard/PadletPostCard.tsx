@@ -1,6 +1,7 @@
+import { useEffect, useRef, useState } from 'react';
 import { BACKGROUND_COLOR_LIGHT } from '../../../../shared/constants/background-colors';
 import { formatRelativeTime } from '../../../../shared/utils/format-relative-time';
-import { ExternalLink, Pencil, Trash2 } from '../../../../shared/icons';
+import { ExternalLink, MoreVertical, Pencil, Trash2 } from '../../../../shared/icons';
 import { useAuth } from '../../../auth/context/AuthProvider';
 import type { Post } from '../../interfaces/post';
 import { PostComments } from '../../../comment';
@@ -23,22 +24,47 @@ function PostActions({ post, onEdit, onDelete }: {
   onEdit?: (post: Post) => void;
   onDelete?: (post: Post) => void;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <div className={`${styles.actions} padlet-post-actions`}>
+    <div ref={ref} className={`${styles.actions} padlet-post-actions`}>
       <button
         type="button"
         className={styles.actionBtn}
-        onClick={() => onEdit?.(post)}
+        aria-label="אפשרויות"
+        onClick={() => setIsOpen((prev) => !prev)}
       >
-        <Pencil size={14} />
+        <MoreVertical size={14} />
       </button>
-      <button
-        type="button"
-        className={`${styles.actionBtn} ${styles.deleteBtn}`}
-        onClick={() => onDelete?.(post)}
-      >
-        <Trash2 size={14} />
-      </button>
+      {isOpen ? (
+        <div className={styles.actionsDropdown}>
+          <button
+            type="button"
+            className={styles.actionsDropdownItem}
+            onClick={() => { setIsOpen(false); onEdit?.(post); }}
+          >
+            <Pencil size={13} strokeWidth={2} aria-hidden="true" />
+            עריכה
+          </button>
+          <button
+            type="button"
+            className={`${styles.actionsDropdownItem} ${styles.actionsDropdownItemDelete}`}
+            onClick={() => { setIsOpen(false); onDelete?.(post); }}
+          >
+            <Trash2 size={13} strokeWidth={2} aria-hidden="true" />
+            מחיקה
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
