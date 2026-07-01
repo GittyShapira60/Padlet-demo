@@ -94,7 +94,7 @@
 }
 
 .actionsDropdownItemDelete {
-  color: #ffffff;
+  color: var(--header-icon-color, #334155);
 }
 
 .card:hover {

@@ -98,11 +98,11 @@
 }
 
 .deleteItem {
-  color: #ffffff;
+  color: var(--header-icon-color, #334155);
 }
 
 .deleteItem:hover {
-  background: #f1f5f9;
+  background: var(--header-btn-bg-hover, rgba(0, 0, 0, 0.06));
 }
 
 .meta {
