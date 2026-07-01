@@ -1,5 +1,5 @@
 .popover {
-  z-index: 1000;
+  z-index: var(--z-popover-on-modal);
   width: min(18.5rem, calc(100vw - 1rem));
   max-height: min(17.5rem, calc(100vh - 1rem));
   display: flex;

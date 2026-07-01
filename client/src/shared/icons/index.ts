@@ -10,11 +10,19 @@ export {
 
   Bell,
 
+  Brain,
+
   Calendar,
 
   Copy,
 
+  ImageIcon,
+
   LayoutDashboard,
+
+  LayoutGrid,
+
+  LinkIcon,
 
   Lock,
 
@@ -25,7 +33,7 @@ export {
   MoreVertical,
 
   Pencil,
-
+  Settings,
   Plus,
 
   Share2,
@@ -36,7 +44,11 @@ export {
 
   SmilePlus,
 
+  Square,
+
   Trash2,
+
+  Type,
 
   Users,
 
