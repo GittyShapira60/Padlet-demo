@@ -68,5 +68,6 @@ export class CreatePostDto {
   @ApiProperty({ example: '12345', required: false, description: 'מזהה הביקור הנוכחי בלוח (לצורך מניעת ספירת ביקור כפולה)' })
   @IsOptional()
   @IsString()
+  @MaxLength(50)
   visit_id?: string;
 }

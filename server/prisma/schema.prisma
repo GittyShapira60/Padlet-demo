@@ -199,7 +199,7 @@ model PadletVisit {
   visited_at   DateTime @db.Timestamptz()
   duration_sec Int?
 
-  padlet Padlet @relation(fields: [padlet_id], references: [padlet_id])
+  padlet Padlet @relation(fields: [padlet_id], references: [padlet_id], onDelete: Cascade)
   user   User?  @relation(fields: [user_id], references: [id])
 
   @@index([padlet_id, visited_at])

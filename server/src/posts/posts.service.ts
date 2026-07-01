@@ -167,7 +167,7 @@ export class PostsService {
       return created;
     });
 
-    await this.recordPostVisit(padletId, authorId, dto.visit_id, now);
+    await this.recordPostVisit(padletId, authorId, dto.visit_id, now).catch(() => {});
 
     await this.touchPadlet(padletId, now);
 

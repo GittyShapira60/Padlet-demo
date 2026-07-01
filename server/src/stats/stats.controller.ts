@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -66,11 +67,14 @@ export class StatsController {
     const fromDate = from ? new Date(from) : fourteenDaysAgo;
     const toDate = to ? new Date(to) : today;
 
+    if (from && isNaN(fromDate.getTime())) throw new BadRequestException('Invalid from date');
+    if (to   && isNaN(toDate.getTime()))   throw new BadRequestException('Invalid to date');
+
     const clampedFrom = fromDate < fourteenDaysAgo ? fourteenDaysAgo : fromDate;
     const clampedTo = toDate > today ? today : toDate;
 
-    // toDate should be end of day so visits throughout that day are included
-    clampedTo.setHours(23, 59, 59, 999);
+    // toDate should cover the full selected day in UTC
+    clampedTo.setUTCHours(23, 59, 59, 999);
 
     return this.statsService.getMostVisitedPadlets(user.id, clampedFrom, clampedTo);
   }
