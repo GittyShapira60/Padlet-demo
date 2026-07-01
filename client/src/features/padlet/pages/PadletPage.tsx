@@ -93,8 +93,8 @@ function PadletBoardBody({
   const pageVars = useMemo(
     () =>
       (isLightBackground(padlet?.background)
-        ? { '--title-color': '#334155' }
-        : { '--title-color': '#ffffff' }) as CSSProperties,
+        ? { '--title-color': '#334155', '--header-icon-color': '#334155', '--header-btn-bg': 'rgba(255, 255, 255, 0.22)', '--header-btn-bg-hover': 'rgba(255, 255, 255, 0.35)', '--header-btn-border': 'rgba(255, 255, 255, 0.4)' }
+        : { '--title-color': '#ffffff', '--header-icon-color': '#ffffff', '--header-btn-bg': 'rgba(0, 0, 0, 0.18)', '--header-btn-bg-hover': 'rgba(0, 0, 0, 0.3)', '--header-btn-border': 'rgba(255, 255, 255, 0.15)' }) as CSSProperties,
     [padlet?.background],
   );
 

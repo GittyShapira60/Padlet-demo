@@ -48,20 +48,53 @@
   height: 1.6rem;
   padding: 0 0.5rem;
   border: none;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.28);
-  color: #ffffff;
+  background: transparent;
+  color: #475569;
   cursor: pointer;
-  backdrop-filter: blur(2px);
-  transition: background 0.15s ease;
+  transition: opacity 0.15s ease;
 }
 
 .actionBtn:hover {
-  background: rgba(0, 0, 0, 0.42);
+  opacity: 0.75;
 }
 
-.deleteBtn {
-  color: #ffffff;
+.actionsDropdown {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  background: var(--header-btn-bg, rgba(255, 255, 255, 0.22));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--header-btn-border, rgba(255, 255, 255, 0.4));
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  min-width: 90px;
+  z-index: 200;
+  overflow: hidden;
+}
+
+.actionsDropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.35rem 0.6rem;
+  border: none;
+  background: transparent;
+  color: var(--header-icon-color, #334155);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  text-align: right;
+  direction: rtl;
+}
+
+.actionsDropdownItem:hover {
+  background: var(--header-btn-bg-hover, rgba(0, 0, 0, 0.06));
+}
+
+.actionsDropdownItemDelete {
+  color: var(--header-icon-color, #334155);
 }
 
 .card:hover {
