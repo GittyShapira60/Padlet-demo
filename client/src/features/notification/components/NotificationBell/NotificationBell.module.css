@@ -7,17 +7,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: none;
-  border: none;
+  background: var(--header-btn-bg, transparent);
+  border: 1px solid var(--header-btn-border, transparent);
   cursor: pointer;
   padding: 6px;
-  border-radius: 8px;
-  color: #64748b;
-  transition: background 0.15s;
+  border-radius: 12px;
+  color: var(--header-icon-color, #64748b);
+  backdrop-filter: blur(2px);
+  transition: background 0.15s, color 0.15s;
 }
 
 .bell:hover {
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--header-btn-bg-hover, rgba(0, 0, 0, 0.06));
 }
 
 .badge {

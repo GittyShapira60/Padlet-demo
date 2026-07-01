@@ -82,3 +82,33 @@ export function resolveBackgroundStyle(
   }
   return { background: BACKGROUND_COLOR_GRADIENTS[value] ?? value };
 }
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const match = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+  if (!match) return null;
+  return {
+    r: parseInt(match[1], 16),
+    g: parseInt(match[2], 16),
+    b: parseInt(match[3], 16),
+  };
+}
+
+function getPerceivedBrightness(hex: string): number {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return 255;
+  return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+}
+
+/** Determines whether a padlet background reads as "light" (dark text/icons) or "dark" (light text/icons). */
+export function isLightBackground(value: string | null | undefined): boolean {
+  if (!value) return true;
+  if (value.startsWith('/') || value.startsWith('http')) return false;
+
+  const resolved = BACKGROUND_COLOR_GRADIENTS[value] ?? value;
+  const hexMatches = resolved.match(/#[0-9a-fA-F]{6}/g);
+  if (!hexMatches || hexMatches.length === 0) return true;
+
+  const avgBrightness =
+    hexMatches.reduce((sum, hex) => sum + getPerceivedBrightness(hex), 0) / hexMatches.length;
+  return avgBrightness > 150;
+}

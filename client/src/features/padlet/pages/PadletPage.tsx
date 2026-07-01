@@ -1,16 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../../../App';
-import { LogOut, Settings, Pencil, Share2 } from '../../../shared/icons';
+import { isLightBackground } from '../../../shared/constants/background-colors';
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
-import PostFilterBar from '../../post/components/PostFilterBar/PostFilterBar';
 import { PostReactionsProvider } from '../../reaction';
 import PadletPostsLayer from '../../post/components/PadletPostsLayer/PadletPostsLayer';
 import ConfirmDialog from '../../../shared/components/ConfirmDialog/ConfirmDialog';
 import { PollProvider } from '../../post/context/PollContext';
 import EditPadletModal from '../components/EditPadletModal/EditPadletModal';
 import SharePadletModal from '../components/SharePadletModal/SharePadletModal';
+import PadletHeaderActions from '../components/PadletHeaderActions/PadletHeaderActions';
 import {
   PadletCapabilitiesProvider,
   usePadletCapabilities,
@@ -36,9 +37,7 @@ function PadletBoardBody({
   isShared,
   padlet,
   filteredPosts,
-  filterSearch,
   setFilterSearch,
-  filterAuthor,
   setFilterAuthor,
   isCreatePostOpen,
   isShareOpen,
@@ -69,19 +68,7 @@ function PadletBoardBody({
   handleConfirmLeave,
 }: PadletBoardBodyProps) {
   const capabilities = usePadletCapabilities();
-  const { setHeaderBackground } = useOutletContext<AppOutletContext>();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const { setHeaderBackground, setHeaderActionSlot } = useOutletContext<AppOutletContext>();
 
   useEffect(() => {
     if (padlet) {
@@ -100,72 +87,50 @@ function PadletBoardBody({
 
   const showMenu =
     capabilities.canEditPadlet || capabilities.canShare || isShared;
+  const hasPosts = (padlet?.postCount ?? 0) > 0;
+
+  const pageVars = useMemo(
+    () =>
+      (isLightBackground(padlet?.background)
+        ? { '--title-color': '#334155' }
+        : { '--title-color': '#ffffff' }) as CSSProperties,
+    [padlet?.background],
+  );
+
+  useEffect(() => {
+    setHeaderActionSlot(
+      <PadletHeaderActions
+        showMenu={showMenu}
+        canEditPadlet={capabilities.canEditPadlet}
+        canShare={capabilities.canShare}
+        isShared={isShared}
+        onEdit={handleOpenEdit}
+        onShare={handleOpenShare}
+        onLeave={handleOpenLeave}
+        hasPosts={hasPosts}
+        onSearchChange={setFilterSearch}
+        onAuthorChange={setFilterAuthor}
+      />,
+    );
+    return () => setHeaderActionSlot(null);
+  }, [
+    setHeaderActionSlot,
+    showMenu,
+    capabilities.canEditPadlet,
+    capabilities.canShare,
+    isShared,
+    handleOpenEdit,
+    handleOpenShare,
+    handleOpenLeave,
+    hasPosts,
+    setFilterSearch,
+    setFilterAuthor,
+  ]);
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={pageVars}>
       <div className={styles.titleRow}>
         <h1 className={styles.boardTitle}>{title}</h1>
-        <PostFilterBar
-          search={filterSearch}
-          author={filterAuthor}
-          onSearchChange={setFilterSearch}
-          onAuthorChange={setFilterAuthor}
-        />
-        {showMenu ? (
-          <div className={styles.menuWrapper} ref={menuRef}>
-            <button
-              type="button"
-              className={styles.menuBtn}
-              aria-label="אפשרויות"
-              onClick={() => setIsMenuOpen((prev: boolean) => !prev)}
-            >
-              <Settings size={20} strokeWidth={2} aria-hidden="true" />
-            </button>
-            {isMenuOpen ? (
-              <div className={styles.dropdown}>
-                {capabilities.canEditPadlet ? (
-                  <button
-                    type="button"
-                    className={styles.dropdownItem}
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      handleOpenEdit();
-                    }}
-                  >
-                    <Pencil size={15} strokeWidth={2} aria-hidden="true" />
-                    עריכה
-                  </button>
-                ) : null}
-                {capabilities.canShare ? (
-                  <button
-                    type="button"
-                    className={styles.dropdownItem}
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      handleOpenShare();
-                    }}
-                  >
-                    <Share2 size={15} strokeWidth={2} aria-hidden="true" />
-                    שיתוף
-                  </button>
-                ) : null}
-                {isShared ? (
-                  <button
-                    type="button"
-                    className={styles.dropdownItem}
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      handleOpenLeave();
-                    }}
-                  >
-                    <LogOut size={15} strokeWidth={2} aria-hidden="true" />
-                    עזוב לוח
-                  </button>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-        ) : null}
       </div>
 
       <PollProvider padletId={padletId} onVoteSuccess={handlePostSaved}>
