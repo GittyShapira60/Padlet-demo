@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
+import { useMemo } from 'react';
 import { useAuth } from '../../../features/auth/context/AuthProvider';
 import { NotificationBell } from '../../../features/notification';
 import { BarChart3, LogOut } from '../../icons';
@@ -22,8 +23,9 @@ export default function AppHeader({
   const username = user?.username ?? 'משתמש';
   const initial = username.charAt(0).toUpperCase();
 
-  const headerVars: CSSProperties | undefined = background
-    ? isLightBackground(background)
+  const headerVars = useMemo<CSSProperties | undefined>(() => {
+    if (!background) return undefined;
+    return isLightBackground(background)
       ? ({
           '--header-icon-color': '#1f2937',
           '--header-btn-bg': 'rgba(255, 255, 255, 0.22)',
@@ -35,8 +37,8 @@ export default function AppHeader({
           '--header-btn-bg': 'rgba(0, 0, 0, 0.18)',
           '--header-btn-bg-hover': 'rgba(0, 0, 0, 0.3)',
           '--header-btn-border': 'rgba(255, 255, 255, 0.15)',
-        } as CSSProperties)
-    : undefined;
+        } as CSSProperties);
+  }, [background]);
 
   return (
     <header

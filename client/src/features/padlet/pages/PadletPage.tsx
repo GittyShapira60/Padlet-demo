@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../../../App';
 import { isLightBackground } from '../../../shared/constants/background-colors';
@@ -37,9 +37,7 @@ function PadletBoardBody({
   isShared,
   padlet,
   filteredPosts,
-  filterSearch,
   setFilterSearch,
-  filterAuthor,
   setFilterAuthor,
   isCreatePostOpen,
   isShareOpen,
@@ -91,11 +89,13 @@ function PadletBoardBody({
     capabilities.canEditPadlet || capabilities.canShare || isShared;
   const hasPosts = (padlet?.postCount ?? 0) > 0;
 
-  const pageVars = (
-    isLightBackground(padlet?.background)
-      ? { '--title-color': '#334155' }
-      : { '--title-color': '#ffffff' }
-  ) as CSSProperties;
+  const pageVars = useMemo<CSSProperties>(
+    () =>
+      isLightBackground(padlet?.background)
+        ? { '--title-color': '#334155' }
+        : { '--title-color': '#ffffff' },
+    [padlet?.background],
+  );
 
   useEffect(() => {
     setHeaderActionSlot(
@@ -108,8 +108,6 @@ function PadletBoardBody({
         onShare={handleOpenShare}
         onLeave={handleOpenLeave}
         hasPosts={hasPosts}
-        search={filterSearch}
-        author={filterAuthor}
         onSearchChange={setFilterSearch}
         onAuthorChange={setFilterAuthor}
       />,
@@ -125,8 +123,6 @@ function PadletBoardBody({
     handleOpenShare,
     handleOpenLeave,
     hasPosts,
-    filterSearch,
-    filterAuthor,
     setFilterSearch,
     setFilterAuthor,
   ]);

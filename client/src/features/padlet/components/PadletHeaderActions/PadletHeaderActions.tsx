@@ -12,8 +12,6 @@ interface PadletHeaderActionsProps {
   onShare: () => void;
   onLeave: () => void;
   hasPosts: boolean;
-  search: string;
-  author: string;
   onSearchChange: (value: string) => void;
   onAuthorChange: (value: string) => void;
 }
@@ -27,13 +25,23 @@ export default function PadletHeaderActions({
   onShare,
   onLeave,
   hasPosts,
-  search,
-  author,
   onSearchChange,
   onAuthorChange,
 }: PadletHeaderActionsProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+  const [authorValue, setAuthorValue] = useState('');
+
+  function handleSearchChange(value: string) {
+    setSearchValue(value);
+    onSearchChange(value);
+  }
+
+  function handleAuthorChange(value: string) {
+    setAuthorValue(value);
+    onAuthorChange(value);
+  }
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -65,10 +73,10 @@ export default function PadletHeaderActions({
           {isSearchOpen ? (
             <div className={styles.searchPopover}>
               <PostFilterBar
-                search={search}
-                author={author}
-                onSearchChange={onSearchChange}
-                onAuthorChange={onAuthorChange}
+                search={searchValue}
+                author={authorValue}
+                onSearchChange={handleSearchChange}
+                onAuthorChange={handleAuthorChange}
               />
             </div>
           ) : null}

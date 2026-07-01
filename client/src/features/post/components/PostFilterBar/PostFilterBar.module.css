@@ -62,5 +62,5 @@
   transform: translateY(-50%);
   width: 1px;
   height: 14px;
-  background: #000000;
+  background: var(--header-icon-color, #334155);
 }
