@@ -154,6 +154,7 @@ export default function CreatePostContentArea({
           type="text"
           placeholder="תיאור (אופציונלי)"
           value={description}
+          style={{ backgroundColor: BACKGROUND_COLOR_LIGHT[selectedColor] ?? selectedColor }}
           onChange={(event) => onDescriptionChange(event.target.value)}
         />
       </div>
@@ -181,6 +182,7 @@ export default function CreatePostContentArea({
           type="text"
           placeholder="תיאור (אופציונלי)"
           value={description}
+          style={{ backgroundColor: BACKGROUND_COLOR_LIGHT[selectedColor] ?? selectedColor }}
           onChange={(event) => onDescriptionChange(event.target.value)}
         />
       </div>
