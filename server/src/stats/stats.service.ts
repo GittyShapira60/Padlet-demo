@@ -19,7 +19,7 @@ interface LayoutStat {
   percentage: number;
 }
 
-interface MostVisitedPadlet {
+export interface MostVisitedPadlet {
   id: string;
   title: string;
   visits: number;
@@ -56,6 +56,7 @@ export class StatsService {
     });
     if (!padlet) throw new NotFoundException('הלוח לא נמצא');
 
+    // כל כניסה לדף הלוח נחשבת ביקור נפרד
     const visit = await this.prisma.padletVisit.create({
       data: {
         padlet_id: padletId,
@@ -132,8 +133,7 @@ export class StatsService {
         LEFT JOIN "Post"        po ON po.padlet_id = p.padlet_id
         WHERE p.user_id = ${userBigId}
         GROUP BY p.padlet_id, p.title
-        ORDER BY visits DESC
-        LIMIT 10
+        ORDER BY visits DESC, avg_duration_sec DESC, p.created_at DESC
       `),
       this.prisma.padlet.groupBy({
         by: ['board_type'],
@@ -169,6 +169,29 @@ export class StatsService {
       })),
       most_visited_padlets: mostVisitedRaw,
     };
+  }
+
+  async getMostVisitedPadlets(userId: string, from: Date, to: Date): Promise<MostVisitedPadlet[]> {
+    const userBigId = this.parseId(userId, 'משתמש לא נמצא');
+
+    return this.prisma.$queryRaw<MostVisitedPadlet[]>(Prisma.sql`
+      SELECT
+        p.padlet_id::text                            AS id,
+        p.title,
+        COUNT(v.visit_id)::int                       AS visits,
+        COUNT(DISTINCT v.user_id)::int               AS unique_visitors,
+        COALESCE(ROUND(AVG(v.duration_sec)), 0)::int AS avg_duration_sec,
+        COUNT(DISTINCT po.post_id)::int              AS posts_count
+      FROM "Padlet" p
+      LEFT JOIN "PadletVisit" v
+        ON  v.padlet_id  = p.padlet_id
+        AND v.visited_at >= ${from}
+        AND v.visited_at <= ${to}
+      LEFT JOIN "Post" po ON po.padlet_id = p.padlet_id
+      WHERE p.user_id = ${userBigId}
+      GROUP BY p.padlet_id, p.title
+      ORDER BY visits DESC, avg_duration_sec DESC, p.created_at DESC
+    `);
   }
 
   async getPadletVisits(padletIdRaw: string, userId: string): Promise<DayCount[]> {

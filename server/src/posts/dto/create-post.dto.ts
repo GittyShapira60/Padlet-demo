@@ -64,4 +64,9 @@ export class CreatePostDto {
   @ArrayMaxSize(4)
   @IsString({ each: true })
   poll_answers?: string[];
+
+  @ApiProperty({ example: '12345', required: false, description: 'מזהה הביקור הנוכחי בלוח (לצורך מניעת ספירת ביקור כפולה)' })
+  @IsOptional()
+  @IsString()
+  visit_id?: string;
 }

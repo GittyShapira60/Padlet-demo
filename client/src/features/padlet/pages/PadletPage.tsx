@@ -45,6 +45,7 @@ function PadletBoardBody({
   isShareOpen,
   isEditOpen,
   postToEdit,
+  visitId,
   postPendingDelete,
   isDeletingPost,
   isLeaveOpen,
@@ -217,6 +218,7 @@ function PadletBoardBody({
         <CreatePostModal
           padletId={padletId}
           postToEdit={postToEdit}
+          visitId={visitId}
           onClose={handleClosePostModal}
           onSubmit={handlePostSaved}
         />

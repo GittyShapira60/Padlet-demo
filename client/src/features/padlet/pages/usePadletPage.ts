@@ -34,6 +34,7 @@ export function usePadletPage() {
   const [isLeavingPadlet, setIsLeavingPadlet] = useState(false);
   const [filterSearch, setFilterSearch] = useState('');
   const [filterAuthor, setFilterAuthor] = useState('');
+  const [visitId, setVisitId] = useState<string | null>(null);
 
   const visitIdRef = useRef<string | null>(null);
   const visitStartRef = useRef<number | null>(null);
@@ -90,6 +91,7 @@ export function usePadletPage() {
         if (visitResult && isMounted) {
           visitIdRef.current = visitResult.visitId;
           visitStartRef.current = Date.now();
+          setVisitId(visitResult.visitId);
         }
         setDefaultPermission(
           detail.defaultPermission
@@ -116,6 +118,7 @@ export function usePadletPage() {
         void updateVisitDuration(visitIdRef.current, elapsed).catch(() => {});
         visitIdRef.current = null;
         visitStartRef.current = null;
+        setVisitId(null);
       }
     };
   }, [padletId]);
@@ -264,6 +267,7 @@ export function usePadletPage() {
     setFilterSearch,
     filterAuthor,
     setFilterAuthor,
+    visitId,
     isLoading,
     error,
     isCreatePostOpen,

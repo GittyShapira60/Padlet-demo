@@ -60,3 +60,9 @@ export function updateVisitDuration(visitId: string, durationSec: number): Promi
 export function getPadletVisits(padletId: string): Promise<DayCount[]> {
   return httpClient<DayCount[]>(`stats/padlets/${padletId}/visits`);
 }
+
+export function getMostVisitedPadlets(from: string, to: string): Promise<MostVisitedPadlet[]> {
+  return httpClient<MostVisitedPadlet[]>(
+    `stats/most-visited?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+  );
+}
