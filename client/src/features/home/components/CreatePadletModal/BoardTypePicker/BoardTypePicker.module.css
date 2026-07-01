@@ -36,9 +36,17 @@
 }
 
 .label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
   font-weight: 700;
   color: #1e293b;
   font-size: 0.95rem;
+}
+
+.boardIcon {
+  flex-shrink: 0;
+  color: #64748b;
 }
 
 .description {

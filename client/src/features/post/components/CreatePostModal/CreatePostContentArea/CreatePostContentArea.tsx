@@ -3,7 +3,7 @@ import {
   EmojiPickerPopover,
   type EmojiDefinition,
 } from '@/modules/emoji';
-import { Smile } from '@/shared/icons';
+import { ImageIcon, LinkIcon, Smile } from '@/shared/icons';
 import {
   PostContentTab as PostContentTabValues,
   type PostContentTab,
@@ -144,7 +144,7 @@ export default function CreatePostContentArea({
             </div>
           ) : (
             <>
-              <span className={styles.fileIcon}>🖼️</span>
+              <ImageIcon size={28} className={styles.contentIcon} />
               <span className={styles.fileLabel}>לחץ כאן לבחירת תמונה מהמחשב</span>
             </>
           )}
@@ -163,14 +163,19 @@ export default function CreatePostContentArea({
   if (activeTab === PostContentTabValues.Link) {
     return (
       <div className={styles.area}>
-        <input
-          className={styles.input}
-          type="url"
-          placeholder="הדבק או הקלד קישור כאן... 🔗"
-          value={textContent}
-          onChange={(event) => onTextChange(event.target.value)}
+        <div
+          className={styles.linkBox}
           style={{ backgroundColor: BACKGROUND_COLOR_LIGHT[selectedColor] ?? selectedColor }}
-        />
+        >
+          <LinkIcon size={22} className={styles.contentIcon} aria-hidden />
+          <input
+            className={styles.linkInput}
+            type="url"
+            placeholder="הדבק או הקלד קישור כאן..."
+            value={textContent}
+            onChange={(event) => onTextChange(event.target.value)}
+          />
+        </div>
         <input
           className={styles.descriptionInput}
           type="text"

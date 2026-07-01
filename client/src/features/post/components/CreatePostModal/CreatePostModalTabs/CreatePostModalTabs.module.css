@@ -29,18 +29,8 @@
   color: var(--color-accent);
 }
 
-.tabIconText {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #64748b;
-}
-
-.tabIconTextActive {
-  color: var(--color-accent);
-}
-
-.tabEmoji {
-  font-size: 1rem;
+.tabIcon {
+  flex-shrink: 0;
 }
 
 .underline {

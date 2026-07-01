@@ -1,14 +1,18 @@
+import type { ComponentType } from 'react';
+import { BarChart3, ImageIcon, LinkIcon, Type } from '@/shared/icons';
 import {
   PostContentTab as PostContentTabValues,
   type PostContentTab,
 } from '../../../enums/post-content-tab';
 import styles from './CreatePostModalTabs.module.css';
 
-const TABS: { id: PostContentTab; label: string; icon: string }[] = [
-  { id: PostContentTabValues.Text, label: 'טקסט', icon: 'T' },
-  { id: PostContentTabValues.Image, label: 'תמונה', icon: '🖼️' },
-  { id: PostContentTabValues.Link, label: 'לינק', icon: '🔗' },
-  { id: PostContentTabValues.Poll, label: 'סקר', icon: '📊' },
+type TabIcon = ComponentType<{ size?: number | string; className?: string }>;
+
+const TABS: { id: PostContentTab; label: string; icon: TabIcon }[] = [
+  { id: PostContentTabValues.Text, label: 'טקסט', icon: Type },
+  { id: PostContentTabValues.Image, label: 'תמונה', icon: ImageIcon },
+  { id: PostContentTabValues.Link, label: 'לינק', icon: LinkIcon },
+  { id: PostContentTabValues.Poll, label: 'סקר', icon: BarChart3 },
 ];
 
 interface CreatePostModalTabsProps {
@@ -24,6 +28,7 @@ export default function CreatePostModalTabs({
     <div className={styles.tabs}>
       {TABS.map((tab) => {
         const isActive = activeTab === tab.id;
+        const Icon = tab.icon;
 
         return (
           <button
@@ -32,15 +37,7 @@ export default function CreatePostModalTabs({
             className={`${styles.tab} ${isActive ? styles.tabActive : ''}`}
             onClick={() => onTabChange(tab.id)}
           >
-            {tab.id === PostContentTabValues.Text ? (
-              <span
-                className={`${styles.tabIconText} ${isActive ? styles.tabIconTextActive : ''}`}
-              >
-                {tab.icon}
-              </span>
-            ) : (
-              <span className={styles.tabEmoji}>{tab.icon}</span>
-            )}
+            <Icon size={18} className={styles.tabIcon} aria-hidden />
             <span>{tab.label}</span>
             {isActive ? <span className={styles.underline} /> : null}
           </button>

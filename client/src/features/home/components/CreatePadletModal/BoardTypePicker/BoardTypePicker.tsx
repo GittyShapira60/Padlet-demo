@@ -11,7 +11,10 @@ interface BoardTypePickerProps {
 export default function BoardTypePicker({ value, onChange }: BoardTypePickerProps) {
   return (
     <div className={styles.list}>
-      {PADLET_BOARD_OPTIONS.map((option) => (
+      {PADLET_BOARD_OPTIONS.map((option) => {
+        const Icon = option.icon;
+
+        return (
         <button
           key={option.id}
           type="button"
@@ -20,7 +23,8 @@ export default function BoardTypePicker({ value, onChange }: BoardTypePickerProp
         >
           <span className={styles.text}>
             <span className={styles.label}>
-              {option.emoji} {option.label}
+              <Icon size={18} className={styles.boardIcon} aria-hidden />
+              <span>{option.label}</span>
             </span>
             <span className={styles.description}>{option.description}</span>
           </span>
@@ -28,7 +32,8 @@ export default function BoardTypePicker({ value, onChange }: BoardTypePickerProp
             <BoardPreview type={option.preview} active={value === option.id} />
           </span>
         </button>
-      ))}
+        );
+      })}
     </div>
   );
 }
