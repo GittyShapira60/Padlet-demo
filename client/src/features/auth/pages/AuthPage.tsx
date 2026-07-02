@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import AuthCard from '../components/AuthCard/AuthCard';
 import styles from './AuthPage.module.css';
 import { useAuthPage } from './useAuthPage';
@@ -17,11 +17,8 @@ export default function AuthPage() {
     handleSubmit,
   } = useAuthPage();
 
-  const { state } = useLocation();
-  const redirectTo = (state as { from?: string } | null)?.from ?? '/';
-
   if (isLoggedIn) {
-    return <Navigate to={redirectTo} replace />;
+    return <Navigate to="/" replace />;
   }
 
   return (

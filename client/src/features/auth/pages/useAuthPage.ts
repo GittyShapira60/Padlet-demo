@@ -8,7 +8,8 @@ export function useAuthPage() {
   const { isLoggedIn, login, register } = useAuth();
   const navigate = useNavigate();
   const { state } = useLocation();
-  const redirectTo = (state as { from?: string } | null)?.from ?? '/';
+  const rawRedirect = (state as { from?: string } | null)?.from;
+  const redirectTo = rawRedirect?.startsWith('/') ? rawRedirect : '/';
   const [mode, setMode] = useState<AuthMode>(AuthModeValues.Login);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
