@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Eye, Share2, FileText, LayoutDashboard, Users } from 'lucide-react';
 import type { DayCount, MostVisitedPadlet, PostTypeStat, LayoutStat } from '../services/stats-service';
 import { useStatsPage } from './useStatsPage';
+import PageHero from '../../../shared/components/PageHero/PageHero';
 import styles from './StatsPage.module.css';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -397,14 +398,15 @@ export default function StatsPage() {
 
   return (
     <div className={styles.page} dir="rtl">
-      {/* Hero */}
-      <div className={styles.hero}>
-        <button className={styles.backBtn} onClick={handleBack}>
-          חזרה ללוחות ←
-        </button>
-        <h1 className={styles.heroTitle}>סטטיסטיקות</h1>
-        <p className={styles.heroSub}>נתוני הפעילות שלך ב-Padlet</p>
-      </div>
+      <PageHero
+        title="סטטיסטיקות"
+        subtitle="נתוני הפעילות שלך ב-Padlet"
+        leftAction={
+          <button className={styles.backBtn} onClick={handleBack}>
+            חזרה ללוחות ←
+          </button>
+        }
+      />
 
       <div className={styles.content}>
         {isLoading && <p className={styles.loading}>טוען...</p>}

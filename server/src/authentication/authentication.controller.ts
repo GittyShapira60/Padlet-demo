@@ -4,6 +4,7 @@ import type { AuthUserDto } from './authentication.service';
 import { AuthenticationService } from './authentication.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @ApiTags('auth')
@@ -13,7 +14,7 @@ export class AuthenticationController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
-  register(@Body() dto: AuthCredentialsDto) {
+  register(@Body() dto: RegisterDto) {
     return this.authenticationService.register(dto);
   }
 

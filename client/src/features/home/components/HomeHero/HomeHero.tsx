@@ -1,4 +1,5 @@
 import { Hand } from '../../../../shared/icons';
+import PageHero from '../../../../shared/components/PageHero/PageHero';
 import styles from './HomeHero.module.css';
 
 interface HomeHeroProps {
@@ -7,16 +8,16 @@ interface HomeHeroProps {
 
 export default function HomeHero({ username }: HomeHeroProps) {
   return (
-    <section className={styles.hero}>
-      <div className={styles.content}>
-        <h2 className={styles.title}>
+    <PageHero
+      title={
+        <span className={styles.titleInner}>
           <Hand className={styles.icon} size={26} />
           <span>
             שלום, <bdi>{username}</bdi>!
           </span>
-        </h2>
-        <p className={styles.subtitle}>הלוחות השיתופיים שלך</p>
-      </div>
-    </section>
+        </span>
+      }
+      subtitle="הלוחות השיתופיים שלך"
+    />
   );
 }

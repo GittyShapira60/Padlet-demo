@@ -1,36 +1,9 @@
-.hero {
-  width: 100%;
-  border-radius: 0;
-  padding: 1rem 1.5rem;
-  background: var(--gradient-brand);
-  color: #ffffff;
-  box-shadow: none;
-}
-
-.content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 0.5rem;
-  box-sizing: border-box;
-}
-
-.title {
-  margin: 0;
-  font-size: clamp(1.35rem, 3vw, 1.75rem);
-  font-weight: 800;
+.titleInner {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  line-height: 1.2;
 }
 
 .icon {
   flex-shrink: 0;
-}
-
-.subtitle {
-  margin: 0.25rem 0 0;
-  font-size: 0.9rem;
-  font-weight: 400;
-  opacity: 0.92;
 }

@@ -25,7 +25,7 @@ export function getAuthErrorMessage(
     }
 
     return mode === AuthModeValues.Login
-      ? 'שם משתמש או סיסמה שגויים'
+      ? 'שם משתמש לא קיים'
       : 'ההרשמה נכשלה, נסי שוב';
   }
 
