@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { BACKGROUND_COLOR_LIGHT } from '../../../../shared/constants/background-colors';
 import { formatRelativeTime } from '../../../../shared/utils/format-relative-time';
 import { ExternalLink, Pencil, Trash2 } from '../../../../shared/icons';
@@ -9,13 +10,30 @@ import PostInteractionBar from '../PostInteractionBar/PostInteractionBar';
 import PollView from './PollView/PollView';
 import styles from './PadletPostCard.module.css';
 
+type PadletPostCardVariant = 'card' | 'bubble';
+
 interface PadletPostCardProps {
   post: Post;
   padletId: string;
   canManage?: boolean;
   canComment?: boolean;
+  variant?: PadletPostCardVariant;
+  commentsCollapsible?: boolean;
+  scrollableComments?: boolean;
   onEdit?: (post: Post) => void;
   onDelete?: (post: Post) => void;
+}
+
+function getPostBodyClassName(variant: PadletPostCardVariant, isImage: boolean): string {
+  if (isImage) {
+    return variant === 'bubble'
+      ? `${styles.imageContent} ${styles.bubbleContent}`
+      : styles.imageContent;
+  }
+
+  return variant === 'bubble'
+    ? `${styles.content} ${styles.bubbleContent}`
+    : styles.content;
 }
 
 function PostActions({ post, onEdit, onDelete }: {
@@ -48,10 +66,14 @@ export default function PadletPostCard({
   padletId,
   canManage = false,
   canComment = false,
+  variant = 'card',
+  commentsCollapsible = false,
+  scrollableComments = false,
   onEdit,
   onDelete,
 }: PadletPostCardProps) {
   const { user } = useAuth();
+  const [commentsOpen, setCommentsOpen] = useState(false);
   const { comments, error, sendComment, removeComment, editComment } = usePostComments(
     padletId,
     post.id,
@@ -65,10 +87,13 @@ export default function PadletPostCard({
         border: `2px solid ${post.color ?? '#e5e7eb'}`,
       }
     : { background };
+  const showComments = canComment && (!commentsCollapsible || commentsOpen);
 
-  return (
-    <article className={styles.card} style={cardStyle}>
-      {canManage ? <PostActions post={post} onEdit={onEdit} onDelete={onDelete} /> : null}
+  const body = (
+    <>
+      {canManage && variant === 'card' ? (
+        <PostActions post={post} onEdit={onEdit} onDelete={onDelete} />
+      ) : null}
 
       <header className={styles.header}>
         <div className={styles.authorMeta}>
@@ -83,12 +108,12 @@ export default function PadletPostCard({
       {post.poll ? (
         <PollView postId={post.id} poll={post.poll} accentColor={post.color ?? '#7c3aed'} />
       ) : post.postType === 'image' ? (
-        <div className={styles.imageContent}>
+        <div className={getPostBodyClassName(variant, true)}>
           {(post.description ?? post.title) ? <p className={styles.imageDescription}>{post.description ?? post.title}</p> : null}
           <img src={post.imageUrl ?? ''} alt={post.description ?? post.title ?? 'תמונה'} className={styles.postImage} />
         </div>
       ) : post.postType === 'link' ? (
-        <div className={styles.content}>
+        <div className={getPostBodyClassName(variant, false)}>
           {(post.description ?? post.title) ? <p className={styles.linkDescription}>{post.description ?? post.title}</p> : null}
           <a
             href={post.subject ?? '#'}
@@ -102,7 +127,7 @@ export default function PadletPostCard({
           </a>
         </div>
       ) : (
-        <div className={styles.content}>
+        <div className={getPostBodyClassName(variant, false)}>
           {post.title ? <h3 className={styles.title}>{post.title}</h3> : null}
           {post.subject ? <p className={styles.subject}>{post.subject}</p> : null}
         </div>
@@ -112,19 +137,35 @@ export default function PadletPostCard({
         postId={post.id}
         commentCount={comments.length}
         showCommentCount={canComment}
+        onCommentToggle={
+          commentsCollapsible ? () => setCommentsOpen((open) => !open) : undefined
+        }
+        commentsExpanded={commentsCollapsible ? commentsOpen : false}
       />
 
-      {canComment ? (
+      {showComments ? (
         <PostComments
           comments={comments}
           error={error}
           currentUsername={user?.username}
           canComment={canComment}
+          scrollableList={scrollableComments}
+          compactScrollableList={scrollableComments}
           onSendComment={sendComment}
           onDeleteComment={removeComment}
           onEditComment={editComment}
         />
       ) : null}
+    </>
+  );
+
+  if (variant === 'bubble') {
+    return body;
+  }
+
+  return (
+    <article className={styles.card} style={cardStyle}>
+      {body}
     </article>
   );
 }

@@ -41,92 +41,9 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 }
 
-.content {
+.bubbleInner {
   display: flex;
   flex-direction: column;
   min-width: 0;
   width: 100%;
-}
-
-.content :global([class*='header']) {
-  margin-bottom: 0.5rem;
-}
-
-.content :global([class*='content']) {
-  flex: 1 1 auto;
-  min-height: 0;
-  max-height: 7.5rem;
-  overflow-y: auto;
-  overflow-x: hidden;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  padding-inline-end: 0.15rem;
-  text-align: right;
-}
-
-.content :global([class*='content'])::-webkit-scrollbar {
-  width: 4px;
-}
-
-.content :global([class*='content'])::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.45);
-  border-radius: 999px;
-}
-
-.content :global([class*='bubbleContent']) {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  overflow-x: hidden;
-  overflow-wrap: break-word;
-  word-break: break-word;
-  text-align: right;
-}
-
-.content :global([class*='title']),
-.content :global([class*='subject']) {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  text-align: right;
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-
-.footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  width: 100%;
-  min-width: 0;
-  margin-top: 0.35rem;
-  padding-top: 0.15rem;
-  direction: rtl;
-}
-
-.footer :global(.padlet-post-actions) {
-  position: static;
-  inset: auto;
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.footer :global([class*='actionBtn']) {
-  height: 1.5rem;
-  padding: 0 0.25rem;
-  border-radius: 6px;
-  background: transparent;
-  color: #64748b;
-  backdrop-filter: none;
-}
-
-.footer :global([class*='actionBtn']):hover {
-  background: rgba(15, 23, 42, 0.08);
-  color: #334155;
-}
-
-.footer :global([class*='deleteBtn']) {
-  color: #64748b;
 }

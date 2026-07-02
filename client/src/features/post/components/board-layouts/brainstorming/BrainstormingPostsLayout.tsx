@@ -1,16 +1,16 @@
 import type { BoardLayoutProps } from '../board-layout-props';
 import BrainstormingPostCard from './BrainstormingPostCard';
-import { getBrainstormTilt } from './brainstorming-layout';
 import styles from './BrainstormingPostsLayout.module.css';
 import { useBrainstormMasonry } from './useBrainstormMasonry';
+
+function getBrainstormTilt(index: number): number {
+  return index % 2 === 0 ? 2.5 : -2.5;
+}
 
 export default function BrainstormingPostsLayout({
   padletId,
   posts,
   canComment,
-  canEditPost,
-  onEditPost,
-  onDeletePost,
 }: BoardLayoutProps) {
   const { containerRef, setItemRef, layout } = useBrainstormMasonry(posts.length);
 
@@ -49,10 +49,7 @@ export default function BrainstormingPostsLayout({
             <BrainstormingPostCard
               post={post}
               padletId={padletId}
-              canManage={canEditPost(post)}
               canComment={canComment}
-              onEdit={onEditPost}
-              onDelete={onDeletePost}
             />
           </div>
         );
