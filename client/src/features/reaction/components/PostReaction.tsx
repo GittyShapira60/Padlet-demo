@@ -11,9 +11,14 @@ import styles from './PostReaction.module.css';
 interface PostReactionProps {
   postId: string;
   variant?: 'default' | 'inline';
+  showAddButton?: boolean;
 }
 
-export default function PostReaction({ postId, variant = 'default' }: PostReactionProps) {
+export default function PostReaction({
+  postId,
+  variant = 'default',
+  showAddButton = true,
+}: PostReactionProps) {
   const anchorRef = useRef<HTMLDivElement>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const { canReact, getPostReactions, setReaction, removeReaction } =
@@ -66,7 +71,7 @@ export default function PostReaction({ postId, variant = 'default' }: PostReacti
         />
       ))}
 
-      {canReact ? (
+      {canReact && showAddButton ? (
         <button
           type="button"
           className={styles.addBtn}

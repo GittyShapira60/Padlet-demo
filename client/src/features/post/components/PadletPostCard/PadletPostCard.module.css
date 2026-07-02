@@ -26,15 +26,6 @@
   pointer-events: auto;
 }
 
-/* Bubble footer uses actions inline (not absolute) */
-.actionsInline {
-  position: static;
-  inset: auto;
-  opacity: 1;
-  pointer-events: auto;
-  transition: none;
-}
-
 .card:hover .actions,
 .card:focus-within .actions {
   opacity: 1;
@@ -202,14 +193,6 @@
   max-width: 100%;
   min-width: 0;
   overflow-x: hidden;
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
-
-.bubbleAuthor {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
   overflow-wrap: break-word;
   word-break: break-word;
 }
