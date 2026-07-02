@@ -20,6 +20,12 @@ export function inviteParticipant(
   });
 }
 
+export function removeParticipant(padletId: string, userId: string): Promise<void> {
+  return httpClient<void>(`padlets/${padletId}/participants/${userId}`, {
+    method: 'DELETE',
+  });
+}
+
 export function updateParticipantPermission(
   padletId: string,
   userId: string,

@@ -42,16 +42,18 @@
   border: 1px solid var(--header-btn-border, rgba(255, 255, 255, 0.4));
   border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  min-width: 130px;
   z-index: 100;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .dropdownItem {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  width: 100%;
+  width: fit-content;
   padding: 0.65rem 1rem;
   border: none;
   background: transparent;
@@ -62,10 +64,12 @@
   transition: background 0.15s ease;
   text-align: right;
   direction: rtl;
+  white-space: nowrap;
 }
 
 .dropdownItem:hover {
   background: var(--header-btn-bg, rgba(0, 0, 0, 0.06));
+  border-radius: 6px;
 }
 
 .searchPopover {
