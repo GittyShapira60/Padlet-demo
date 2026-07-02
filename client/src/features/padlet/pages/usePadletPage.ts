@@ -57,6 +57,10 @@ export function usePadletPage() {
   }, [posts, filterSearch, filterAuthor]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [padletId]);
+
+  useEffect(() => {
     if (!padletId) {
       setError('לוח לא נמצא');
       setIsLoading(false);

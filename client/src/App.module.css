@@ -1,26 +1,19 @@
 .app {
-
-  min-height: 100vh;
-
+  height: 100vh;
   width: 100%;
-
   direction: rtl;
-
   font-family: var(--font-family);
-
   color: #213547;
-
   background: #f3f4f6;
-
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-
-
 .main {
-
   flex: 1;
-
   width: 100%;
-
+  min-height: 0;
+  overflow-y: auto;
 }
 
