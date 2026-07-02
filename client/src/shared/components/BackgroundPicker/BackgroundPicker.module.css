@@ -59,8 +59,9 @@
 
 .swatchSelected,
 .swatchSelected:hover,
-.swatchSelected:focus {
-  border-color: #ffffff;
+.swatchSelected:focus,
+.swatchSelected:active {
+  box-shadow: 0 0 0 2px var(--color-brand-pink);
 }
 
 .swatch:hover {
@@ -71,13 +72,6 @@
 .swatch:focus,
 .swatch:focus-visible {
   outline: none;
-}
-
-.swatchSelected {
-  border-color: #ffffff;
-  box-shadow:
-    0 0 0 2px var(--color-brand-pink),
-    0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .gradientGrid {
