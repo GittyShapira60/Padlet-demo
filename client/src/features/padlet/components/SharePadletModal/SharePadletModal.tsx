@@ -45,6 +45,7 @@ export default function SharePadletModal({
     handleRowPermissionChange,
     handleInviteUser,
     handleCollaboratorPermissionChange,
+    handleRemoveCollaborator,
     clearInviteError,
     reportCopyError,
     resetModalForm,
@@ -103,6 +104,9 @@ export default function SharePadletModal({
             collaboratorMinimum={collaboratorMinimum}
             onPermissionChange={(collaboratorId, permission) =>
               void handleCollaboratorPermissionChange(collaboratorId, permission)
+            }
+            onRemove={(collaboratorId) =>
+              void handleRemoveCollaborator(collaboratorId)
             }
           />
         )}

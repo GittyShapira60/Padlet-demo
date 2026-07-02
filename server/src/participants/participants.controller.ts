@@ -69,4 +69,15 @@ export class ParticipantsController {
   ) {
     return this.participantsService.leavePadlet(user.id, padletId);
   }
+
+  @Delete(':participantUserId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Remove a collaborator from a padlet board' })
+  removeParticipant(
+    @CurrentUser() user: AuthUserDto,
+    @Param('padletId') padletId: string,
+    @Param('participantUserId') participantUserId: string,
+  ) {
+    return this.participantsService.removeParticipant(user.id, padletId, participantUserId);
+  }
 }

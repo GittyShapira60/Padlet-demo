@@ -10,6 +10,7 @@ import type { Collaborator } from '../interfaces/share-padlet.types';
 import {
   getParticipants,
   inviteParticipant,
+  removeParticipant,
   updateParticipantPermission,
 } from '../services/participant-service';
 import { updatePadletDefaultPermission } from '../services/padlet-service';
@@ -165,6 +166,21 @@ export function useSharePadletModal({
     [collaboratorMinimum, defaultInvitePermission, padletId, rowPermissions],
   );
 
+  const handleRemoveCollaborator = useCallback(
+    async (collaboratorId: string) => {
+      setInviteError('');
+      try {
+        await removeParticipant(padletId, collaboratorId);
+        setCollaborators((current) =>
+          current.filter((c) => c.id !== collaboratorId),
+        );
+      } catch {
+        setInviteError('הסרת משתף הפעולה נכשלה');
+      }
+    },
+    [padletId],
+  );
+
   const handleCollaboratorPermissionChange = useCallback(
     async (collaboratorId: string, permission: PadletPermissionType) => {
       const nextPermission = clampPermission(permission, collaboratorMinimum);
@@ -245,6 +261,7 @@ export function useSharePadletModal({
     handleRowPermissionChange,
     handleInviteUser,
     handleCollaboratorPermissionChange,
+    handleRemoveCollaborator,
     clearInviteError,
     reportCopyError,
     resetModalForm,

@@ -172,6 +172,31 @@ export class ParticipantsService {
     );
   }
 
+  async removeParticipant(
+    userId: string,
+    padletIdRaw: string,
+    participantUserIdRaw: string,
+  ): Promise<void> {
+    const requesterId = this.parseId(userId, 'משתמש לא נמצא');
+    const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
+    const participantUserId = this.parseId(participantUserIdRaw, 'משתמש לא נמצא');
+
+    await this.padletAccess.assertCanManageSharing(requesterId, padletId);
+
+    const participant = await this.prisma.participant.findUnique({
+      where: { padlet_id_user_id: { padlet_id: padletId, user_id: participantUserId } },
+    });
+    if (!participant) throw new NotFoundException('משתף הפעולה לא נמצא');
+
+    await this.prisma.participant.delete({
+      where: { padlet_id_user_id: { padlet_id: padletId, user_id: participantUserId } },
+    });
+
+    this.realtimeGateway.emitToUser(participantUserId.toString(), 'padlet:removed', {
+      padletId: padletId.toString(),
+    });
+  }
+
   async leavePadlet(userId: string, padletIdRaw: string): Promise<void> {
     const requesterId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
