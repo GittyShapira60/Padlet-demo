@@ -116,7 +116,7 @@ export default function PadletPostCard({
 
   const body = (
     <>
-      {canManage && variant === 'card' ? (
+      {canManage ? (
         <PostActions post={post} onEdit={onEdit} onDelete={onDelete} />
       ) : null}
 
