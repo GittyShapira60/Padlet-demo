@@ -1,6 +1,6 @@
 .canvas {
   position: relative;
-  min-height: calc(100vh - 11rem);
+  min-height: calc(100vh - 16rem);
   padding: 0 1rem 0;
   overflow-x: clip;
 }
