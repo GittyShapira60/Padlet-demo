@@ -6,17 +6,7 @@
 
 /* ── Hero ─────────────────────────────────────────────── */
 
-.hero {
-  background: linear-gradient(135deg, #8b5cf6 0%, #d452b7 40%, #f59032 100%);
-  padding: 22px 48px 26px;
-  position: relative;
-  text-align: right;
-}
-
 .backBtn {
-  position: absolute;
-  top: 20px;
-  left: 32px;
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.9);
@@ -28,19 +18,6 @@
 }
 .backBtn:hover {
   background: rgba(255, 255, 255, 0.15);
-}
-
-.heroTitle {
-  color: #fff;
-  font-size: 32px;
-  font-weight: 800;
-  margin: 0 0 4px;
-}
-
-.heroSub {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 15px;
-  margin: 0;
 }
 
 /* ── Content ──────────────────────────────────────────── */
@@ -699,12 +676,6 @@
 }
 
 @media (max-width: 600px) {
-  .hero {
-    padding: 32px 20px 40px;
-  }
-  .heroTitle {
-    font-size: 30px;
-  }
   .summaryGrid {
     grid-template-columns: 1fr 1fr;
   }
