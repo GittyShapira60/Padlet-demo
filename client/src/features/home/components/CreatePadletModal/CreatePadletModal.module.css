@@ -73,8 +73,16 @@
 }
 
 .createBtn:hover:not(:disabled) {
-  opacity: 0.92;
+  background: var(--gradient-brand-cta);
+  filter: brightness(1.08);
   transform: translateY(-1px);
+  box-shadow: 0 0 0 2px #000;
+}
+
+.createBtn:active:not(:disabled) {
+  background: var(--gradient-brand-cta);
+  filter: brightness(0.92);
+  transform: scale(0.97);
 }
 
 .createBtn:disabled {

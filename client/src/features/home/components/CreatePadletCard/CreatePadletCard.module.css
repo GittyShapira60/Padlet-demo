@@ -18,6 +18,11 @@
   transform: translateY(-2px);
 }
 
+.card:active {
+  background: var(--color-accent-light, #fff7f0);
+  transform: scale(0.97);
+}
+
 .plus {
   font-size: 2rem;
   line-height: 1;
