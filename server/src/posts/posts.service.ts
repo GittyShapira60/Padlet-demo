@@ -378,6 +378,7 @@ export class PostsService {
 
     await this.prisma.$transaction([
       this.prisma.comment.deleteMany({ where: { post_id: postId } }),
+      this.prisma.notification.deleteMany({ where: { post_id: postId } }),
       this.prisma.post.delete({ where: { post_id: postId } }),
     ]);
 
@@ -408,6 +409,7 @@ export class PostsService {
 
     const now = new Date();
     await this.prisma.$transaction([
+      this.prisma.notification.deleteMany({ where: { post_id: postId } }),
       this.prisma.poll.delete({ where: { post_id: postId } }),
       this.prisma.post.update({
         where: { post_id: postId },
