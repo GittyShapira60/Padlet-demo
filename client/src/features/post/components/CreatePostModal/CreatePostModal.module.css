@@ -82,7 +82,15 @@
 }
 
 .submitBtn:hover:not(:disabled) {
-  opacity: 0.92;
+  background: var(--gradient-brand-cta);
+  filter: brightness(1.08);
+  box-shadow: 0 0 0 2px #000;
+}
+
+.submitBtn:active:not(:disabled) {
+  background: var(--gradient-brand-cta);
+  filter: brightness(0.92);
+  transform: scale(0.98);
 }
 
 .submitBtn:disabled {

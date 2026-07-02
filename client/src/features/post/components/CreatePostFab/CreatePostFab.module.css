@@ -19,6 +19,20 @@
 }
 
 .fab:hover {
-  opacity: 0.92;
+  background: var(--gradient-brand-cta);
+  filter: brightness(1.08);
   transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--color-accent-shadow), 0 0 0 2px #000;
+}
+
+.fab:active {
+  background: var(--gradient-brand-cta);
+  filter: brightness(0.92);
+  transform: scale(0.96);
+}
+
+.fab:active {
+  background: var(--gradient-brand-cta);
+  transform: scale(0.96);
+  opacity: 0.88;
 }

@@ -1,4 +1,4 @@
-import { BACKGROUND_COLOR_GRADIENTS, BACKGROUND_COLORS } from '../../../../../shared/constants/background-colors';
+import { BACKGROUND_COLOR_GRADIENTS, POST_COLORS } from '../../../../../shared/constants/background-colors';
 import styles from './PostColorPicker.module.css';
 
 interface PostColorPickerProps {
@@ -14,7 +14,7 @@ export default function PostColorPicker({
     <div className={styles.root}>
       <span className={styles.label}>צבע רקע:</span>
       <div className={styles.swatches}>
-        {BACKGROUND_COLORS.map((color) => {
+        {POST_COLORS.map((color) => {
           const isSelected =
             selectedColor.toLowerCase() === color.toLowerCase();
 
@@ -23,7 +23,10 @@ export default function PostColorPicker({
               key={color}
               type="button"
               className={`${styles.swatch} ${isSelected ? styles.swatchSelected : ''}`}
-              style={{ background: BACKGROUND_COLOR_GRADIENTS[color] ?? color }}
+              style={{
+                background: BACKGROUND_COLOR_GRADIENTS[color] ?? color,
+                boxShadow: color === '#FFFFFF' && !isSelected ? 'inset 0 0 0 1.5px #d1d5db' : undefined,
+              }}
               onClick={() => onColorChange(color)}
             />
           );

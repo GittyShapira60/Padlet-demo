@@ -11,8 +11,15 @@ export const BACKGROUND_COLORS = [
   '#FFB74D',
 ] as const;
 
+/** Colors available for posts only — includes white which is excluded from padlet backgrounds. */
+export const POST_COLORS = [
+  '#FFFFFF',
+  ...BACKGROUND_COLORS,
+] as const;
+
 /** Gradient display per color — light → dark of the same hue. */
 export const BACKGROUND_COLOR_GRADIENTS: Record<string, string> = {
+  '#FFFFFF': '#FFFFFF',
   '#E57373': 'linear-gradient(135deg, #FFEBEE, #E57373)',
   '#FF8A65': 'linear-gradient(135deg, #FBE9E7, #FF8A65)',
   '#FFD54F': 'linear-gradient(135deg, #FFFDE7, #FFD54F)',
@@ -26,6 +33,7 @@ export const BACKGROUND_COLOR_GRADIENTS: Record<string, string> = {
 
 /** Lighter version of each color — for post card backgrounds. */
 export const BACKGROUND_COLOR_LIGHT: Record<string, string> = {
+  '#FFFFFF': '#FFFFFF',
   '#E57373': '#EF9A9A',
   '#FF8A65': '#FFAB91',
   '#FFD54F': '#FFE082',
