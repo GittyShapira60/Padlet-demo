@@ -11,6 +11,9 @@ export default function BrainstormingPostsLayout({
   padletId,
   posts,
   canComment,
+  canEditPost,
+  onEditPost,
+  onDeletePost,
 }: BoardLayoutProps) {
   const { containerRef, setItemRef, layout } = useBrainstormMasonry(posts.length);
 
@@ -49,7 +52,10 @@ export default function BrainstormingPostsLayout({
             <BrainstormingPostCard
               post={post}
               padletId={padletId}
+              canManage={canEditPost(post)}
               canComment={canComment}
+              onEdit={onEditPost}
+              onDelete={onDeletePost}
             />
           </div>
         );
