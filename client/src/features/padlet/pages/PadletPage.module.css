@@ -3,6 +3,7 @@
   width: 100%;
   direction: rtl;
   overflow-x: clip;
+  --canvas-offset: 16rem;
 }
 
 .titleRow {
