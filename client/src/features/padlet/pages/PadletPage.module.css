@@ -17,69 +17,13 @@
   text-align: right;
   font-size: clamp(1.25rem, 3vw, 1.75rem);
   font-weight: 800;
-  color: #ffffff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  color: var(--title-color, #ffffff);
   line-height: 1.25;
   min-width: 0;
   flex-shrink: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.menuWrapper {
-  position: relative;
-}
-
-.menuBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  outline: none;
-  padding: 0.35rem;
-  background: transparent;
-  color: #64748b;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
-
-.menuBtn:hover {
-  opacity: 0.75;
-}
-
-.dropdown {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  left: 0;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  min-width: 130px;
-  z-index: 100;
-  overflow: hidden;
-}
-
-.dropdownItem {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.65rem 1rem;
-  border: none;
-  background: transparent;
-  color: #334155;
-  font: inherit;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  text-align: right;
-  direction: rtl;
-}
-
-.dropdownItem:hover {
-  background: #f1f5f9;
 }
 
 .status,

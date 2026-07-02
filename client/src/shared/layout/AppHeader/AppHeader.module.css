@@ -74,24 +74,24 @@
 }
 
 .logout,
-.stats,
-.bell {
-  border: none;
-  background: transparent;
+.stats {
+  border: 1px solid var(--header-btn-border, transparent);
+  background: var(--header-btn-bg, transparent);
   cursor: pointer;
   font: inherit;
-  color: #64748b;
+  color: var(--header-icon-color, #64748b);
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
   padding: 0.25rem 0.35rem;
-  transition: color 0.15s ease;
+  border-radius: 12px;
+  backdrop-filter: blur(2px);
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .logout:hover,
-.stats:hover,
-.bell:hover {
-  color: #334155;
+.stats:hover {
+  background: var(--header-btn-bg-hover, rgba(0, 0, 0, 0.06));
 }
 
 .bell {

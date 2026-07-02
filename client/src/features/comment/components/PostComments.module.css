@@ -62,13 +62,18 @@
   width: 1.6rem;
   height: 1.6rem;
   margin-top: 0.05rem;
-  color: #475569;
+  border: none;
+  background: transparent;
+  color: var(--header-icon-color, #475569);
   flex-shrink: 0;
+  cursor: pointer;
+  transition: color 0.15s ease;
 }
 
 .menuBtn:hover,
 .menuBtn[aria-expanded='true'] {
-  color: #1e293b;
+  color: var(--header-icon-color, #1e293b);
+  opacity: 0.75;
 }
 
 .menuWrapper {
@@ -86,9 +91,10 @@
   flex-direction: column;
   width: max-content;
   overflow: hidden;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--header-btn-border, rgba(255, 255, 255, 0.4));
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--header-btn-bg, rgba(255, 255, 255, 0.22));
+  backdrop-filter: blur(12px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
@@ -99,7 +105,7 @@
   padding: 0.5rem 0.6rem;
   border: none;
   background: transparent;
-  color: #334155;
+  color: var(--header-icon-color, #334155);
   font: inherit;
   font-size: 0.8rem;
   cursor: pointer;
@@ -109,15 +115,15 @@
 }
 
 .dropdownItem:hover {
-  background: #f1f5f9;
+  background: var(--header-btn-bg-hover, rgba(0, 0, 0, 0.06));
 }
 
 .deleteItem {
-  color: #0f172a;
+  color: var(--header-icon-color, #334155);
 }
 
 .deleteItem:hover {
-  background: #f1f5f9;
+  background: var(--header-btn-bg-hover, rgba(0, 0, 0, 0.06));
 }
 
 .meta {

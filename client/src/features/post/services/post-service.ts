@@ -18,10 +18,11 @@ export interface PostInput {
 export function createPost(
   padletId: string,
   input: PostInput,
+  visitId?: string | null,
 ): Promise<Post> {
   return httpClient<Post>(`padlets/${padletId}/posts`, {
     method: 'POST',
-    body: toContentBody(input),
+    body: { ...toContentBody(input), visit_id: visitId ?? undefined },
   });
 }
 

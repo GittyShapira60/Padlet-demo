@@ -20,6 +20,7 @@ function fileToBase64(file: File): Promise<string> {
 interface UseCreatePostModalOptions {
   padletId: string;
   postToEdit?: Post | null;
+  visitId?: string | null;
   onClose: () => void;
   onSubmit?: (post: Post) => void;
 }
@@ -59,6 +60,7 @@ function getInitialState(postToEdit?: Post | null) {
 export function useCreatePostModal({
   padletId,
   postToEdit,
+  visitId,
   onClose,
   onSubmit,
 }: UseCreatePostModalOptions) {
@@ -150,7 +152,7 @@ export function useCreatePostModal({
     try {
       const post = isEditMode
         ? await updatePost(padletId, postToEdit.id, input)
-        : await createPost(padletId, input);
+        : await createPost(padletId, input, visitId);
       onSubmit?.(post);
       setActiveTab(PostContentTabValues.Text);
       setTextContent('');
@@ -165,7 +167,7 @@ export function useCreatePostModal({
     } finally {
       setIsLoading(false);
     }
-  }, [activeTab, canSubmit, description, isEditMode, isLoading, onClose, onSubmit, padletId, pollAnswers, postToEdit, selectedColor, selectedFile, textContent]);
+  }, [activeTab, canSubmit, description, isEditMode, isLoading, onClose, onSubmit, padletId, pollAnswers, postToEdit, selectedColor, selectedFile, textContent, visitId]);
 
   return {
     isEditMode,
