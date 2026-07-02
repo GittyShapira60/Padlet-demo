@@ -39,7 +39,9 @@
 }
 
 .confirmBtn:hover:not(:disabled) {
+  background: var(--gradient-brand-cta);
   opacity: 0.9;
+  box-shadow: 0 0 0 2px #000;
 }
 
 .confirmBtn:disabled {
@@ -61,7 +63,8 @@
 }
 
 .cancelBtn:hover:not(:disabled) {
-  background: #f8fafc;
+  background: #f1f5f9;
+  box-shadow: 0 0 0 2px #000;
 }
 
 .cancelBtn:disabled {

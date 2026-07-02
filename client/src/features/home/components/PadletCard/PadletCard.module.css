@@ -140,11 +140,17 @@
   font-size: 0.7rem;
   font-weight: 600;
   backdrop-filter: blur(2px);
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 
 .actionBtn:hover {
-  background: rgba(0, 0, 0, 0.42);
+  background: rgba(0, 0, 0, 0.55);
+  transform: scale(1.05);
+}
+
+.actionBtn:active {
+  background: rgba(0, 0, 0, 0.65);
+  transform: scale(0.97);
 }
 
 .dialogOptions {

@@ -34,25 +34,15 @@
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
-.swatch:not(.swatchSelected):hover,
-.swatch:not(.swatchSelected):focus,
-.swatch:not(.swatchSelected):focus-visible,
-.swatch:not(.swatchSelected):active {
-  outline: none;
-  box-shadow: none;
+.swatch:not(.swatchSelected):hover {
   transform: scale(1.05);
 }
 
-.swatchSelected {
-  position: relative;
-  z-index: 1;
-  outline: 3px solid var(--color-brand-pink);
-  outline-offset: 3px;
-}
-
+.swatchSelected,
 .swatchSelected:hover,
 .swatchSelected:focus,
 .swatchSelected:focus-visible,
 .swatchSelected:active {
-  transform: scale(1.1);
+  box-shadow: 0 0 0 2px var(--color-brand-pink);
 }
+
