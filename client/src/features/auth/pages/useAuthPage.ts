@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthMode as AuthModeValues, type AuthMode } from '../enums/auth-mode';
 import { useAuth } from '../context/AuthProvider';
 import { getAuthErrorMessage } from '../utils/get-auth-error-message';
@@ -7,6 +7,9 @@ import { getAuthErrorMessage } from '../utils/get-auth-error-message';
 export function useAuthPage() {
   const { isLoggedIn, login, register } = useAuth();
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const rawRedirect = (state as { from?: string } | null)?.from;
+  const redirectTo = rawRedirect?.startsWith('/') ? rawRedirect : '/';
   const [mode, setMode] = useState<AuthMode>(AuthModeValues.Login);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -48,7 +51,7 @@ export function useAuthPage() {
         await register(username, password);
       }
 
-      navigate('/', { replace: true });
+      navigate(redirectTo, { replace: true });
     } catch (err) {
       setError(getAuthErrorMessage(err, mode));
     } finally {
