@@ -11,6 +11,8 @@ export interface Padlet {
   postCount: number;
   isShared: boolean;
   updatedAt: string;
+  ownerUsername: string;
+  createdAt: string;
 }
 
 export interface PadletBoards {
