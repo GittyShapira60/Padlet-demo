@@ -3,6 +3,7 @@ import { useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../../../App';
 import { isLightBackground } from '../../../shared/constants/background-colors';
+import { formatRelativeTime } from '../../../shared/utils/format-relative-time';
 import CreatePostFab from '../../post/components/CreatePostFab/CreatePostFab';
 import CreatePostModal from '../../post/components/CreatePostModal/CreatePostModal';
 import { PostReactionsProvider } from '../../reaction';
@@ -131,6 +132,11 @@ function PadletBoardBody({
   return (
     <div className={styles.page} style={pageVars}>
       <div className={styles.titleRow}>
+        {padlet ? (
+          <p className={styles.boardMeta}>
+            {padlet.ownerUsername} · {formatRelativeTime(padlet.createdAt)}
+          </p>
+        ) : null}
         <h1 className={styles.boardTitle}>{title}</h1>
       </div>
 

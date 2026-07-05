@@ -21,6 +21,8 @@ export interface PadletResponseDto {
   postCount: number;
   isShared: boolean;
   updatedAt: string;
+  ownerUsername: string;
+  createdAt: string;
 }
 
 export interface PadletBoardsResponseDto {
@@ -35,7 +37,7 @@ export interface PadletDetailResponseDto {
   defaultPermission: PadletPermission | null;
 }
 
-type PadletWithCount = Padlet & { _count: { posts: number } };
+type PadletWithCount = Padlet & { _count: { posts: number }; user: { username: string } };
 
 const POSTS_PER_ROW = 3;
 
@@ -54,12 +56,12 @@ export class PadletsService {
     const [mine, shared] = await Promise.all([
       this.prisma.padlet.findMany({
         where: { user_id: ownerId },
-        include: { _count: { select: { posts: true } } },
+        include: { _count: { select: { posts: true } }, user: { select: { username: true } } },
         orderBy: { updated_at: 'desc' },
       }),
       this.prisma.padlet.findMany({
         where: { participants: { some: { user_id: ownerId } } },
-        include: { _count: { select: { posts: true } } },
+        include: { _count: { select: { posts: true } }, user: { select: { username: true } } },
         orderBy: { updated_at: 'desc' },
       }),
     ]);
@@ -84,7 +86,7 @@ export class PadletsService {
         created_at: now,
         updated_at: now,
       },
-      include: { _count: { select: { posts: true } } },
+      include: { _count: { select: { posts: true } }, user: { select: { username: true } } },
     });
 
     return this.toPadletResponse(padlet, false);
@@ -111,7 +113,7 @@ export class PadletsService {
         ...(dto.board_type !== undefined ? { board_type: dto.board_type } : {}),
         updated_at: new Date(),
       },
-      include: { _count: { select: { posts: true } } },
+      include: { _count: { select: { posts: true } }, user: { select: { username: true } } },
     });
 
     const response = this.toPadletResponse(updated, !access.isOwner);
@@ -147,6 +149,7 @@ export class PadletsService {
       where: { padlet_id: padletId },
       include: {
         _count: { select: { posts: true } },
+        user: { select: { username: true } },
         posts: {
           where: Object.keys(postWhere).length ? postWhere : undefined,
           include: {
@@ -278,7 +281,7 @@ export class PadletsService {
             }
           : {}),
       },
-      include: { _count: { select: { posts: true } } },
+      include: { _count: { select: { posts: true } }, user: { select: { username: true } } },
     });
 
     return this.toPadletResponse(copy, false);
@@ -304,6 +307,8 @@ export class PadletsService {
       postCount: padlet._count.posts,
       isShared,
       updatedAt: padlet.updated_at.toISOString(),
+      ownerUsername: padlet.user.username,
+      createdAt: padlet.created_at.toISOString(),
     };
   }
 
