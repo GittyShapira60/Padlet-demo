@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { User } from '../../../shared/interfaces/user';
 import * as authService from '../services/auth-service';
 import { getAuthData } from '../utils/auth-token-storage';
@@ -24,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(
     () => getAuthData()?.user ?? null,
   );
+  const navigate = useNavigate();
 
   const login = useCallback(async (username: string, password: string) => {
     const { user: loggedInUser } = await authService.login(username, password);
@@ -41,7 +43,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     authService.logout();
     setUser(null);
-  }, []);
+    navigate('/login', { replace: true });
+  }, [navigate]);
 
   const value = useMemo(
     () => ({

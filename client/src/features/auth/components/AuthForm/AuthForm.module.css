@@ -21,12 +21,14 @@
   font-weight: 700;
   cursor: pointer;
   margin-top: 0.5rem;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: filter 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .submit:hover:not(:disabled) {
-  opacity: 0.9;
+  background: var(--gradient-brand-cta);
+  filter: brightness(1.08);
   transform: translateY(-1px);
+  box-shadow: 0 0 0 2px #000;
 }
 
 .submit:disabled {
