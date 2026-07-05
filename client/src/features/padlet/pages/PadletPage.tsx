@@ -64,7 +64,7 @@ function PadletBoardBody({
   handleRequestDeletePost,
   handleCancelDeletePost,
   handleConfirmDeletePost,
-  handleLayoutChange,
+  handlePostSwap,
   handleOpenLeave,
   handleCancelLeave,
   handleConfirmLeave,
@@ -152,8 +152,8 @@ function PadletBoardBody({
             posts={filteredPosts}
             onEditPost={handleEditPost}
             onDeletePost={(post) => void handleRequestDeletePost(post)}
-            onLayoutChange={(postId, layout) =>
-              void handleLayoutChange(postId, layout)
+            onPostSwap={(sourcePostId, targetPostId) =>
+              void handlePostSwap(sourcePostId, targetPostId)
             }
           />
         </PostReactionsProvider>

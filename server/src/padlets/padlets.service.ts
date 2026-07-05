@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PadletBoardType, PadletPermission, type Padlet } from '@prisma/client';
+import { PadletBoardType, PadletPermission, Prisma, type Padlet } from '@prisma/client';
 import { RealtimeGateway } from '../gateway/realtime.gateway';
 import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PostsService, type PostResponseDto, type PostWithAuthor } from '../posts/posts.service';
@@ -38,8 +38,6 @@ export interface PadletDetailResponseDto {
 }
 
 type PadletWithCount = Padlet & { _count: { posts: number }; user: { username: string } };
-
-const POSTS_PER_ROW = 3;
 
 @Injectable()
 export class PadletsService {
@@ -244,6 +242,7 @@ export class PadletsService {
     if (!original) throw new NotFoundException('הלוח לא נמצא');
 
     const now = new Date();
+    const freeWallOrders: number[] = [];
 
     const copy = await this.prisma.padlet.create({
       data: {
@@ -257,16 +256,27 @@ export class PadletsService {
         ...(dto.includePosts && original.posts?.length
           ? {
               posts: {
-                create: original.posts.map((p, i) => ({
-                  user_id: ownerId,
-                  content_kind: p.content_kind,
-                  title: p.title,
-                  subject: p.subject,
-                  color: p.color,
-                  data_layout: this.buildLayout(i),
-                  created_at: now,
-                  updated_at: now,
-                })),
+                create: original.posts.map((p) => {
+                  const layout =
+                    original.board_type === PadletBoardType.free_wall
+                      ? this.postsService.buildFreeWallOrder(freeWallOrders)
+                      : null;
+
+                  if (layout) {
+                    freeWallOrders.push(layout.order);
+                  }
+
+                  return {
+                    user_id: ownerId,
+                    content_kind: p.content_kind,
+                    title: p.title,
+                    subject: p.subject,
+                    color: p.color,
+                    data_layout: layout ? this.postsService.toJsonLayout(layout) : Prisma.DbNull,
+                    created_at: now,
+                    updated_at: now,
+                  };
+                }),
               },
             }
           : {}),
@@ -284,14 +294,7 @@ export class PadletsService {
       include: { _count: { select: { posts: true } }, user: { select: { username: true } } },
     });
 
-    return this.toPadletResponse(copy, false);
-  }
-
-  private buildLayout(index: number) {
-    return {
-      x: 8 + (index % POSTS_PER_ROW) * 26,
-      y: 12 + Math.floor(index / POSTS_PER_ROW) * 20,
-    };
+    return this.toPadletResponse(copy as PadletWithCount, false);
   }
 
   private toPadletResponse(

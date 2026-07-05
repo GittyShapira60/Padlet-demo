@@ -1,4 +1,4 @@
-import type { Post, PostLayout } from '../interfaces/post';
+import type { Post } from '../interfaces/post';
 import type { PostContentTab } from '../enums/post-content-tab';
 import { httpClient } from '../../../shared/services';
 
@@ -41,16 +41,16 @@ export function updatePost(
 }
 
 /**
- * Updates a post's position on a padlet board.
+ * Swaps two post positions on a free-wall board.
  */
-export function updatePostLayout(
+export function swapPosts(
   padletId: string,
-  postId: string,
-  layout: PostLayout,
-): Promise<Post> {
-  return httpClient<Post>(`padlets/${padletId}/posts/${postId}/layout`, {
-    method: 'PATCH',
-    body: layout,
+  sourcePostId: string,
+  targetPostId: string,
+): Promise<{ source: Post; target: Post }> {
+  return httpClient<{ source: Post; target: Post }>(`padlets/${padletId}/posts/swap`, {
+    method: 'POST',
+    body: { sourcePostId, targetPostId },
   });
 }
 

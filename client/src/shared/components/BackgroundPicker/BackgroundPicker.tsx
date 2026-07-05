@@ -48,7 +48,12 @@ export default function BackgroundPicker({
               className={`${styles.swatch} ${selectedColor === color ? styles.swatchSelected : ''}`}
               style={
                 (BACKGROUND_COLOR_GRADIENTS[color] ?? color).includes('gradient')
-                  ? { backgroundImage: BACKGROUND_COLOR_GRADIENTS[color], backgroundRepeat: 'no-repeat' }
+                  ? {
+                      backgroundImage: BACKGROUND_COLOR_GRADIENTS[color],
+                      backgroundRepeat: 'no-repeat',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }
                   : { backgroundColor: color }
               }
               onClick={() => onColorChange(color)}

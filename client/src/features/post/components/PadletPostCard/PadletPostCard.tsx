@@ -1,14 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { BACKGROUND_COLOR_LIGHT } from '../../../../shared/constants/background-colors';
 import { formatRelativeTime } from '../../../../shared/utils/format-relative-time';
+import { scrollActivityIntoViewAfterLayout, hasActiveScrollActivity } from '../../../../shared/utils/scroll-activity-into-view';
 import { MoreVertical, Pencil, Trash2 } from '../../../../shared/icons';
 import { useAuth } from '../../../auth/context/AuthProvider';
 import type { Post } from '../../interfaces/post';
 import { PostComments } from '../../../comment';
+import { COMMENTS_SCROLL_THRESHOLD } from '../../../comment/constants/comments-scroll';
 import { usePostComments } from '../../../comment/hooks/usePostComments';
 import PostInteractionBar from '../PostInteractionBar/PostInteractionBar';
 import PollView from './PollView/PollView';
 import styles from './PadletPostCard.module.css';
+import scrollableStyles from '../../../../shared/styles/scrollable.module.css';
 
 type PadletPostCardVariant = 'card' | 'bubble';
 
@@ -19,9 +22,9 @@ interface PadletPostCardProps {
   canComment?: boolean;
   variant?: PadletPostCardVariant;
   commentsCollapsible?: boolean;
-  scrollableComments?: boolean;
   onEdit?: (post: Post) => void;
   onDelete?: (post: Post) => void;
+  onContentResize?: () => void;
 }
 
 function getPostBodyClassName(variant: PadletPostCardVariant, isImage: boolean): string {
@@ -32,8 +35,8 @@ function getPostBodyClassName(variant: PadletPostCardVariant, isImage: boolean):
   }
 
   return variant === 'bubble'
-    ? `${styles.content} ${styles.bubbleContent}`
-    : styles.content;
+    ? `${styles.content} ${scrollableStyles.scrollableY} ${styles.bubbleContent}`
+    : `${styles.content} ${scrollableStyles.scrollableY}`;
 }
 
 function PostActions({ post, onEdit, onDelete }: {
@@ -93,17 +96,19 @@ export default function PadletPostCard({
   canComment = false,
   variant = 'card',
   commentsCollapsible = false,
-  scrollableComments = false,
   onEdit,
   onDelete,
+  onContentResize,
 }: PadletPostCardProps) {
   const { user } = useAuth();
+  const cardRef = useRef<HTMLElement>(null);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const { comments, error, sendComment, removeComment, editComment } = usePostComments(
     padletId,
     post.id,
     canComment,
   );
+  const scrollableComments = comments.length > COMMENTS_SCROLL_THRESHOLD;
   const background = BACKGROUND_COLOR_LIGHT[post.color ?? ''] ?? post.color ?? '#ffffff';
   const authorInitial = post.authorUsername.charAt(0).toUpperCase();
   const cardStyle = post.poll
@@ -113,6 +118,39 @@ export default function PadletPostCard({
       }
     : { background };
   const showComments = canComment && (!commentsCollapsible || commentsOpen);
+
+  useEffect(() => {
+    onContentResize?.();
+  }, [comments.length, post.imageUrl, post.poll, post.postType, post.title, post.description, post.subject, showComments, onContentResize]);
+
+  useEffect(() => {
+    if (!showComments) {
+      return;
+    }
+
+    const node = cardRef.current;
+    if (!node) {
+      return;
+    }
+
+    let frameId = 0;
+    const observer = new ResizeObserver(() => {
+      if (!hasActiveScrollActivity(node)) {
+        return;
+      }
+
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => {
+        scrollActivityIntoViewAfterLayout(node);
+      });
+    });
+
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frameId);
+    };
+  }, [post.id, showComments]);
 
   const body = (
     <>
@@ -135,7 +173,12 @@ export default function PadletPostCard({
       ) : post.postType === 'image' ? (
         <div className={getPostBodyClassName(variant, true)}>
           {(post.description ?? post.title) ? <p className={styles.imageDescription}>{post.description ?? post.title}</p> : null}
-          <img src={post.imageUrl ?? ''} alt={post.description ?? post.title ?? 'תמונה'} className={styles.postImage} />
+          <img
+            src={post.imageUrl ?? ''}
+            alt={post.description ?? post.title ?? 'תמונה'}
+            className={styles.postImage}
+            onLoad={onContentResize}
+          />
         </div>
       ) : post.postType === 'link' ? (
         <div className={getPostBodyClassName(variant, false)}>
@@ -184,11 +227,15 @@ export default function PadletPostCard({
   );
 
   if (variant === 'bubble') {
-    return body;
+    return (
+      <div ref={cardRef as RefObject<HTMLDivElement>}>
+        {body}
+      </div>
+    );
   }
 
   return (
-    <article className={styles.card} style={cardStyle}>
+    <article ref={cardRef as RefObject<HTMLElement>} className={styles.card} style={cardStyle}>
       {body}
     </article>
   );

@@ -1,9 +1,9 @@
 .bubblePost {
-  display: inline-block;
+  display: block;
   position: relative;
-  width: fit-content;
+  width: 100%;
   min-width: 160px;
-  max-width: 220px;
+  max-width: 100%;
 }
 
 .bubble {

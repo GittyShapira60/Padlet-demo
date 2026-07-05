@@ -1,8 +1,17 @@
 .layer {
   position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  padding: 1.5rem 1.25rem 5rem;
+  min-height: calc(100dvh - var(--canvas-offset, 16rem));
+  padding: 1.5rem 1.25rem var(--board-bottom-dock, 5.5rem);
   box-sizing: border-box;
+}
+
+.layerTimeline {
+  padding-inline: 0;
+  padding-bottom: 0;
 }
 
 .empty {

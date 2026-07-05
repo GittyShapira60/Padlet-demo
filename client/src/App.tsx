@@ -37,7 +37,7 @@ function App() {
         actionSlot={headerActionSlot}
         onLogoClick={handleLogoClick}
       />
-      <main className={styles.main}>
+      <main className={styles.main} data-board-scroll-container>
         <Outlet
           context={
             { setHeaderCenterSlot, setHeaderBackground, setHeaderActionSlot } satisfies AppOutletContext

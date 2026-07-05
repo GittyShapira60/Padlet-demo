@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -18,7 +19,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostContentInputDto } from './dto/post-content-input.dto';
 import { PostLayoutDto } from './dto/post-layout.dto';
-import { UpdatePostLayoutDto } from './dto/update-post-layout.dto';
+import { SwapPostsDto } from './dto/swap-posts.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 
 export type { PostLayoutDto };
@@ -73,8 +74,7 @@ export type PostWithAuthor = Prisma.PostGetPayload<{
   };
 }>;
 
-const FREE_WALL_COLUMNS = 5;
-const GRID_COLUMNS = 4;
+const FREE_WALL_ORDER_START = 0;
 
 @Injectable()
 export class PostsService {
@@ -96,12 +96,13 @@ export class PostsService {
 
     const access = await this.padletAccess.assertCanCreatePost(authorId, padletId);
 
-    const existingCount = await this.prisma.post.count({
-      where: { padlet_id: padletId },
-    });
-
     const { contentKind, title, subject } = this.mapPostContent(dto);
     const now = new Date();
+
+    const dataLayout =
+      access.boardType === PadletBoardType.free_wall
+        ? await this.buildFreeWallOrderForPadlet(padletId)
+        : null;
 
     const post = await this.prisma.$transaction(async (tx) => {
       const created = await tx.post.create({
@@ -114,9 +115,7 @@ export class PostsService {
           subject,
           description: dto.description ?? null,
           color: dto.color ?? null,
-          data_layout: this.toJsonLayout(
-            this.buildLayout(access.boardType, existingCount),
-          ),
+          data_layout: dataLayout ? this.toJsonLayout(dataLayout) : Prisma.DbNull,
           created_at: now,
           updated_at: now,
         },
@@ -312,44 +311,76 @@ export class PostsService {
     return postResponse;
   }
 
-  async updatePostLayout(
+  async swapPostPositions(
     userId: string,
     padletIdRaw: string,
-    postIdRaw: string,
-    dto: UpdatePostLayoutDto,
-  ): Promise<PostResponseDto> {
+    dto: SwapPostsDto,
+  ): Promise<{ source: PostResponseDto; target: PostResponseDto }> {
     const requesterId = this.parseId(userId, 'משתמש לא נמצא');
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
-    const postId = this.parseId(postIdRaw, 'הפוסט לא נמצא');
+    const sourcePostId = this.parseId(dto.sourcePostId, 'הפוסט לא נמצא');
+    const targetPostId = this.parseId(dto.targetPostId, 'הפוסט לא נמצא');
 
-    const existingPost = await this.findPostForUser(
-      requesterId,
-      padletId,
-      postId,
-    );
+    if (sourcePostId === targetPostId) {
+      throw new BadRequestException('לא ניתן להחליף פוסט עם עצמו');
+    }
+
+    const padlet = await this.padletAccess.assertCanView(requesterId, padletId);
+
+    if (padlet.boardType !== PadletBoardType.free_wall) {
+      throw new BadRequestException('החלפת מיקום פוסטים זמינה רק בלוח קיר חופשי');
+    }
+
+    const sourcePost = await this.findPostForUser(requesterId, padletId, sourcePostId);
+    const targetPost = await this.findPostForUser(requesterId, padletId, targetPostId);
 
     await this.padletAccess.assertCanEditPost(
       requesterId,
       padletId,
-      existingPost.user_id,
+      sourcePost.user_id,
     );
 
+    await this.ensureFreeWallOrders(padletId);
+
+    const refreshedSource = await this.findPostForUser(requesterId, padletId, sourcePostId);
+    const refreshedTarget = await this.findPostForUser(requesterId, padletId, targetPostId);
+
+    const sourceOrder = this.resolveFreeWallOrder(refreshedSource.data_layout);
+    const targetOrder = this.resolveFreeWallOrder(refreshedTarget.data_layout);
     const now = new Date();
 
-    await this.prisma.post.update({
-      where: { post_id: postId },
-      data: {
-        data_layout: this.toJsonLayout(dto),
-        updated_at: now,
-      },
-    });
+    await this.prisma.$transaction([
+      this.prisma.post.update({
+        where: { post_id: sourcePostId },
+        data: {
+          data_layout: this.toJsonLayout({ order: targetOrder }),
+          updated_at: now,
+        },
+      }),
+      this.prisma.post.update({
+        where: { post_id: targetPostId },
+        data: {
+          data_layout: this.toJsonLayout({ order: sourceOrder }),
+          updated_at: now,
+        },
+      }),
+    ]);
 
     await this.touchPadlet(padletId, now);
 
-    const postWithPoll = await this.findPostWithPoll(postId);
-    const postResponse = this.toPostResponse(postWithPoll, requesterId);
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
-    return postResponse;
+    const sourceResponse = this.toPostResponse(
+      await this.findPostWithPoll(sourcePostId),
+      requesterId,
+    );
+    const targetResponse = this.toPostResponse(
+      await this.findPostWithPoll(targetPostId),
+      requesterId,
+    );
+
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', sourceResponse);
+    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', targetResponse);
+
+    return { source: sourceResponse, target: targetResponse };
   }
 
   async deletePost(
@@ -373,7 +404,7 @@ export class PostsService {
       existingPost.user_id,
     );
 
-    const padlet = await this.padletAccess.assertCanView(requesterId, padletId);
+    await this.padletAccess.assertCanView(requesterId, padletId);
     const now = new Date();
 
     await this.prisma.$transaction([
@@ -381,10 +412,6 @@ export class PostsService {
       this.prisma.notification.deleteMany({ where: { post_id: postId } }),
       this.prisma.post.delete({ where: { post_id: postId } }),
     ]);
-
-    if (padlet.boardType !== PadletBoardType.free_wall) {
-      await this.reindexPostLayouts(padletId, padlet.boardType);
-    }
 
     await this.touchPadlet(padletId, now);
 
@@ -501,7 +528,7 @@ export class PostsService {
       description: post.description ?? null,
       color: post.color,
       layout: post.data_layout
-        ? (post.data_layout as unknown as PostLayoutDto)
+        ? this.normalizeFreeWallLayout(post.data_layout as unknown as PostLayoutDto)
         : null,
       createdAt: post.created_at.toISOString(),
       poll: pollData,
@@ -587,54 +614,79 @@ export class PostsService {
     });
   }
 
-  private async reindexPostLayouts(
+  buildFreeWallOrder(existingOrders: number[]): PostLayoutDto {
+    const maxOrder = existingOrders.reduce(
+      (max, order) => Math.max(max, order),
+      FREE_WALL_ORDER_START - 1,
+    );
+
+    return { order: maxOrder + 1 };
+  }
+
+  private async buildFreeWallOrderForPadlet(
     padletId: bigint,
-    boardType: PadletBoardType,
-  ): Promise<void> {
+  ): Promise<PostLayoutDto> {
+    await this.ensureFreeWallOrders(padletId);
+    const existingOrders = await this.getFreeWallOrders(padletId);
+    return this.buildFreeWallOrder(existingOrders);
+  }
+
+  private async ensureFreeWallOrders(padletId: bigint): Promise<void> {
     const posts = await this.prisma.post.findMany({
       where: { padlet_id: padletId },
       orderBy: { created_at: 'asc' },
-      select: { post_id: true },
+      select: { post_id: true, data_layout: true },
     });
 
-    await Promise.all(
+    const needsMigration = posts.some((post) => {
+      const raw = post.data_layout as Record<string, unknown> | null;
+      return !raw || typeof raw.order !== 'number';
+    });
+
+    if (!needsMigration) {
+      return;
+    }
+
+    await this.prisma.$transaction(
       posts.map((post, index) =>
         this.prisma.post.update({
           where: { post_id: post.post_id },
-          data: {
-            data_layout: this.toJsonLayout(this.buildLayout(boardType, index)),
-          },
+          data: { data_layout: { order: index } },
         }),
       ),
     );
   }
 
-  buildLayout(boardType: PadletBoardType, index: number): PostLayoutDto {
-    switch (boardType) {
-      case PadletBoardType.brainstorming: {
-        const columns = 4;
-        const col = index % columns;
-        const row = Math.floor(index / columns);
-        return {
-          x: 2 + col * 24,
-          y: 2 + row * 22,
-        };
-      }
-      case PadletBoardType.grid:
-        return { x: index % GRID_COLUMNS, y: Math.floor(index / GRID_COLUMNS) };
-      case PadletBoardType.timeline:
-        return { x: index, y: 0 };
-      case PadletBoardType.free_wall:
-      default:
-        return {
-          x: 3 + (index % FREE_WALL_COLUMNS) * 18,
-          y: 2 + Math.floor(index / FREE_WALL_COLUMNS) * 38,
-        };
-    }
+  private async getFreeWallOrders(padletId: bigint): Promise<number[]> {
+    const posts = await this.prisma.post.findMany({
+      where: {
+        padlet_id: padletId,
+        data_layout: { not: Prisma.DbNull },
+      },
+      select: { data_layout: true },
+    });
+
+    return posts.map((post) =>
+      this.resolveFreeWallOrder(post.data_layout),
+    );
   }
 
-  private toJsonLayout(layout: PostLayoutDto): Prisma.InputJsonValue {
-    return { x: layout.x, y: layout.y };
+  private resolveFreeWallOrder(dataLayout: unknown): number {
+    const raw = dataLayout as Record<string, unknown> | null;
+    if (raw && typeof raw.order === 'number' && Number.isFinite(raw.order)) {
+      return Math.round(raw.order);
+    }
+
+    return FREE_WALL_ORDER_START;
+  }
+
+  private normalizeFreeWallLayout(layout: PostLayoutDto): PostLayoutDto {
+    return { order: this.resolveFreeWallOrder(layout) };
+  }
+
+  toJsonLayout(layout: PostLayoutDto): Prisma.InputJsonValue {
+    const normalized = this.normalizeFreeWallLayout(layout);
+    return { order: normalized.order };
   }
 
   private mapPostContent(dto: PostContentInputDto): {
