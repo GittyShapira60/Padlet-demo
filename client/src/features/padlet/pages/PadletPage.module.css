@@ -1,9 +1,9 @@
 .page {
   position: relative;
   width: 100%;
-  height: 100%;
   direction: rtl;
-  overflow: hidden;
+  overflow-x: clip;
+  --canvas-offset: 16rem;
 }
 
 .titleRow {
