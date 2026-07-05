@@ -203,10 +203,56 @@
 
 .postImage {
   width: 100%;
-  height: 120px;
-  object-fit: cover;
+  height: auto;
+  max-height: 280px;
+  object-fit: contain;
   border-radius: 8px;
   display: block;
+  cursor: zoom-in;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.lightboxClose {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+  z-index: 1001;
+}
+
+.lightboxClose:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  padding: 1.5rem;
+}
+
+.lightboxImage {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
 }
 
 .imageDescription,
