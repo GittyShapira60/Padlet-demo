@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { BACKGROUND_COLOR_LIGHT } from '../../../../shared/constants/background-colors';
 import { formatRelativeTime } from '../../../../shared/utils/format-relative-time';
 import { MoreVertical, Pencil, Trash2 } from '../../../../shared/icons';
@@ -99,6 +100,7 @@ export default function PadletPostCard({
 }: PadletPostCardProps) {
   const { user } = useAuth();
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [isImageOpen, setIsImageOpen] = useState(false);
   const { comments, error, sendComment, removeComment, editComment } = usePostComments(
     padletId,
     post.id,
@@ -135,7 +137,39 @@ export default function PadletPostCard({
       ) : post.postType === 'image' ? (
         <div className={getPostBodyClassName(variant, true)}>
           {(post.description ?? post.title) ? <p className={styles.imageDescription}>{post.description ?? post.title}</p> : null}
-          <img src={post.imageUrl ?? ''} alt={post.description ?? post.title ?? 'תמונה'} className={styles.postImage} />
+          <img
+            src={post.imageUrl ?? ''}
+            alt={post.description ?? post.title ?? 'תמונה'}
+            className={styles.postImage}
+            onClick={() => setIsImageOpen(true)}
+          />
+          {isImageOpen ? createPortal(
+            <div
+              className={styles.lightboxOverlay}
+              onClick={() => setIsImageOpen(false)}
+              data-no-drag
+              role="dialog"
+              aria-modal="true"
+              aria-label="תמונה בגודל מלא"
+            >
+              <button
+                type="button"
+                className={styles.lightboxClose}
+                onClick={() => setIsImageOpen(false)}
+                aria-label="סגור"
+                data-no-drag
+              >
+                ✕
+              </button>
+              <img
+                src={post.imageUrl ?? ''}
+                alt={post.description ?? post.title ?? 'תמונה'}
+                className={styles.lightboxImage}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>,
+            document.body
+          ) : null}
         </div>
       ) : post.postType === 'link' ? (
         <div className={getPostBodyClassName(variant, false)}>

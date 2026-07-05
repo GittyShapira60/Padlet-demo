@@ -67,7 +67,7 @@ export default function DraggablePost({
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
       if (!canDrag || event.button !== 0) return;
-      if ((event.target as HTMLElement).closest('button, a, [data-no-drag]')) return;
+      if ((event.target as HTMLElement).closest('button, a, img, [data-no-drag]')) return;
 
       dragStart.current = { clientX: event.clientX, clientY: event.clientY, layout: latestLayout.current };
       isDragging.current = true;
