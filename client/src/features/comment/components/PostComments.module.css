@@ -23,23 +23,11 @@
 
 .listScrollable {
   max-height: 7.5rem;
-  overflow-y: auto;
-  overflow-x: hidden;
   margin-bottom: 0.35rem;
-  padding-inline-end: 0.15rem;
 }
 
 .listScrollableCompact {
   max-height: 4.1rem;
-}
-
-.listScrollable::-webkit-scrollbar {
-  width: 4px;
-}
-
-.listScrollable::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.45);
-  border-radius: 999px;
 }
 
 /* CommentItem */

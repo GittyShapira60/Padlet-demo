@@ -1,4 +1,11 @@
 .app {
+  --board-scrollbar-size: 14px;
+  --board-fab-offset: 1.5rem;
+  --board-fab-height: 3rem;
+  --board-bottom-dock: calc(
+    var(--board-fab-offset) + var(--board-fab-height) + var(--board-scrollbar-size)
+  );
+
   height: 100vh;
   width: 100%;
   direction: rtl;
@@ -15,5 +22,6 @@
   width: 100%;
   min-height: 0;
   overflow-y: auto;
+  scroll-padding-bottom: var(--board-bottom-dock);
 }
 

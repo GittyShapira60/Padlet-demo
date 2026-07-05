@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { ArrowLeft, Plus, Smile } from '../../../shared/icons';
+import { scrollActivityIntoViewAfterLayout } from '@/shared/utils/scroll-activity-into-view';
 import {
   EmojiPickerPopover,
   type EmojiDefinition,
@@ -33,6 +34,7 @@ export default function CommentComposer({
     }
 
     inputRef.current?.focus();
+    scrollActivityIntoViewAfterLayout(anchorRef.current);
   }
 
   function handleSend() {
@@ -82,7 +84,7 @@ export default function CommentComposer({
 
   return (
     <>
-      <div ref={anchorRef} className={barClassName}>
+      <div ref={anchorRef} className={barClassName} data-no-drag data-scroll-activity>
         {isTyping ? (
           <button
             type="button"
@@ -110,8 +112,16 @@ export default function CommentComposer({
           value={value}
           placeholder={PLACEHOLDER}
           disabled={disabled}
-          onChange={(event) => setValue(event.target.value)}
-          onFocus={() => setIsFocused(true)}
+          onChange={(event) => {
+            setValue(event.target.value);
+            if (isFocused) {
+              scrollActivityIntoViewAfterLayout(anchorRef.current);
+            }
+          }}
+          onFocus={() => {
+            setIsFocused(true);
+            scrollActivityIntoViewAfterLayout(anchorRef.current);
+          }}
           onBlur={() => setIsFocused(false)}
           onKeyDown={handleKeyDown}
           onClick={focusInput}

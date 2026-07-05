@@ -12,7 +12,7 @@ import type { AuthUserDto } from '../authentication/authentication.service';
 import { CurrentUser } from '../authentication/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostLayoutDto } from './dto/update-post-layout.dto';
+import { SwapPostsDto } from './dto/swap-posts.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostsService } from './posts.service';
 
@@ -44,15 +44,14 @@ export class PostsController {
     return this.postsService.updatePost(user.id, padletId, postId, dto);
   }
 
-  @Patch(':postId/layout')
-  @ApiOperation({ summary: 'Update a post layout on a padlet board' })
-  updatePostLayout(
+  @Post('swap')
+  @ApiOperation({ summary: 'Swap two post positions on a free-wall board' })
+  swapPosts(
     @CurrentUser() user: AuthUserDto,
     @Param('padletId') padletId: string,
-    @Param('postId') postId: string,
-    @Body() dto: UpdatePostLayoutDto,
+    @Body() dto: SwapPostsDto,
   ) {
-    return this.postsService.updatePostLayout(user.id, padletId, postId, dto);
+    return this.postsService.swapPostPositions(user.id, padletId, dto);
   }
 
   @Delete(':postId')

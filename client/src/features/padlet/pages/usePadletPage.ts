@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../auth/context/AuthProvider';
-import type { Post, PostLayout } from '../../post/interfaces/post';
-import { deletePost, updatePostLayout } from '../../post/services/post-service';
+import type { Post } from '../../post/interfaces/post';
+import { deletePost, swapPosts } from '../../post/services/post-service';
+import { swapPostLayouts } from '../../post/components/board-layouts/free_wall/free-wall-order';
 import type { Padlet } from '../interfaces/padlet';
 import { connectSocket } from '../../../shared/services/socket.service';
 import {
@@ -12,6 +13,7 @@ import {
 import { getPadletDetail, leavePadlet } from '../services/padlet-service';
 import { mapApiPermission } from '../utils/padlet-capabilities';
 import { recordVisit, updateVisitDuration } from '../../stats/services/stats-service';
+import { resetBoardScrollPosition } from '../../../shared/utils/scroll-activity-into-view';
 
 export function usePadletPage() {
   const { padletId } = useParams<{ padletId: string }>();
@@ -57,8 +59,20 @@ export function usePadletPage() {
   }, [posts, filterSearch, filterAuthor]);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    resetBoardScrollPosition();
   }, [padletId]);
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        resetBoardScrollPosition();
+      });
+    });
+  }, [padletId, isLoading]);
 
   useEffect(() => {
     if (!padletId) {
@@ -279,23 +293,31 @@ export function usePadletPage() {
     }
   }, [padletId, postPendingDelete]);
 
-  const handleLayoutChange = useCallback(
-    async (postId: string, layout: PostLayout) => {
+  const handlePostSwap = useCallback(
+    async (sourcePostId: string, targetPostId: string) => {
       if (!padletId) {
         return;
       }
 
-      setPosts((current: Post[]) =>
-        current.map((item: Post) => (item.id === postId ? { ...item, layout } : item)),
-      );
+      let previousPosts: Post[] = [];
+
+      setPosts((current: Post[]) => {
+        previousPosts = current;
+        return swapPostLayouts(current, sourcePostId, targetPostId);
+      });
 
       try {
-        const updatedPost = await updatePostLayout(padletId, postId, layout);
+        const { source, target } = await swapPosts(padletId, sourcePostId, targetPostId);
         setPosts((current) =>
-          current.map((item) => (item.id === postId ? updatedPost : item)),
+          current.map((item) => {
+            if (item.id === source.id) return source;
+            if (item.id === target.id) return target;
+            return item;
+          }),
         );
       } catch {
-        setError('עדכון מיקום הפוסט נכשל');
+        setPosts(previousPosts);
+        setError('החלפת מיקום הפוסטים נכשלה');
       }
     },
     [padletId],
@@ -365,7 +387,7 @@ export function usePadletPage() {
     handleRequestDeletePost,
     handleCancelDeletePost,
     handleConfirmDeletePost,
-    handleLayoutChange,
+    handlePostSwap,
     handleOpenLeave,
     handleCancelLeave,
     handleConfirmLeave,

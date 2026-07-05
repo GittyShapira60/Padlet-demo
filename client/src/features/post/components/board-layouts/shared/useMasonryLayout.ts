@@ -4,7 +4,9 @@ const H_PADDING = 16;
 const V_PADDING = 14;
 const GAP_X = 24;
 const GAP_Y = 22;
-const MIN_COLUMN_WIDTH = 252;
+const TARGET_COLUMNS = 5;
+const MIN_COLUMN_WIDTH = 220;
+const MAX_COLUMN_WIDTH = 260;
 const BOTTOM_PADDING = 80;
 
 export interface MasonryPosition {
@@ -18,7 +20,7 @@ interface MasonryLayout {
   height: number;
 }
 
-export function useBrainstormMasonry(itemCount: number) {
+export function useMasonryLayout(itemCount: number, layoutKey = '') {
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [layout, setLayout] = useState<MasonryLayout | null>(null);
@@ -41,11 +43,18 @@ export function useBrainstormMasonry(itemCount: number) {
     const compute = () => {
       const containerWidth = container.clientWidth;
       const available = containerWidth - H_PADDING * 2;
-      const columnCount = Math.max(
-        1,
-        Math.floor((available + GAP_X) / (MIN_COLUMN_WIDTH + GAP_X)),
-      );
-      const columnWidth = (available - GAP_X * (columnCount - 1)) / columnCount;
+      let columnCount = TARGET_COLUMNS;
+      let columnWidth = (available - GAP_X * (columnCount - 1)) / columnCount;
+
+      if (columnWidth < MIN_COLUMN_WIDTH) {
+        columnCount = Math.max(
+          1,
+          Math.floor((available + GAP_X) / (MIN_COLUMN_WIDTH + GAP_X)),
+        );
+        columnWidth = (available - GAP_X * (columnCount - 1)) / columnCount;
+      } else {
+        columnWidth = Math.min(columnWidth, MAX_COLUMN_WIDTH);
+      }
 
       container.style.setProperty('--masonry-slot-width', `${columnWidth}px`);
 
@@ -54,7 +63,7 @@ export function useBrainstormMasonry(itemCount: number) {
 
       for (let index = 0; index < itemCount; index++) {
         const el = itemRefs.current[index];
-        const height = el?.getBoundingClientRect().height ?? 0;
+        const height = el?.offsetHeight ?? 0;
 
         let col = 0;
         for (let c = 1; c < columnCount; c++) {
@@ -79,6 +88,7 @@ export function useBrainstormMasonry(itemCount: number) {
     };
 
     compute();
+    const settlePass = requestAnimationFrame(compute);
 
     const observer = new ResizeObserver(compute);
     observer.observe(container);
@@ -88,8 +98,11 @@ export function useBrainstormMasonry(itemCount: number) {
       }
     });
 
-    return () => observer.disconnect();
-  }, [itemCount]);
+    return () => {
+      cancelAnimationFrame(settlePass);
+      observer.disconnect();
+    };
+  }, [itemCount, layoutKey]);
 
   return { containerRef, setItemRef, layout };
 }

@@ -1,0 +1,1 @@
+export const COMMENTS_SCROLL_THRESHOLD = 10;

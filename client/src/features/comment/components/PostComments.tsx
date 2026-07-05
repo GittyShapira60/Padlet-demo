@@ -1,6 +1,7 @@
 import CommentComposer from './CommentComposer';
 import CommentItem from './CommentItem';
 import type { Comment } from '../types/comment';
+import scrollableStyles from '../../../shared/styles/scrollable.module.css';
 import styles from './PostComments.module.css';
 
 interface PostCommentsProps {
@@ -29,6 +30,7 @@ export default function PostComments({
   const hasComments = comments.length > 0;
   const listClassName = [
     styles.list,
+    scrollableList ? scrollableStyles.scrollableY : '',
     scrollableList ? styles.listScrollable : '',
     compactScrollableList ? styles.listScrollableCompact : '',
   ]
@@ -36,7 +38,7 @@ export default function PostComments({
     .join(' ');
 
   return (
-    <section className={styles.section}>
+    <section className={styles.section} data-no-drag>
       {error ? <p className={styles.error}>{error}</p> : null}
 
       {hasComments ? (

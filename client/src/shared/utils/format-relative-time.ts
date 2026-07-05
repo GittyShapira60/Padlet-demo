@@ -2,6 +2,16 @@ const relativeTimeFormatter = new Intl.RelativeTimeFormat('he', {
   numeric: 'auto',
 });
 
+function cleanRelativeTime(value: string): string {
+  return value
+    .trim()
+    .replace(/^\((.+)\)$/, '$1')
+    .replace(/\s*\(\d+\)\s*/g, ' ')
+    .replace(/[()]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function formatRelativeTime(isoDate: string): string {
   const diffMs = Date.now() - new Date(isoDate).getTime();
   const diffMinutes = Math.floor(diffMs / 60_000);
@@ -11,17 +21,17 @@ export function formatRelativeTime(isoDate: string): string {
   }
 
   if (diffMinutes < 60) {
-    return relativeTimeFormatter.format(-diffMinutes, 'minute');
+    return cleanRelativeTime(relativeTimeFormatter.format(-diffMinutes, 'minute'));
   }
 
   const diffHours = Math.floor(diffMinutes / 60);
   if (diffHours < 24) {
-    return relativeTimeFormatter.format(-diffHours, 'hour');
+    return cleanRelativeTime(relativeTimeFormatter.format(-diffHours, 'hour'));
   }
 
   const diffDays = Math.floor(diffHours / 24);
   if (diffDays < 7) {
-    return relativeTimeFormatter.format(-diffDays, 'day');
+    return cleanRelativeTime(relativeTimeFormatter.format(-diffDays, 'day'));
   }
 
   return new Date(isoDate).toLocaleDateString('he-IL', {

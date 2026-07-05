@@ -1,11 +1,25 @@
+.root {
+  margin-top: auto;
+  width: 100%;
+}
+
 .track {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  min-height: 280px;
+}
+
+.trackInner {
   position: relative;
   display: flex;
   align-items: flex-start;
   gap: 0;
-  overflow-x: auto;
-  padding: 3.5rem 0.5rem 2rem;
-  min-height: 280px;
+  direction: rtl;
+  width: max-content;
+  min-width: 100%;
+  box-sizing: border-box;
+  padding: 3.5rem 0.5rem var(--board-scrollbar-size, 14px);
 }
 
 .line {
@@ -16,6 +30,7 @@
   height: 3px;
   background: rgba(148, 163, 184, 0.55);
   border-radius: 999px;
+  pointer-events: none;
 }
 
 .post {

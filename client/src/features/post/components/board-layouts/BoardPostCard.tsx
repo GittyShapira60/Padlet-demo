@@ -8,6 +8,7 @@ interface BoardPostCardProps {
   canComment: boolean;
   onEditPost?: (post: Post) => void;
   onDeletePost?: (post: Post) => void;
+  onContentResize?: () => void;
 }
 
 export default function BoardPostCard({
@@ -17,6 +18,7 @@ export default function BoardPostCard({
   canComment,
   onEditPost,
   onDeletePost,
+  onContentResize,
 }: BoardPostCardProps) {
   return (
     <PadletPostCard
@@ -26,6 +28,7 @@ export default function BoardPostCard({
       canComment={canComment}
       onEdit={onEditPost}
       onDelete={onDeletePost}
+      onContentResize={onContentResize}
     />
   );
 }
