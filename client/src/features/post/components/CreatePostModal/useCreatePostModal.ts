@@ -1,5 +1,4 @@
 import { useCallback, useRef, useState } from 'react';
-import { BACKGROUND_COLORS } from '../../../../shared/constants/background-colors';
 import {
   PostContentTab as PostContentTabValues,
   type PostContentTab,
@@ -39,7 +38,7 @@ function getInitialState(postToEdit?: Post | null) {
       activeTab: PostContentTabValues.Text,
       textContent: '',
       description: '',
-      selectedColor: BACKGROUND_COLORS[0],
+      selectedColor: '#FFFFFF',
       pollAnswers: [...INITIAL_POLL_ANSWERS],
     };
   }
@@ -52,7 +51,7 @@ function getInitialState(postToEdit?: Post | null) {
     activeTab,
     textContent: getInitialTextContent(postToEdit, activeTab),
     description: getInitialDescription(postToEdit),
-    selectedColor: postToEdit.color ?? BACKGROUND_COLORS[0],
+    selectedColor: postToEdit.color ?? '#FFFFFF',
     pollAnswers,
   };
 }
@@ -158,7 +157,7 @@ export function useCreatePostModal({
       setTextContent('');
       setDescription('');
       setSelectedFile(null);
-      setSelectedColor(BACKGROUND_COLORS[0]);
+      setSelectedColor('#FFFFFF');
       setPollAnswers([...INITIAL_POLL_ANSWERS]);
       nextIdRef.current = INITIAL_POLL_ANSWERS.length + 1;
       onClose();

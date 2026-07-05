@@ -24,7 +24,7 @@ function App() {
   const appStyle = useMemo(
     () =>
       headerBackground
-        ? { ...resolveBackgroundStyle(headerBackground), backgroundAttachment: 'fixed' as const }
+        ? resolveBackgroundStyle(headerBackground)
         : undefined,
     [headerBackground],
   );
