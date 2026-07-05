@@ -13,7 +13,7 @@ import {
 import { getPadletDetail, leavePadlet } from '../services/padlet-service';
 import { mapApiPermission } from '../utils/padlet-capabilities';
 import { recordVisit, updateVisitDuration } from '../../stats/services/stats-service';
-import { resetBoardScrollPosition } from '../../../shared/utils/scroll-activity-into-view';
+import { PadletBoardType } from '../enums/padlet-board-type';
 
 export function usePadletPage() {
   const { padletId } = useParams<{ padletId: string }>();
@@ -38,6 +38,7 @@ export function usePadletPage() {
   const [filterSearch, setFilterSearch] = useState('');
   const [filterAuthor, setFilterAuthor] = useState('');
   const [visitId, setVisitId] = useState<string | null>(null);
+  const [timelineScrollPostId, setTimelineScrollPostId] = useState<string | null>(null);
 
   const visitIdRef = useRef<string | null>(null);
   const visitStartRef = useRef<number | null>(null);
@@ -59,20 +60,8 @@ export function usePadletPage() {
   }, [posts, filterSearch, filterAuthor]);
 
   useEffect(() => {
-    resetBoardScrollPosition();
+    setTimelineScrollPostId(null);
   }, [padletId]);
-
-  useEffect(() => {
-    if (isLoading) {
-      return;
-    }
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        resetBoardScrollPosition();
-      });
-    });
-  }, [padletId, isLoading]);
 
   useEffect(() => {
     if (!padletId) {
@@ -244,6 +233,9 @@ export function usePadletPage() {
   }, []);
 
   const handlePostSaved = useCallback((post: Post) => {
+    const isNewPost = !posts.some((item) => item.id === post.id);
+    const shouldScrollTimeline = isNewPost && padlet?.boardType === PadletBoardType.Timeline;
+
     setPosts((current) => {
       const existingIndex = current.findIndex((item) => item.id === post.id);
 
@@ -258,6 +250,14 @@ export function usePadletPage() {
 
       return current.map((item) => (item.id === post.id ? post : item));
     });
+
+    if (shouldScrollTimeline) {
+      setTimelineScrollPostId(post.id);
+    }
+  }, [padlet?.boardType, posts]);
+
+  const clearTimelineScrollPost = useCallback(() => {
+    setTimelineScrollPostId(null);
   }, []);
 
   const handleEditPost = useCallback((post: Post) => {
@@ -384,6 +384,8 @@ export function usePadletPage() {
     handlePadletUpdated,
     handlePostSaved,
     handleEditPost,
+    timelineScrollPostId,
+    clearTimelineScrollPost,
     handleRequestDeletePost,
     handleCancelDeletePost,
     handleConfirmDeletePost,

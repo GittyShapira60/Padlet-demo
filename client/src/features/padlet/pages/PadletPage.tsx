@@ -61,6 +61,8 @@ function PadletBoardBody({
   handlePadletUpdated,
   handlePostSaved,
   handleEditPost,
+  timelineScrollPostId,
+  clearTimelineScrollPost,
   handleRequestDeletePost,
   handleCancelDeletePost,
   handleConfirmDeletePost,
@@ -150,6 +152,8 @@ function PadletBoardBody({
             padletId={padletId}
             boardType={boardType}
             posts={filteredPosts}
+            timelineScrollPostId={timelineScrollPostId}
+            onTimelineScrollComplete={clearTimelineScrollPost}
             onEditPost={handleEditPost}
             onDeletePost={(post) => void handleRequestDeletePost(post)}
             onPostSwap={(sourcePostId, targetPostId) =>
