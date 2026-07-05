@@ -1,13 +1,19 @@
 .root {
-  margin-top: auto;
   width: 100%;
+  min-height: calc(100dvh - var(--timeline-track-top, 8.5rem) - var(--board-bottom-dock, 5.5rem));
 }
 
 .track {
-  width: 100%;
+  position: fixed;
+  top: var(--timeline-track-top, 8.5rem);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  direction: ltr;
   overflow-x: auto;
   overflow-y: visible;
-  min-height: 280px;
+  z-index: 1;
+  box-sizing: border-box;
 }
 
 .trackInner {
@@ -19,12 +25,12 @@
   width: max-content;
   min-width: 100%;
   box-sizing: border-box;
-  padding: 3.5rem 0.5rem var(--board-scrollbar-size, 14px);
+  padding: 2.25rem 0.5rem var(--board-bottom-dock, 5.5rem);
 }
 
 .line {
   position: absolute;
-  top: 2.75rem;
+  top: 1.7rem;
   left: 0.5rem;
   right: 0.5rem;
   height: 3px;

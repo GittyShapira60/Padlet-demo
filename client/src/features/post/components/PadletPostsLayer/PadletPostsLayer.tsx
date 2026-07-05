@@ -11,6 +11,8 @@ interface PadletPostsLayerProps {
   padletId: string;
   boardType: PadletBoardType;
   posts: Post[];
+  timelineScrollPostId?: string | null;
+  onTimelineScrollComplete?: () => void;
   onEditPost?: (post: Post) => void;
   onDeletePost?: (post: Post) => void;
   onPostSwap?: (sourcePostId: string, targetPostId: string) => void;
@@ -20,6 +22,8 @@ export default function PadletPostsLayer({
   padletId,
   boardType,
   posts,
+  timelineScrollPostId = null,
+  onTimelineScrollComplete,
   onEditPost,
   onDeletePost,
   onPostSwap,
@@ -59,10 +63,22 @@ export default function PadletPostsLayer({
       content = <GridPostsLayout {...layoutProps} />;
       break;
     case PadletBoardType.Timeline:
-      content = <TimelinePostsLayout {...layoutProps} />;
+      content = (
+        <TimelinePostsLayout
+          {...layoutProps}
+          scrollToPostId={timelineScrollPostId}
+          onScrollToPostComplete={onTimelineScrollComplete}
+        />
+      );
       break;
     default:
-      content = <TimelinePostsLayout {...layoutProps} />;
+      content = (
+        <TimelinePostsLayout
+          {...layoutProps}
+          scrollToPostId={timelineScrollPostId}
+          onScrollToPostComplete={onTimelineScrollComplete}
+        />
+      );
       break;
   }
 

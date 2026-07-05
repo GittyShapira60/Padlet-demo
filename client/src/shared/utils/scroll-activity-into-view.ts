@@ -1,6 +1,39 @@
 const BOARD_SCROLL_CONTAINER_SELECTOR = '[data-board-scroll-container]';
 const DEFAULT_BOTTOM_INSET_PX = 88;
 
+export function scrollTimelinePostIntoView(
+  post: HTMLElement,
+  options: { behavior?: ScrollBehavior } = {},
+): void {
+  const { behavior = 'smooth' } = options;
+  const track = post.closest<HTMLElement>('[data-timeline-track]');
+  if (!track) {
+    return;
+  }
+
+  const maxScrollLeft = Math.max(0, track.scrollWidth - track.clientWidth);
+  if (maxScrollLeft === 0) {
+    return;
+  }
+
+  const trackRect = track.getBoundingClientRect();
+  const postRect = post.getBoundingClientRect();
+  const edgePadding = 24;
+  const isFullyVisible =
+    postRect.left >= trackRect.left + edgePadding
+    && postRect.right <= trackRect.right - edgePadding;
+
+  if (isFullyVisible) {
+    return;
+  }
+
+  const postLeft = postRect.left - trackRect.left + track.scrollLeft;
+  const targetScrollLeft = postLeft - (track.clientWidth - postRect.width) / 2;
+  const nextScrollLeft = Math.max(0, Math.min(targetScrollLeft, maxScrollLeft));
+
+  track.scrollTo({ left: nextScrollLeft, behavior });
+}
+
 function getCssVariableSource(): Element {
   return document.querySelector('main')?.parentElement ?? document.documentElement;
 }
@@ -43,15 +76,6 @@ export function hasActiveScrollActivity(container: HTMLElement): boolean {
     active.matches('input:not([type="hidden"]), textarea, [contenteditable="true"]') ||
     active.closest('[data-scroll-activity]') !== null
   );
-}
-
-export function resetBoardScrollPosition(): void {
-  const verticalContainer = getBoardScrollContainer();
-  verticalContainer?.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-
-  document.querySelectorAll<HTMLElement>('[data-timeline-track]').forEach((track) => {
-    track.scrollTo({ left: 0, top: 0, behavior: 'instant' });
-  });
 }
 
 function getHorizontalScrollContainer(element: HTMLElement): HTMLElement | null {
