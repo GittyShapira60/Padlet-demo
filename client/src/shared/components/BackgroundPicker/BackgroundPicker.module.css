@@ -61,7 +61,7 @@
 .swatchSelected:hover,
 .swatchSelected:focus,
 .swatchSelected:active {
-  box-shadow: 0 0 0 2px var(--color-brand-pink);
+  border-color: var(--color-brand-pink);
 }
 
 .swatch:hover {
@@ -83,44 +83,27 @@
 .gradientSwatch {
   aspect-ratio: 2 / 1;
   border: 2px solid transparent;
-  border-radius: 8px;
+  border-radius: 20px;
   cursor: pointer;
   padding: 0;
   outline: none;
   appearance: none;
   position: relative;
   overflow: hidden;
+  background-origin: border-box;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease;
+}
+
+.gradientSwatchSelected {
+  border-color: var(--color-brand-pink);
 }
 
 .gradientSwatch:hover {
   transform: scale(1.04);
 }
 
-.gradientSwatchSelected {
-  border-color: #ffffff;
-  box-shadow:
-    0 0 0 2px var(--color-brand-pink),
-    0 4px 10px rgba(0, 0, 0, 0.2);
-}
 
-.gradientCheckmark {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #ffffff;
-  color: #1e293b;
-  font-size: 0.65rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
 
 .empty {
   margin: 0;

@@ -1,36 +1,7 @@
-import type { CSSProperties } from 'react';
 import { BACKGROUND_COLOR_GRADIENTS, BACKGROUND_COLORS, BACKGROUND_GRADIENTS, BACKGROUND_IMAGES } from '../../constants/background-colors';
 import styles from './BackgroundPicker.module.css';
 
 export type BackgroundTab = 'colors' | 'images' | 'patterns';
-
-function SwatchGrid({
-  items,
-  selected,
-  getStyle,
-  onSelect,
-}: {
-  items: readonly string[];
-  selected: string;
-  getStyle: (item: string) => CSSProperties;
-  onSelect: (item: string) => void;
-}) {
-  return (
-    <div className={styles.gradientGrid}>
-      {items.map((item) => (
-        <button
-          key={item}
-          type="button"
-          className={`${styles.gradientSwatch} ${selected === item ? styles.gradientSwatchSelected : ''}`}
-          style={getStyle(item)}
-          onClick={() => onSelect(item)}
-        >
-          {selected === item && <span className={styles.gradientCheckmark}>✓</span>}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 const TAB_LABELS: Record<BackgroundTab, string> = {
   colors: 'צבעוניים',
@@ -75,25 +46,39 @@ export default function BackgroundPicker({
               key={color}
               type="button"
               className={`${styles.swatch} ${selectedColor === color ? styles.swatchSelected : ''}`}
-              style={{ background: BACKGROUND_COLOR_GRADIENTS[color] ?? color }}
+              style={
+                (BACKGROUND_COLOR_GRADIENTS[color] ?? color).includes('gradient')
+                  ? { backgroundImage: BACKGROUND_COLOR_GRADIENTS[color], backgroundRepeat: 'no-repeat' }
+                  : { backgroundColor: color }
+              }
               onClick={() => onColorChange(color)}
             />
           ))}
         </div>
       ) : activeTab === 'images' ? (
-        <SwatchGrid
-          items={BACKGROUND_IMAGES}
-          selected={selectedColor}
-          getStyle={(src) => ({ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' })}
-          onSelect={onColorChange}
-        />
+        <div className={styles.gradientGrid}>
+          {BACKGROUND_IMAGES.map((src) => (
+            <button
+              key={src}
+              type="button"
+              className={`${styles.gradientSwatch} ${selectedColor === src ? styles.gradientSwatchSelected : ''}`}
+              style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
+              onClick={() => onColorChange(src)}
+            />
+          ))}
+        </div>
       ) : activeTab === 'patterns' ? (
-        <SwatchGrid
-          items={BACKGROUND_GRADIENTS}
-          selected={selectedColor}
-          getStyle={(gradient) => ({ background: gradient })}
-          onSelect={onColorChange}
-        />
+        <div className={styles.gradientGrid}>
+          {BACKGROUND_GRADIENTS.map((gradient) => (
+            <button
+              key={gradient}
+              type="button"
+              className={`${styles.gradientSwatch} ${selectedColor === gradient ? styles.gradientSwatchSelected : ''}`}
+              style={{ backgroundImage: gradient, backgroundRepeat: 'no-repeat' }}
+              onClick={() => onColorChange(gradient)}
+            />
+          ))}
+        </div>
       ) : null}
     </div>
   );

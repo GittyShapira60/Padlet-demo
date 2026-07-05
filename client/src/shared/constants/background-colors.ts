@@ -86,9 +86,13 @@ export function resolveBackgroundStyle(
 ): Record<string, string> {
   if (!value) return { background: defaultBg };
   if (value.startsWith('/') || value.startsWith('http')) {
-    return { backgroundImage: `url(${value})`, backgroundSize: 'cover', backgroundPosition: 'center' };
+    return { backgroundImage: `url(${value})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' };
   }
-  return { background: BACKGROUND_COLOR_GRADIENTS[value] ?? value };
+  const resolved = BACKGROUND_COLOR_GRADIENTS[value] ?? value;
+  if (resolved.includes('gradient')) {
+    return { backgroundImage: resolved, backgroundRepeat: 'no-repeat' };
+  }
+  return { backgroundColor: resolved };
 }
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
