@@ -1,4 +1,6 @@
 .root {
+  --swatch-radius: 8px;
+
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -40,11 +42,15 @@
 .swatch {
   aspect-ratio: 1;
   border: 2px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--swatch-radius);
   cursor: pointer;
   padding: 0;
   outline: none;
   appearance: none;
+  overflow: hidden;
+  background-origin: border-box;
+  background-size: cover;
+  background-position: center;
   -webkit-tap-highlight-color: transparent;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -83,7 +89,7 @@
 .gradientSwatch {
   aspect-ratio: 2 / 1;
   border: 2px solid transparent;
-  border-radius: 20px;
+  border-radius: var(--swatch-radius);
   cursor: pointer;
   padding: 0;
   outline: none;

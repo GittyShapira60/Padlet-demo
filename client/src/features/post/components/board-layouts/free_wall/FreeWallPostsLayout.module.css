@@ -1,4 +1,31 @@
 .canvas {
-  position: relative;
-  min-height: calc(100dvh - var(--canvas-offset, 16rem));
+  composes: canvas from '../shared/masonry-layout.module.css';
+  min-height: calc(100vh - 11rem);
+}
+
+.item {
+  composes: item from '../shared/masonry-layout.module.css';
+  transition: top 0.22s ease, right 0.22s ease;
+}
+
+.item.is-draggable {
+  touch-action: none;
+  cursor: grab;
+}
+
+.item.is-draggable:active {
+  cursor: grabbing;
+}
+
+.dragging {
+  z-index: 100;
+  cursor: grabbing;
+  user-select: none;
+  transition: none;
+  filter: drop-shadow(0 12px 24px rgba(15, 23, 42, 0.18));
+}
+
+.dragging > * {
+  transform: scale(1.02);
+  transition: transform 0.15s ease;
 }

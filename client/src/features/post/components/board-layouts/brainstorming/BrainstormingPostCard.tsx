@@ -33,7 +33,6 @@ export default function BrainstormingPostCard({
         onDelete={onDelete}
         variant="bubble"
         commentsCollapsible
-        scrollableComments
       />
     </ThoughtBubble>
   );

@@ -1,6 +1,6 @@
 import { PadletBoardType } from '../../../padlet/enums/padlet-board-type';
 import { usePadletCapabilities } from '../../../padlet/context/PadletCapabilitiesContext';
-import type { Post, PostLayout } from '../../interfaces/post';
+import type { Post } from '../../interfaces/post';
 import BrainstormingPostsLayout from '../board-layouts/brainstorming/BrainstormingPostsLayout';
 import FreeWallPostsLayout from '../board-layouts/free_wall/FreeWallPostsLayout';
 import GridPostsLayout from '../board-layouts/grid/GridPostsLayout';
@@ -13,7 +13,7 @@ interface PadletPostsLayerProps {
   posts: Post[];
   onEditPost?: (post: Post) => void;
   onDeletePost?: (post: Post) => void;
-  onLayoutChange?: (postId: string, layout: PostLayout) => void;
+  onPostSwap?: (sourcePostId: string, targetPostId: string) => void;
 }
 
 export default function PadletPostsLayer({
@@ -22,7 +22,7 @@ export default function PadletPostsLayer({
   posts,
   onEditPost,
   onDeletePost,
-  onLayoutChange,
+  onPostSwap,
 }: PadletPostsLayerProps) {
   const { canEditPost, canDragPost, canComment } = usePadletCapabilities();
 
@@ -44,7 +44,7 @@ export default function PadletPostsLayer({
     canDragPost,
     onEditPost,
     onDeletePost,
-    onLayoutChange,
+    onPostSwap,
   };
   let content;
 
@@ -66,5 +66,10 @@ export default function PadletPostsLayer({
       break;
   }
 
-  return <div className={styles.layer}>{content}</div>;
+  const layerClassName =
+    boardType === PadletBoardType.Timeline
+      ? `${styles.layer} ${styles.layerTimeline}`
+      : styles.layer;
+
+  return <div className={layerClassName}>{content}</div>;
 }

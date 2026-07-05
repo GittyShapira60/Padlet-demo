@@ -1,6 +1,6 @@
 .fab {
   position: fixed;
-  bottom: 1.5rem;
+  bottom: calc(var(--board-fab-offset, 1.5rem) + var(--board-scrollbar-size, 14px));
   left: 1.5rem;
   z-index: 3;
   display: inline-flex;

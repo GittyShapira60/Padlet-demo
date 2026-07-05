@@ -1,6 +1,5 @@
 export interface PostLayout {
-  x: number;
-  y: number;
+  order: number;
 }
 
 export interface PollOption {

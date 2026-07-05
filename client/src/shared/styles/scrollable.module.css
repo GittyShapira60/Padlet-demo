@@ -1,0 +1,16 @@
+.scrollableY {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-inline-end: 0.15rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.45) transparent;
+}
+
+.scrollableY::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollableY::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.45);
+  border-radius: 999px;
+}

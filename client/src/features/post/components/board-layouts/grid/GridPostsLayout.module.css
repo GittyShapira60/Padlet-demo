@@ -1,11 +1,8 @@
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 3rem;
-  align-content: start;
+.canvas {
+  composes: canvas from '../shared/masonry-layout.module.css';
+  min-height: calc(100vh - 11rem);
 }
 
 .item {
-  min-width: 0;
-  overflow: visible;
+  composes: item from '../shared/masonry-layout.module.css';
 }

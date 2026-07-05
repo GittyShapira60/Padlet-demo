@@ -1,5 +1,6 @@
-import BoardPostCard from '../BoardPostCard';
 import type { BoardLayoutProps } from '../board-layout-props';
+import BoardLayoutPostCard from '../shared/BoardLayoutPostCard';
+import MasonryCanvas from '../shared/MasonryCanvas';
 import styles from './GridPostsLayout.module.css';
 
 export default function GridPostsLayout({
@@ -10,20 +11,14 @@ export default function GridPostsLayout({
   onEditPost,
   onDeletePost,
 }: BoardLayoutProps) {
+  const cardProps = { padletId, canComment, canEditPost, onEditPost, onDeletePost };
+
   return (
-    <div className={styles.grid}>
-      {posts.map((post) => (
-        <div key={post.id} className={styles.item}>
-          <BoardPostCard
-            post={post}
-            padletId={padletId}
-            canManage={canEditPost(post)}
-            canComment={canComment}
-            onEditPost={onEditPost}
-            onDeletePost={onDeletePost}
-          />
-        </div>
-      ))}
-    </div>
+    <MasonryCanvas
+      items={posts}
+      canvasClassName={styles.canvas}
+      itemClassName={styles.item}
+      renderItem={(post) => <BoardLayoutPostCard post={post} {...cardProps} />}
+    />
   );
 }
