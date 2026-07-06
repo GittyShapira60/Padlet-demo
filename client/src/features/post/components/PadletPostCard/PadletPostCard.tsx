@@ -108,7 +108,6 @@ export default function PadletPostCard({
   const { comments, error, sendComment, removeComment, editComment } = usePostComments(
     padletId,
     post.id,
-    canComment,
   );
   const scrollableComments = comments.length > COMMENTS_SCROLL_THRESHOLD;
   const background = BACKGROUND_COLOR_LIGHT[post.color ?? ''] ?? post.color ?? '#ffffff';
@@ -119,7 +118,7 @@ export default function PadletPostCard({
         border: `2px solid ${post.color ?? '#e5e7eb'}`,
       }
     : { background };
-  const showComments = canComment && (!commentsCollapsible || commentsOpen);
+  const showComments = !commentsCollapsible || commentsOpen;
 
   useEffect(() => {
     onContentResize?.();
@@ -234,7 +233,7 @@ export default function PadletPostCard({
       <PostInteractionBar
         postId={post.id}
         commentCount={comments.length}
-        showCommentCount={canComment}
+        showCommentCount={true}
         onCommentToggle={
           commentsCollapsible ? () => setCommentsOpen((open) => !open) : undefined
         }
