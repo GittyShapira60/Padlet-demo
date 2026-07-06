@@ -24,6 +24,7 @@ interface NotificationContextValue {
   markRead: (id: string) => Promise<void>;
   markAllRead: () => Promise<void>;
   deleteNotification: (id: string) => Promise<void>;
+  refreshNotifications: () => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextValue | null>(null);
@@ -53,10 +54,17 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     const handleNotification = (incoming: Notification) => {
       setNotifications((prev) => [incoming, ...prev]);
     };
+
+    const handlePadletRemoved = ({ padletId }: { padletId: string }) => {
+      setNotifications((prev) => prev.filter((n) => n.padletId !== padletId));
+    };
+
     socket.on('notification', handleNotification);
+    socket.on('padlet:removed', handlePadletRemoved);
 
     return () => {
       socket.off('notification', handleNotification);
+      socket.off('padlet:removed', handlePadletRemoved);
     };
   }, [isLoggedIn]);
 
@@ -77,14 +85,23 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   }, []);
 
+  const refreshNotifications = useCallback(async () => {
+    try {
+      const data = await fetchNotifications();
+      setNotifications(data);
+    } catch {
+      // silent
+    }
+  }, []);
+
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.isRead).length,
     [notifications],
   );
 
   const value = useMemo(
-    () => ({ notifications, unreadCount, markRead, markAllRead, deleteNotification }),
-    [notifications, unreadCount, markRead, markAllRead, deleteNotification],
+    () => ({ notifications, unreadCount, markRead, markAllRead, deleteNotification, refreshNotifications }),
+    [notifications, unreadCount, markRead, markAllRead, deleteNotification, refreshNotifications],
   );
 
   return (

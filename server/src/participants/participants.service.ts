@@ -192,6 +192,14 @@ export class ParticipantsService {
       where: { padlet_id_user_id: { padlet_id: padletId, user_id: participantUserId } },
     });
 
+    await this.prisma.notification.deleteMany({
+      where: {
+        padlet_id: padletId,
+        user_id: participantUserId,
+        type: NotificationType.padlet_share,
+      },
+    });
+
     this.realtimeGateway.emitToUser(participantUserId.toString(), 'padlet:removed', {
       padletId: padletId.toString(),
     });
@@ -234,6 +242,18 @@ export class ParticipantsService {
           user_id: requesterId,
         },
       },
+    });
+
+    await this.prisma.notification.deleteMany({
+      where: {
+        padlet_id: padletId,
+        user_id: requesterId,
+        type: NotificationType.padlet_share,
+      },
+    });
+
+    this.realtimeGateway.emitToUser(requesterId.toString(), 'padlet:removed', {
+      padletId: padletId.toString(),
     });
   }
 

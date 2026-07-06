@@ -18,18 +18,11 @@ const ERROR_MESSAGES = {
 export function usePostComments(
   padletId: string,
   postId: string,
-  enabled = true,
 ) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!enabled) {
-      setComments([]);
-      setError('');
-      return;
-    }
-
     let isMounted = true;
 
     async function load() {
@@ -52,11 +45,10 @@ export function usePostComments(
     return () => {
       isMounted = false;
     };
-  }, [enabled, padletId, postId]);
+  }, [padletId, postId]);
 
   useEffect(() => {
     const socket = connectSocket();
-    if (!enabled) return;
 
     const handleCreated = (data: { postId: string; comment: Comment }) => {
       if (data.postId !== postId) return;
@@ -87,7 +79,7 @@ export function usePostComments(
       socket.off('comment:updated', handleUpdated);
       socket.off('comment:deleted', handleDeleted);
     };
-  }, [enabled, postId]);
+  }, [postId]);
 
   const sendComment = useCallback(
     async (body: string) => {

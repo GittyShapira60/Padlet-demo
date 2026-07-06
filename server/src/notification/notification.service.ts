@@ -35,13 +35,72 @@ export class NotificationService {
   }
 
   async findForUser(userId: string): Promise<NotificationResponseDto[]> {
+    const userIdBig = BigInt(userId);
+
     const notifications = await this.prisma.notification.findMany({
-      where: { user_id: BigInt(userId) },
+      where: { user_id: userIdBig },
       orderBy: { created_at: 'desc' },
       take: 50,
     });
 
-    return notifications.map((n) => this.toDto(n));
+    const padletIds = [
+      ...new Set(
+        notifications
+          .map((n) => n.padlet_id)
+          .filter((id): id is bigint => id !== null),
+      ),
+    ];
+
+    const staleIdSet = new Set<string>();
+
+    if (padletIds.length > 0) {
+      // Check which padlets still exist
+      const existingPadlets = await this.prisma.padlet.findMany({
+        where: { padlet_id: { in: padletIds } },
+        select: { padlet_id: true },
+      });
+      const existingPadletIds = new Set(existingPadlets.map((p) => p.padlet_id.toString()));
+
+      // For padlet_share: also verify user is still owner or participant
+      const sharePadletIds = notifications
+        .filter((n) => n.type === 'padlet_share' && n.padlet_id !== null)
+        .map((n) => n.padlet_id as bigint);
+
+      let accessibleSharePadletIds = new Set<string>();
+      if (sharePadletIds.length > 0) {
+        const accessible = await this.prisma.padlet.findMany({
+          where: {
+            padlet_id: { in: sharePadletIds },
+            OR: [
+              { user_id: userIdBig },
+              { participants: { some: { user_id: userIdBig } } },
+            ],
+          },
+          select: { padlet_id: true },
+        });
+        accessibleSharePadletIds = new Set(accessible.map((p) => p.padlet_id.toString()));
+      }
+
+      for (const n of notifications) {
+        if (n.padlet_id === null) continue;
+        const idStr = n.padlet_id.toString();
+        if (!existingPadletIds.has(idStr)) {
+          staleIdSet.add(n.id.toString());
+        } else if (n.type === 'padlet_share' && !accessibleSharePadletIds.has(idStr)) {
+          staleIdSet.add(n.id.toString());
+        }
+      }
+    }
+
+    if (staleIdSet.size > 0) {
+      void this.prisma.notification.deleteMany({
+        where: { id: { in: [...staleIdSet].map(BigInt) } },
+      });
+    }
+
+    return notifications
+      .filter((n) => !staleIdSet.has(n.id.toString()))
+      .map((n) => this.toDto(n));
   }
 
   async markRead(userId: string, notifId: string): Promise<void> {
