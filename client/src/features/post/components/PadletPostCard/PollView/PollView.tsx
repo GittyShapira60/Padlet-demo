@@ -1,6 +1,7 @@
 import { useState, useCallback, type CSSProperties } from 'react';
 import { usePoll } from '../../../context/PollContext';
 import type { Poll, PollOption } from '../../../interfaces/post';
+import { isLightBackground } from '../../../../../shared/constants/background-colors';
 import styles from './PollView.module.css';
 
 interface PollViewProps {
@@ -17,7 +18,8 @@ export default function PollView({ postId, poll, accentColor }: PollViewProps) {
   const [isVoting, setIsVoting] = useState(false);
   const [voteError, setVoteError] = useState<string | null>(null);
   const hasVoted = poll.userVotedOptionId !== null;
-  const rootStyle = { '--poll-accent': accentColor } as CSSProperties;
+  const uiAccent = isLightBackground(accentColor) ? '#334155' : accentColor;
+  const rootStyle = { '--poll-accent': uiAccent } as CSSProperties;
 
   const handleVote = useCallback(async () => {
     if (!selectedOptionId || isVoting) return;

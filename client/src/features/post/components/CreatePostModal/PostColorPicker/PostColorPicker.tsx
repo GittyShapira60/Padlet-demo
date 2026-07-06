@@ -25,7 +25,7 @@ export default function PostColorPicker({
               className={`${styles.swatch} ${isSelected ? styles.swatchSelected : ''}`}
               style={{
                 background: BACKGROUND_COLOR_GRADIENTS[color] ?? color,
-                boxShadow: color === '#FFFFFF' && !isSelected ? 'inset 0 0 0 1.5px #d1d5db' : undefined,
+                boxShadow: color === '#FFFFFF' && !isSelected ? 'inset 0 0 0 2px #9ca3af' : undefined,
               }}
               onClick={() => onColorChange(color)}
             />

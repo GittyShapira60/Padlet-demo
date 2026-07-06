@@ -1,4 +1,4 @@
-import { resolveBackgroundStyle } from '../../../../../shared/constants/background-colors';
+import { resolveBackgroundStyle, isLightBackground } from '../../../../../shared/constants/background-colors';
 import styles from './CreatePadletModalHeader.module.css';
 
 interface CreatePadletModalHeaderProps {
@@ -12,8 +12,21 @@ export default function CreatePadletModalHeader({
   background,
   onClose,
 }: CreatePadletModalHeaderProps) {
+  const isLight = isLightBackground(background);
+  const textColor = isLight ? '#1e293b' : '#ffffff';
+  const btnBg = isLight ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.22)';
+  const btnBgHover = isLight ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.35)';
+
   return (
-    <header className={styles.header} style={resolveBackgroundStyle(background)}>
+    <header
+      className={styles.header}
+      style={{
+        ...resolveBackgroundStyle(background),
+        '--modal-title-color': textColor,
+        '--modal-btn-bg': btnBg,
+        '--modal-btn-bg-hover': btnBgHover,
+      } as React.CSSProperties}
+    >
       <button
         type="button"
         className={styles.closeBtn}
