@@ -114,7 +114,7 @@ function getPerceivedBrightness(hex: string): number {
 /** Determines whether a padlet background reads as "light" (dark text/icons) or "dark" (light text/icons). */
 export function isLightBackground(value: string | null | undefined): boolean {
   if (!value) return true;
-  if (value.startsWith('/') || value.startsWith('http')) return false;
+  if (value.startsWith('/') || value.startsWith('http')) return true;
 
   const resolved = BACKGROUND_COLOR_GRADIENTS[value] ?? value;
   const hexMatches = resolved.match(/#[0-9a-fA-F]{6}/g);

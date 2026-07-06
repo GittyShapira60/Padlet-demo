@@ -43,6 +43,6 @@
 .swatchSelected:focus,
 .swatchSelected:focus-visible,
 .swatchSelected:active {
-  box-shadow: 0 0 0 2px var(--color-brand-pink);
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--color-brand-pink);
 }
 
