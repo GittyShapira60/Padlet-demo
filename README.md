@@ -98,6 +98,4 @@ Pick **one** way — do not mix Docker and `npm` on the same ports.
 
 - [Client structure](client/README.md)
 - [Server structure](server/README.md)
-  ```bash
-  docker compose up --build
-  ```
+- [Testing guide](docs/TESTING.md)
