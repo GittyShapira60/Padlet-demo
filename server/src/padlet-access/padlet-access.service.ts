@@ -18,7 +18,7 @@ import {
 } from './padlet-capabilities';
 
 export interface PadletAccessContext {
-  padletId: bigint;
+  padletId: string;
   boardType: PadletBoardType;
   permission: PadletPermission;
   defaultPermission: PadletPermission | null;
@@ -30,8 +30,8 @@ export class PadletAccessService {
   constructor(private readonly prisma: PrismaService) {}
 
   async resolveAccess(
-    userId: bigint,
-    padletId: bigint,
+    userId: string,
+    padletId: string,
   ): Promise<PadletAccessContext> {
     const padlet = await this.prisma.padlet.findUnique({
       where: { padlet_id: padletId },
@@ -83,7 +83,7 @@ export class PadletAccessService {
     throw new NotFoundException('הלוח לא נמצא');
   }
 
-  async assertCanView(userId: bigint, padletId: bigint): Promise<PadletAccessContext> {
+  async assertCanView(userId: string, padletId: string): Promise<PadletAccessContext> {
     const access = await this.resolveAccess(userId, padletId);
     if (!canView(access.permission)) {
       throw new ForbiddenException('אין הרשאה לצפות בלוח זה');
@@ -92,8 +92,8 @@ export class PadletAccessService {
   }
 
   async assertCanCreatePost(
-    userId: bigint,
-    padletId: bigint,
+    userId: string,
+    padletId: string,
   ): Promise<PadletAccessContext> {
     const access = await this.assertCanView(userId, padletId);
     if (!canCreatePost(access.permission)) {
@@ -103,9 +103,9 @@ export class PadletAccessService {
   }
 
   async assertCanEditPost(
-    userId: bigint,
-    padletId: bigint,
-    postAuthorId: bigint,
+    userId: string,
+    padletId: string,
+    postAuthorId: string,
   ): Promise<PadletAccessContext> {
     const access = await this.assertCanView(userId, padletId);
     if (!canEditPost(access.permission, postAuthorId === userId)) {
@@ -115,9 +115,9 @@ export class PadletAccessService {
   }
 
   async assertCanDeletePost(
-    userId: bigint,
-    padletId: bigint,
-    postAuthorId: bigint,
+    userId: string,
+    padletId: string,
+    postAuthorId: string,
   ): Promise<PadletAccessContext> {
     const access = await this.assertCanView(userId, padletId);
     if (!canDeletePost(access.permission, postAuthorId === userId)) {
@@ -127,8 +127,8 @@ export class PadletAccessService {
   }
 
   async assertCanReact(
-    userId: bigint,
-    padletId: bigint,
+    userId: string,
+    padletId: string,
   ): Promise<PadletAccessContext> {
     const access = await this.assertCanView(userId, padletId);
     if (!canReact(access.permission)) {
@@ -138,8 +138,8 @@ export class PadletAccessService {
   }
 
   async assertCanComment(
-    userId: bigint,
-    padletId: bigint,
+    userId: string,
+    padletId: string,
   ): Promise<PadletAccessContext> {
     const access = await this.assertCanView(userId, padletId);
     if (!canComment(access.permission)) {
@@ -149,8 +149,8 @@ export class PadletAccessService {
   }
 
   async assertCanEditPadlet(
-    userId: bigint,
-    padletId: bigint,
+    userId: string,
+    padletId: string,
   ): Promise<PadletAccessContext> {
     const access = await this.resolveAccess(userId, padletId);
     if (!canEditPadlet(access.permission)) {
@@ -160,8 +160,8 @@ export class PadletAccessService {
   }
 
   async assertCanManageSharing(
-    userId: bigint,
-    padletId: bigint,
+    userId: string,
+    padletId: string,
   ): Promise<PadletAccessContext> {
     const access = await this.resolveAccess(userId, padletId);
     if (!canManageSharing(access.permission)) {
@@ -171,21 +171,13 @@ export class PadletAccessService {
   }
 
   async assertCanDeletePadlet(
-    userId: bigint,
-    padletId: bigint,
+    userId: string,
+    padletId: string,
   ): Promise<PadletAccessContext> {
     const access = await this.resolveAccess(userId, padletId);
     if (!canDeletePadlet(access.permission)) {
       throw new ForbiddenException('רק הבעלים יכול למחוק את הלוח');
     }
     return access;
-  }
-
-  private parseId(raw: string, errorMessage: string): bigint {
-    try {
-      return BigInt(raw);
-    } catch {
-      throw new NotFoundException(errorMessage);
-    }
   }
 }

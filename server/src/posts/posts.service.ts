@@ -115,7 +115,7 @@ export class PostsService {
           subject,
           description: dto.description ?? null,
           color: dto.color ?? null,
-          data_layout: dataLayout ? this.toJsonLayout(dataLayout) : Prisma.DbNull,
+          data_layout: dataLayout ? this.toJsonLayout(dataLayout) : null,
           created_at: now,
           updated_at: now,
         },
@@ -174,15 +174,15 @@ export class PostsService {
 
     const postWithPoll = await this.findPostWithPoll(post.post_id);
     const postResponse = this.toPostResponse(postWithPoll, authorId);
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:created', postResponse);
+    this.realtimeGateway.broadcastToPadlet(padletId, 'post:created', postResponse);
     return postResponse;
   }
 
   private async notifyPadletMembers(
-    padletId: bigint,
-    authorId: bigint,
+    padletId: string,
+    authorId: string,
     actorUsername: string,
-    postId: bigint,
+    postId: string,
   ): Promise<void> {
     const padletWithMembers = await this.prisma.padlet.findUnique({
       where: { padlet_id: padletId },
@@ -196,7 +196,7 @@ export class PostsService {
 
     const recipientIds = [
       padletWithMembers.user_id,
-      ...padletWithMembers.participants.map((p: { user_id: bigint }) => p.user_id),
+      ...padletWithMembers.participants.map((p: { user_id: string }) => p.user_id),
     ].filter((id) => id !== authorId);
 
     await Promise.all(
@@ -307,7 +307,7 @@ export class PostsService {
 
     const postWithPoll = await this.findPostWithPoll(postId);
     const postResponse = this.toPostResponse(postWithPoll, requesterId);
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    this.realtimeGateway.broadcastToPadlet(padletId, 'post:updated', postResponse);
     return postResponse;
   }
 
@@ -377,8 +377,8 @@ export class PostsService {
       requesterId,
     );
 
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', sourceResponse);
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', targetResponse);
+    this.realtimeGateway.broadcastToPadlet(padletId, 'post:updated', sourceResponse);
+    this.realtimeGateway.broadcastToPadlet(padletId, 'post:updated', targetResponse);
 
     return { source: sourceResponse, target: targetResponse };
   }
@@ -415,7 +415,7 @@ export class PostsService {
 
     await this.touchPadlet(padletId, now);
 
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:deleted', { postId: postIdRaw });
+    this.realtimeGateway.broadcastToPadlet(padletId, 'post:deleted', { postId: postIdRaw });
     return this.getPadletPosts(padletId, requesterId);
   }
 
@@ -448,7 +448,7 @@ export class PostsService {
 
     const postWithPoll = await this.findPostWithPoll(postId);
     const postResponse = this.toPostResponse(postWithPoll, requesterId);
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    this.realtimeGateway.broadcastToPadlet(padletId, 'post:updated', postResponse);
     return postResponse;
   }
 
@@ -483,11 +483,11 @@ export class PostsService {
 
     const postWithPoll = await this.findPostWithPoll(postId);
     const postResponse = this.toPostResponse(postWithPoll, voterId);
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'post:updated', postResponse);
+    this.realtimeGateway.broadcastToPadlet(padletId, 'post:updated', postResponse);
     return postResponse;
   }
 
-  toPostResponse(post: PostWithAuthor, requesterId?: bigint): PostResponseDto {
+  toPostResponse(post: PostWithAuthor, requesterId?: string): PostResponseDto {
     let pollData: PollResponseDto | null = null;
 
     if (post.poll) {
@@ -498,12 +498,12 @@ export class PostsService {
         : null;
 
       pollData = {
-        id: poll.poll_id.toString(),
+        id: poll.poll_id,
         question: poll.question,
         totalVotes,
-        userVotedOptionId: userVote ? userVote.option_id.toString() : null,
+        userVotedOptionId: userVote ? userVote.option_id : null,
         options: poll.poll_options.map((opt) => ({
-          id: opt.option_id.toString(),
+          id: opt.option_id,
           label: opt.label,
           sortOrder: opt.sort_order,
           voteCount: opt.poll_votes.length,
@@ -519,8 +519,8 @@ export class PostsService {
         : 'text');
 
     return {
-      id: post.post_id.toString(),
-      padletId: post.padlet_id.toString(),
+      id: post.post_id,
+      padletId: post.padlet_id,
       authorUsername: post.user.username,
       postType,
       title: post.title,
@@ -537,7 +537,7 @@ export class PostsService {
   }
 
   private async findPostWithPoll(
-    postId: bigint,
+    postId: string,
   ): Promise<PostWithAuthor> {
     const post = await this.prisma.post.findUnique({
       where: { post_id: postId },
@@ -561,9 +561,9 @@ export class PostsService {
   }
 
   private async findPostForUser(
-    userId: bigint,
-    padletId: bigint,
-    postId: bigint,
+    userId: string,
+    padletId: string,
+    postId: string,
   ): Promise<PostWithAuthor> {
     await this.padletAccess.assertCanView(userId, padletId);
 
@@ -586,8 +586,8 @@ export class PostsService {
   }
 
   private async getPadletPosts(
-    padletId: bigint,
-    requesterId?: bigint,
+    padletId: string,
+    requesterId?: string,
   ): Promise<PostResponseDto[]> {
     const posts = await this.prisma.post.findMany({
       where: { padlet_id: padletId },
@@ -607,7 +607,7 @@ export class PostsService {
     return posts.map((post) => this.toPostResponse(post as PostWithAuthor, requesterId));
   }
 
-  private async touchPadlet(padletId: bigint, updatedAt: Date): Promise<void> {
+  private async touchPadlet(padletId: string, updatedAt: Date): Promise<void> {
     await this.prisma.padlet.update({
       where: { padlet_id: padletId },
       data: { updated_at: updatedAt },
@@ -624,14 +624,14 @@ export class PostsService {
   }
 
   private async buildFreeWallOrderForPadlet(
-    padletId: bigint,
+    padletId: string,
   ): Promise<PostLayoutDto> {
     await this.ensureFreeWallOrders(padletId);
     const existingOrders = await this.getFreeWallOrders(padletId);
     return this.buildFreeWallOrder(existingOrders);
   }
 
-  private async ensureFreeWallOrders(padletId: bigint): Promise<void> {
+  private async ensureFreeWallOrders(padletId: string): Promise<void> {
     const posts = await this.prisma.post.findMany({
       where: { padlet_id: padletId },
       orderBy: { created_at: 'asc' },
@@ -657,11 +657,11 @@ export class PostsService {
     );
   }
 
-  private async getFreeWallOrders(padletId: bigint): Promise<number[]> {
+  private async getFreeWallOrders(padletId: string): Promise<number[]> {
     const posts = await this.prisma.post.findMany({
       where: {
         padlet_id: padletId,
-        data_layout: { not: Prisma.DbNull },
+        data_layout: { not: null },
       },
       select: { data_layout: true },
     });
@@ -707,26 +707,21 @@ export class PostsService {
     }
   }
 
-  private parseId(raw: string, errorMessage: string): bigint {
-    try {
-      return BigInt(raw);
-    } catch {
+  private parseId(raw: string, errorMessage: string): string {
+    if (!/^[0-9a-f]{24}$/i.test(raw)) {
       throw new NotFoundException(errorMessage);
     }
+    return raw;
   }
 
-  private safeParseId(raw: string | undefined): bigint | null {
-    if (!raw) return null;
-    try {
-      return BigInt(raw);
-    } catch {
-      return null;
-    }
+  private safeParseId(raw: string | undefined): string | null {
+    if (!raw || !/^[0-9a-f]{24}$/i.test(raw)) return null;
+    return raw;
   }
 
   private async recordPostVisit(
-    padletId: bigint,
-    authorId: bigint,
+    padletId: string,
+    authorId: string,
     visitIdRaw: string | undefined,
     now: Date,
   ): Promise<void> {

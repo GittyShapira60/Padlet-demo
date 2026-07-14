@@ -1,15 +1,15 @@
 # Padlet-demo
 
-Monorepo: **client** (React) + **server** (NestJS). Optional: **Docker** for postgres + server + client.
+Monorepo: **client** (React) + **server** (NestJS). Optional: **Docker** for mongo + server + client.
 
 | Directory | Stack |
 |-----------|-------|
 | [`client/`](client/) | React, Vite, TypeScript |
-| [`server/`](server/) | NestJS, Prisma, PostgreSQL |
+| [`server/`](server/) | NestJS, Prisma, MongoDB |
 
 ## Quick start (local)
 
-**Prerequisites:** Node.js 20+, npm, PostgreSQL.
+**Prerequisites:** Node.js 20+, npm, MongoDB (running as a single-node replica set — required for transactions, e.g. `mongod --replSet rs0` then `mongosh --eval "rs.initiate()"` once).
 
 ```bash
 # Server
@@ -47,7 +47,7 @@ docker compose -f docker-compose up --build
 | API | http://localhost:3001/api |
 | Health | http://localhost:3001/api/health |
 | Swagger | http://localhost:3001/api/docs |
-| PostgreSQL (host) | `localhost:5433` |
+| MongoDB (host) | `localhost:27018` |
 
 For Docker, set in `client/.env`:
 
@@ -61,8 +61,8 @@ VITE_API_URL=http://localhost:3001/api
 Padlet-demo/
 ├── client/           # Frontend — see client/README.md
 ├── server/           # Backend — see server/README.md
-├── docker-compose    # postgres + server + client
-└── .env              # POSTGRES_* (Docker only)
+├── docker-compose    # mongo + server + client
+└── .env              # MONGO_DB (Docker only)
 ```
 
 ## Where to add code
@@ -86,7 +86,7 @@ Pick **one** way — do not mix Docker and `npm` on the same ports.
 |------|---------|---------------|
 | **All local (npm)** | `server`: `npm run start:dev` + `client`: `npm run dev` | `VITE_API_URL=/api` (see `client/.env.example`) |
 | **All Docker** | `docker compose -f docker-compose up --build` | set in compose (`3001`) — no change needed |
-| **DB only Docker** | `docker compose up postgres` + npm for server/client | `VITE_API_URL=/api`, server `DATABASE_URL` → `localhost:5433` |
+| **DB only Docker** | `docker compose up mongo` + npm for server/client | `VITE_API_URL=/api`, server `DATABASE_URL` → `mongodb://localhost:27018/padlet_db?replicaSet=rs0` |
 
 **Common problems**
 

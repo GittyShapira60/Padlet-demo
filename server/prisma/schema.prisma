@@ -1,12 +1,13 @@
 // Prisma Schema
 // Converted from DBML (padlet-like system)
+// Migrated to MongoDB — see README for details
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
@@ -49,8 +50,8 @@ enum NotificationType {
 // ─── Models ──────────────────────────────────────────────
 
 model User {
-  id            BigInt         @id @default(autoincrement())
-  username      String         @unique @db.VarChar(64)
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  username      String         @unique
   password_hash String
 
   padlets        Padlet[]
@@ -64,15 +65,15 @@ model User {
 }
 
 model Padlet {
-  padlet_id          BigInt           @id @default(autoincrement())
-  user_id            BigInt
+  padlet_id          String            @id @default(auto()) @map("_id") @db.ObjectId
+  user_id            String            @db.ObjectId
   board_type         PadletBoardType
   default_permission PadletPermission?
-  title              String           @db.VarChar(255)
+  title              String
   description        String?
-  background         String?          @db.VarChar(255)
-  created_at         DateTime         @db.Timestamptz()
-  updated_at         DateTime         @db.Timestamptz()
+  background         String?
+  created_at         DateTime
+  updated_at         DateTime
 
   user         User          @relation(fields: [user_id], references: [id])
   posts        Post[]
@@ -81,18 +82,18 @@ model Padlet {
 }
 
 model Post {
-  post_id      BigInt          @id @default(autoincrement())
-  padlet_id    BigInt
-  user_id      BigInt
+  post_id      String          @id @default(auto()) @map("_id") @db.ObjectId
+  padlet_id    String          @db.ObjectId
+  user_id      String          @db.ObjectId
   content_kind PostContentKind @default(none)
-  post_type    String?         @db.VarChar(20)
-  title        String?         @db.VarChar(255)
+  post_type    String?
+  title        String?
   subject      String?
   description  String?
-  color        String?         @db.VarChar(32)
+  color        String?
   data_layout  Json?
-  created_at   DateTime        @db.Timestamptz()
-  updated_at   DateTime        @db.Timestamptz()
+  created_at   DateTime
+  updated_at   DateTime
 
   padlet         Padlet          @relation(fields: [padlet_id], references: [padlet_id], onDelete: Cascade)
   user           User            @relation(fields: [user_id], references: [id])
@@ -103,7 +104,7 @@ model Post {
 }
 
 model PostAttachment {
-  post_id         BigInt             @id
+  post_id         String             @id @map("_id") @db.ObjectId
   attachment_type PostAttachmentType
   /// picture/file: base64 encoded; link: url+title; see SCHEMA.md
   attachment_data String
@@ -112,8 +113,8 @@ model PostAttachment {
 }
 
 model Poll {
-  poll_id BigInt @id @default(autoincrement())
-  post_id BigInt @unique
+  poll_id  String @id @default(auto()) @map("_id") @db.ObjectId
+  post_id  String @unique @db.ObjectId
   question String
 
   post         Post         @relation(fields: [post_id], references: [post_id], onDelete: Cascade)
@@ -122,10 +123,10 @@ model Poll {
 }
 
 model PollOption {
-  option_id  BigInt   @id @default(autoincrement())
-  poll_id    BigInt
+  option_id  String @id @default(auto()) @map("_id") @db.ObjectId
+  poll_id    String @db.ObjectId
   label      String
-  sort_order Int      @db.SmallInt
+  sort_order Int
 
   poll       Poll       @relation(fields: [poll_id], references: [poll_id], onDelete: Cascade)
   poll_votes PollVote[]
@@ -134,69 +135,72 @@ model PollOption {
 }
 
 model PollVote {
-  poll_id   BigInt
-  user_id   BigInt
-  option_id BigInt
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  poll_id   String @db.ObjectId
+  user_id   String @db.ObjectId
+  option_id String @db.ObjectId
 
   poll   Poll       @relation(fields: [poll_id], references: [poll_id], onDelete: Cascade)
   user   User       @relation(fields: [user_id], references: [id])
   option PollOption @relation(fields: [option_id], references: [option_id], onDelete: Cascade)
 
-  @@id([poll_id, user_id])
+  @@unique([poll_id, user_id])
 }
 
 model Participant {
-  padlet_id  BigInt
-  user_id    BigInt
+  id         String           @id @default(auto()) @map("_id") @db.ObjectId
+  padlet_id  String           @db.ObjectId
+  user_id    String           @db.ObjectId
   permission PadletPermission
 
   padlet Padlet @relation(fields: [padlet_id], references: [padlet_id], onDelete: Cascade)
   user   User   @relation(fields: [user_id], references: [id])
 
-  @@id([padlet_id, user_id])
+  @@unique([padlet_id, user_id])
 }
 
 model Comment {
-  comment_id BigInt   @id @default(autoincrement())
-  post_id    BigInt
-  user_id    BigInt
+  comment_id String    @id @default(auto()) @map("_id") @db.ObjectId
+  post_id    String    @db.ObjectId
+  user_id    String    @db.ObjectId
   body       String
-  created_at DateTime @db.Timestamptz()
-  updated_at DateTime? @db.Timestamptz()
+  created_at DateTime
+  updated_at DateTime?
 
   post Post @relation(fields: [post_id], references: [post_id], onDelete: Cascade)
   user User @relation(fields: [user_id], references: [id])
 }
 
 model PostReaction {
-  post_id       BigInt
-  user_id       BigInt
-  reaction_code String @db.VarChar(32)
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  post_id       String @db.ObjectId
+  user_id       String @db.ObjectId
+  reaction_code String
 
   post Post @relation(fields: [post_id], references: [post_id], onDelete: Cascade)
   user User @relation(fields: [user_id], references: [id])
 
-  @@id([post_id, user_id, reaction_code])
+  @@unique([post_id, user_id, reaction_code])
 }
 
 model Notification {
-  id             BigInt           @id @default(autoincrement())
-  user_id        BigInt
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  user_id        String           @db.ObjectId
   type           NotificationType
-  actor_username String           @db.VarChar(64)
-  padlet_id      BigInt?
-  post_id        BigInt?
+  actor_username String
+  padlet_id      String?          @db.ObjectId
+  post_id        String?          @db.ObjectId
   is_read        Boolean          @default(false)
-  created_at     DateTime         @db.Timestamptz()
+  created_at     DateTime
 
   user User @relation(fields: [user_id], references: [id])
 }
 
 model PadletVisit {
-  visit_id     BigInt   @id @default(autoincrement())
-  padlet_id    BigInt
-  user_id      BigInt?
-  visited_at   DateTime @db.Timestamptz()
+  visit_id     String   @id @default(auto()) @map("_id") @db.ObjectId
+  padlet_id    String   @db.ObjectId
+  user_id      String?  @db.ObjectId
+  visited_at   DateTime
   duration_sec Int?
 
   padlet Padlet @relation(fields: [padlet_id], references: [padlet_id], onDelete: Cascade)

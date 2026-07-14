@@ -18,7 +18,7 @@ export class UsersService {
     });
 
     return users.map((user) => ({
-      id: user.id.toString(),
+      id: user.id,
       username: user.username,
     }));
   }
