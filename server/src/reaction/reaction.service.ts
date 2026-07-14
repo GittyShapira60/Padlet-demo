@@ -64,7 +64,7 @@ export class ReactionService {
 
     const grouped = new Map<string, (typeof reactions)[number][]>();
     for (const reaction of reactions) {
-      const postId = reaction.post_id.toString();
+      const postId = reaction.post_id;
       const current = grouped.get(postId) ?? [];
       current.push(reaction);
       grouped.set(postId, current);
@@ -100,7 +100,7 @@ export class ReactionService {
       },
     });
 
-    return this.toPostReactionsView(postId.toString(), reactions, requesterId);
+    return this.toPostReactionsView(postId, reactions, requesterId);
   }
 
   async setPostReaction(
@@ -180,7 +180,7 @@ export class ReactionService {
     }
 
     const view = await this.getPostReactions(userId, padletIdRaw, postIdRaw);
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'reaction:updated', {
+    this.realtimeGateway.broadcastToPadlet(padletId, 'reaction:updated', {
       postId: postIdRaw,
       summaries: view.summaries,
     });
@@ -206,7 +206,7 @@ export class ReactionService {
     });
 
     const view = await this.getPostReactions(userId, padletIdRaw, postIdRaw);
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'reaction:updated', {
+    this.realtimeGateway.broadcastToPadlet(padletId, 'reaction:updated', {
       postId: postIdRaw,
       summaries: view.summaries,
     });
@@ -216,11 +216,11 @@ export class ReactionService {
   private toPostReactionsView(
     postId: string,
     reactions: {
-      user_id: bigint;
+      user_id: string;
       reaction_code: string;
       user: { username: string };
     }[],
-    requesterId: bigint,
+    requesterId: string,
   ): PostReactionsViewDto {
     const summaries = new Map<
       string,
@@ -235,7 +235,7 @@ export class ReactionService {
 
       current.count += 1;
       current.reactors.push({
-        userId: reaction.user_id.toString(),
+        userId: reaction.user_id,
         username: reaction.user.username,
       });
       summaries.set(reaction.reaction_code, current);
@@ -261,9 +261,9 @@ export class ReactionService {
   }
 
   private async assertPostAccess(
-    userId: bigint,
-    padletId: bigint,
-    postId: bigint,
+    userId: string,
+    padletId: string,
+    postId: string,
     requireReact: boolean,
   ): Promise<void> {
     if (requireReact) {
@@ -285,11 +285,10 @@ export class ReactionService {
     }
   }
 
-  private parseId(raw: string, errorMessage: string): bigint {
-    try {
-      return BigInt(raw);
-    } catch {
+  private parseId(raw: string, errorMessage: string): string {
+    if (!/^[0-9a-f]{24}$/i.test(raw)) {
       throw new NotFoundException(errorMessage);
     }
+    return raw;
   }
 }

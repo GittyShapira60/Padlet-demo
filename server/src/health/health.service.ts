@@ -9,7 +9,7 @@ export class HealthService {
     let database: 'up' | 'down' = 'down';
 
     try {
-      await this.prisma.$queryRaw`SELECT 1`;
+      await this.prisma.$runCommandRaw({ ping: 1 });
       database = 'up';
     } catch {
       database = 'down';

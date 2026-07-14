@@ -1,6 +1,6 @@
 # Server
 
-NestJS REST API. PostgreSQL via **Prisma** (`prisma/`).
+NestJS REST API. MongoDB via **Prisma** (`prisma/`).
 
 ## Setup
 
@@ -46,7 +46,7 @@ Variables are read from `server/.env` via `@nestjs/config` (see [`.env.example`]
 
 | Variable | Purpose |
 |----------|---------|
-| `DATABASE_URL` | PostgreSQL connection string |
+| `DATABASE_URL` | MongoDB connection string (must include `?replicaSet=rs0` — transactions require a replica set) |
 | `PORT` | API port (default `3000`) |
 | `CORS_ORIGIN` | Allowed frontend origin (default `http://localhost:5173`) |
 | `API_PREFIX` | Route prefix (default `api`) |
@@ -55,7 +55,7 @@ Variables are read from `server/.env` via `@nestjs/config` (see [`.env.example`]
 ## Data access
 
 ```text
-Controller → Service → PrismaService → PostgreSQL
+Controller → Service → PrismaService → MongoDB
 ```
 
 Inject `PrismaService` in feature services. No repository layer.

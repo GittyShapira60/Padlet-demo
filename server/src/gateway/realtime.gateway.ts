@@ -48,7 +48,7 @@ export class RealtimeGateway
       return;
     }
     try {
-      await this.padletAccess.assertCanView(BigInt(userId), BigInt(padletId));
+      await this.padletAccess.assertCanView(userId, padletId);
       void client.join(`padlet:${padletId}`);
     } catch { /* noop */ }
   }

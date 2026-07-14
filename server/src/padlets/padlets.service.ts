@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PadletBoardType, PadletPermission, Prisma, type Padlet } from '@prisma/client';
+import { PadletBoardType, PadletPermission, type Padlet } from '@prisma/client';
 import { RealtimeGateway } from '../gateway/realtime.gateway';
 import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PostsService, type PostResponseDto, type PostWithAuthor } from '../posts/posts.service';
@@ -115,7 +115,7 @@ export class PadletsService {
     });
 
     const response = this.toPadletResponse(updated, !access.isOwner);
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'padlet:updated', response);
+    this.realtimeGateway.broadcastToPadlet(padletId, 'padlet:updated', response);
     return response;
   }
 
@@ -133,13 +133,13 @@ export class PadletsService {
       ...(query.search
         ? {
             OR: [
-              { title: { contains: query.search, mode: 'insensitive' as const } },
-              { subject: { contains: query.search, mode: 'insensitive' as const } },
+              { title: { contains: query.search } },
+              { subject: { contains: query.search } },
             ],
           }
         : {}),
       ...(query.author
-        ? { user: { username: { contains: query.author, mode: 'insensitive' as const } } }
+        ? { user: { username: { contains: query.author } } }
         : {}),
     };
 
@@ -199,7 +199,7 @@ export class PadletsService {
       select: { default_permission: true },
     });
 
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'padlet:permission-changed', {
+    this.realtimeGateway.broadcastToPadlet(padletId, 'padlet:permission-changed', {
       defaultPermission: updated.default_permission,
     });
     return { defaultPermission: updated.default_permission };
@@ -211,7 +211,7 @@ export class PadletsService {
 
     await this.padletAccess.assertCanDeletePadlet(requesterId, padletId);
 
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'padlet:deleted', {});
+    this.realtimeGateway.broadcastToPadlet(padletId, 'padlet:deleted', {});
 
     await this.prisma.postAttachment.deleteMany({ where: { post: { padlet_id: padletId } } });
     await this.prisma.post.deleteMany({ where: { padlet_id: padletId } });
@@ -272,7 +272,7 @@ export class PadletsService {
                     title: p.title,
                     subject: p.subject,
                     color: p.color,
-                    data_layout: layout ? this.postsService.toJsonLayout(layout) : Prisma.DbNull,
+                    data_layout: layout ? this.postsService.toJsonLayout(layout) : null,
                     created_at: now,
                     updated_at: now,
                   };
@@ -302,7 +302,7 @@ export class PadletsService {
     isShared: boolean,
   ): PadletResponseDto {
     return {
-      id: padlet.padlet_id.toString(),
+      id: padlet.padlet_id,
       title: padlet.title,
       description: padlet.description,
       boardType: padlet.board_type,
@@ -315,11 +315,10 @@ export class PadletsService {
     };
   }
 
-  private parseId(raw: string, errorMessage: string): bigint {
-    try {
-      return BigInt(raw);
-    } catch {
+  private parseId(raw: string, errorMessage: string): string {
+    if (!/^[0-9a-f]{24}$/i.test(raw)) {
       throw new NotFoundException(errorMessage);
     }
+    return raw;
   }
 }

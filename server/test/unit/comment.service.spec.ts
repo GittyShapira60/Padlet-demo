@@ -2,6 +2,12 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CommentService } from '../../src/comment/comment.service';
 
+const USER_5 = '000000000000000000000005';
+const USER_7 = '000000000000000000000007';
+const PADLET_10 = '000000000000000000000010';
+const POST_100 = '000000000000000000000100';
+const COMMENT_1 = '000000000000000000000001';
+
 describe('CommentService', () => {
   const prisma = {
     comment: {
@@ -44,13 +50,13 @@ describe('CommentService', () => {
       const now = new Date('2026-01-01T00:00:00.000Z');
 
       padletAccess.assertCanComment.mockResolvedValue({
-        padletId: 10n,
+        padletId: PADLET_10,
       });
-      prisma.post.findFirst.mockResolvedValue({ user_id: 7n });
+      prisma.post.findFirst.mockResolvedValue({ user_id: USER_7 });
       prisma.comment.create.mockResolvedValue({
-        comment_id: 1n,
-        post_id: 100n,
-        user_id: 5n,
+        comment_id: COMMENT_1,
+        post_id: POST_100,
+        user_id: USER_5,
         body: 'Nice post',
         created_at: now,
         updated_at: now,
@@ -58,14 +64,14 @@ describe('CommentService', () => {
       });
 
       const result = await service.createComment(
-        '5',
+        USER_5,
         'alice',
-        '10',
-        '100',
+        PADLET_10,
+        POST_100,
         { body: 'Nice post' },
       );
 
-      expect(padletAccess.assertCanComment).toHaveBeenCalledWith(5n, 10n);
+      expect(padletAccess.assertCanComment).toHaveBeenCalledWith(USER_5, PADLET_10);
       expect(result.body).toBe('Nice post');
       expect(result.authorUsername).toBe('alice');
       expect(realtimeGateway.broadcastToPadlet).toHaveBeenCalled();
@@ -77,7 +83,7 @@ describe('CommentService', () => {
       );
 
       await expect(
-        service.createComment('5', 'alice', '10', '100', { body: 'Nice post' }),
+        service.createComment(USER_5, 'alice', PADLET_10, POST_100, { body: 'Nice post' }),
       ).rejects.toThrow(ForbiddenException);
 
       expect(prisma.comment.create).not.toHaveBeenCalled();
@@ -87,37 +93,37 @@ describe('CommentService', () => {
   describe('deleteComment', () => {
     it('deletes comment when user is the author', async () => {
       padletAccess.assertCanComment.mockResolvedValue({
-        padletId: 10n,
+        padletId: PADLET_10,
       });
-      prisma.post.findFirst.mockResolvedValue({ user_id: 7n });
+      prisma.post.findFirst.mockResolvedValue({ user_id: USER_7 });
       prisma.comment.findFirst.mockResolvedValue({
-        comment_id: 1n,
-        post_id: 100n,
-        user_id: 5n,
+        comment_id: COMMENT_1,
+        post_id: POST_100,
+        user_id: USER_5,
       });
       prisma.comment.delete.mockResolvedValue({});
 
-      await service.deleteComment('5', '10', '100', '1');
+      await service.deleteComment(USER_5, PADLET_10, POST_100, COMMENT_1);
 
       expect(prisma.comment.delete).toHaveBeenCalledWith({
-        where: { comment_id: 1n },
+        where: { comment_id: COMMENT_1 },
       });
       expect(realtimeGateway.broadcastToPadlet).toHaveBeenCalledWith(
-        '10',
+        PADLET_10,
         'comment:deleted',
-        { postId: '100', commentId: '1' },
+        { postId: POST_100, commentId: COMMENT_1 },
       );
     });
 
     it('throws when comment does not exist', async () => {
       padletAccess.assertCanComment.mockResolvedValue({
-        padletId: 10n,
+        padletId: PADLET_10,
       });
-      prisma.post.findFirst.mockResolvedValue({ user_id: 7n });
+      prisma.post.findFirst.mockResolvedValue({ user_id: USER_7 });
       prisma.comment.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.deleteComment('5', '10', '100', '1'),
+        service.deleteComment(USER_5, PADLET_10, POST_100, COMMENT_1),
       ).rejects.toThrow(NotFoundException);
 
       expect(prisma.comment.delete).not.toHaveBeenCalled();

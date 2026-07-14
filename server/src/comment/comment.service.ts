@@ -91,7 +91,7 @@ export class CommentService {
     }
 
     const response = this.toCommentResponse(comment);
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'comment:created', {
+    this.realtimeGateway.broadcastToPadlet(padletId, 'comment:created', {
       postId: postIdRaw,
       comment: response,
     });
@@ -138,7 +138,7 @@ export class CommentService {
     });
 
     const response = this.toCommentResponse(updated);
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'comment:updated', {
+    this.realtimeGateway.broadcastToPadlet(padletId, 'comment:updated', {
       postId: postIdRaw,
       comment: response,
     });
@@ -178,7 +178,7 @@ export class CommentService {
       where: { comment_id: commentId },
     });
 
-    this.realtimeGateway.broadcastToPadlet(padletId.toString(), 'comment:deleted', {
+    this.realtimeGateway.broadcastToPadlet(padletId, 'comment:deleted', {
       postId: postIdRaw,
       commentId: commentIdRaw,
     });
@@ -186,8 +186,8 @@ export class CommentService {
 
   private toCommentResponse(comment: CommentWithAuthor): CommentResponseDto {
     return {
-      id: comment.comment_id.toString(),
-      postId: comment.post_id.toString(),
+      id: comment.comment_id,
+      postId: comment.post_id,
       authorUsername: comment.user.username,
       body: comment.body,
       createdAt: comment.created_at.toISOString(),
@@ -196,9 +196,9 @@ export class CommentService {
   }
 
   private async findPostInPadlet(
-    padletId: bigint,
-    postId: bigint,
-  ): Promise<{ user_id: bigint }> {
+    padletId: string,
+    postId: string,
+  ): Promise<{ user_id: string }> {
     const post = await this.prisma.post.findFirst({
       where: {
         post_id: postId,
@@ -214,11 +214,10 @@ export class CommentService {
     return post;
   }
 
-  private parseId(raw: string): bigint {
-    try {
-      return BigInt(raw);
-    } catch {
+  private parseId(raw: string): string {
+    if (!/^[0-9a-f]{24}$/i.test(raw)) {
       throw new BadRequestException('Invalid ID format');
     }
+    return raw;
   }
 }

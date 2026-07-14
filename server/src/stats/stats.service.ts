@@ -48,7 +48,7 @@ export class StatsService {
 
   async recordVisit(padletIdRaw: string, userId: string): Promise<{ visitId: string }> {
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
-    const userBigId = this.parseId(userId, 'משתמש לא נמצא');
+    const userId_ = this.parseId(userId, 'משתמש לא נמצא');
 
     const padlet = await this.prisma.padlet.findUnique({
       where: { padlet_id: padletId },
@@ -56,16 +56,15 @@ export class StatsService {
     });
     if (!padlet) throw new NotFoundException('הלוח לא נמצא');
 
-    // כל כניסה לדף הלוח נחשבת ביקור נפרד
     const visit = await this.prisma.padletVisit.create({
       data: {
         padlet_id: padletId,
-        user_id: userBigId,
+        user_id: userId_,
         visited_at: new Date(),
       },
     });
 
-    return { visitId: visit.visit_id.toString() };
+    return { visitId: visit.visit_id };
   }
 
   async updateVisitDuration(
@@ -74,10 +73,10 @@ export class StatsService {
     durationSec: number,
   ): Promise<void> {
     const visitId = this.parseId(visitIdRaw, 'הביקור לא נמצא');
-    const userBigId = this.parseId(userId, 'משתמש לא נמצא');
+    const userId_ = this.parseId(userId, 'משתמש לא נמצא');
 
     const visit = await this.prisma.padletVisit.findFirst({
-      where: { visit_id: visitId, user_id: userBigId },
+      where: { visit_id: visitId, user_id: userId_ },
     });
     if (!visit) throw new NotFoundException('הביקור לא נמצא');
 
@@ -88,11 +87,11 @@ export class StatsService {
   }
 
   async getStats(userId: string): Promise<StatsResponseDto> {
-    const userBigId = this.parseId(userId, 'משתמש לא נמצא');
+    const userId_ = this.parseId(userId, 'משתמש לא נמצא');
     const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
 
     const userPadlets = await this.prisma.padlet.findMany({
-      where: { user_id: userBigId },
+      where: { user_id: userId_ },
       select: { padlet_id: true },
     });
     const padletIds = userPadlets.map((p) => p.padlet_id);
@@ -100,7 +99,7 @@ export class StatsService {
 
     const [sharedWithMe, totalPosts] = await Promise.all([
       this.prisma.participant.count({
-        where: { user_id: userBigId, permission: { not: 'owner' } },
+        where: { user_id: userId_, permission: { not: 'owner' } },
       }),
       padletIds.length > 0
         ? this.prisma.post.count({ where: { padlet_id: { in: padletIds } } })
@@ -120,24 +119,10 @@ export class StatsService {
             select: { visited_at: true },
           })
         : Promise.resolve([]),
-      this.prisma.$queryRaw<MostVisitedRawRow[]>(Prisma.sql`
-        SELECT
-          p.padlet_id::text                           AS id,
-          p.title,
-          COUNT(v.visit_id)::int                      AS visits,
-          COUNT(DISTINCT v.user_id)::int              AS unique_visitors,
-          COALESCE(ROUND(AVG(v.duration_sec)), 0)::int AS avg_duration_sec,
-          COUNT(DISTINCT po.post_id)::int             AS posts_count
-        FROM "Padlet" p
-        LEFT JOIN "PadletVisit" v  ON v.padlet_id  = p.padlet_id
-        LEFT JOIN "Post"        po ON po.padlet_id = p.padlet_id
-        WHERE p.user_id = ${userBigId}
-        GROUP BY p.padlet_id, p.title
-        ORDER BY visits DESC, avg_duration_sec DESC, p.created_at DESC
-      `),
+      this.queryMostVisitedPadlets(userId_),
       this.prisma.padlet.groupBy({
         by: ['board_type'],
-        where: { user_id: userBigId },
+        where: { user_id: userId_ },
         _count: { board_type: true },
       }),
       padletIds.length > 0
@@ -172,38 +157,104 @@ export class StatsService {
   }
 
   async getMostVisitedPadlets(userId: string, from: Date, to: Date): Promise<MostVisitedPadlet[]> {
-    const userBigId = this.parseId(userId, 'משתמש לא נמצא');
+    const userId_ = this.parseId(userId, 'משתמש לא נמצא');
+    return this.queryMostVisitedPadlets(userId_, { from, to });
+  }
 
-    return this.prisma.$queryRaw<MostVisitedPadlet[]>(Prisma.sql`
-      SELECT
-        p.padlet_id::text                            AS id,
-        p.title,
-        COUNT(v.visit_id)::int                       AS visits,
-        COUNT(DISTINCT v.user_id)::int               AS unique_visitors,
-        COALESCE(ROUND(AVG(v.duration_sec)), 0)::int AS avg_duration_sec,
-        COUNT(DISTINCT po.post_id)::int              AS posts_count
-      FROM "Padlet" p
-      LEFT JOIN "PadletVisit" v
-        ON  v.padlet_id  = p.padlet_id
-        AND v.visited_at >= ${from}
-        AND v.visited_at <= ${to}
-      LEFT JOIN "Post" po ON po.padlet_id = p.padlet_id
-      WHERE p.user_id = ${userBigId}
-      GROUP BY p.padlet_id, p.title
-      ORDER BY visits DESC, avg_duration_sec DESC, p.created_at DESC
-    `);
+  /**
+   * Mongo equivalent of the old Postgres JOIN/GROUP BY query. Runs as a raw
+   * aggregation pipeline because it needs cross-collection counts/averages
+   * that Prisma's query builder can't express. `aggregateRaw` returns MongoDB
+   * extended JSON, so ObjectIds come back as `{ $oid: string }`.
+   */
+  private async queryMostVisitedPadlets(
+    userId: string,
+    dateRange?: { from: Date; to: Date },
+  ): Promise<MostVisitedPadlet[]> {
+    const visitMatch: unknown[] = [{ $eq: ['$padlet_id', '$$padletId'] }];
+    if (dateRange) {
+      visitMatch.push(
+        { $gte: ['$visited_at', { $date: dateRange.from.toISOString() }] },
+        { $lte: ['$visited_at', { $date: dateRange.to.toISOString() }] },
+      );
+    }
+
+    const rows = await this.prisma.padlet.aggregateRaw({
+      pipeline: [
+        { $match: { user_id: { $oid: userId } } },
+        {
+          $lookup: {
+            from: 'PadletVisit',
+            let: { padletId: '$_id' },
+            pipeline: [{ $match: { $expr: { $and: visitMatch } } }],
+            as: 'visits',
+          },
+        },
+        {
+          $lookup: {
+            from: 'Post',
+            localField: '_id',
+            foreignField: 'padlet_id',
+            as: 'posts',
+          },
+        },
+        {
+          $project: {
+            title: 1,
+            created_at: 1,
+            visits: { $size: '$visits' },
+            unique_visitors: {
+              $size: {
+                $setUnion: [
+                  {
+                    $filter: {
+                      input: '$visits.user_id',
+                      as: 'uid',
+                      cond: { $ne: ['$$uid', null] },
+                    },
+                  },
+                  [],
+                ],
+              },
+            },
+            avg_duration_sec: {
+              $ifNull: [{ $round: [{ $avg: '$visits.duration_sec' }, 0] }, 0],
+            },
+            posts_count: { $size: '$posts' },
+          },
+        },
+        { $sort: { visits: -1, avg_duration_sec: -1, created_at: -1 } },
+      ] as Prisma.InputJsonValue[],
+    });
+
+    return (rows as unknown as MostVisitedRawRow[]).map((row) => ({
+      id: this.extractOid(row._id),
+      title: row.title,
+      visits: row.visits,
+      unique_visitors: row.unique_visitors,
+      avg_duration_sec: row.avg_duration_sec,
+      posts_count: row.posts_count,
+    }));
+  }
+
+  private extractOid(value: unknown): string {
+    if (typeof value === 'string') return value;
+    if (value && typeof value === 'object' && '$oid' in value) {
+      return (value as { $oid: string }).$oid;
+    }
+    throw new Error('Expected ObjectId value from aggregateRaw result');
   }
 
   async getPadletVisits(padletIdRaw: string, userId: string): Promise<DayCount[]> {
     const padletId = this.parseId(padletIdRaw, 'הלוח לא נמצא');
-    const userBigId = this.parseId(userId, 'משתמש לא נמצא');
+    const userId_ = this.parseId(userId, 'משתמש לא נמצא');
 
     const padlet = await this.prisma.padlet.findFirst({
       where: {
         padlet_id: padletId,
         OR: [
-          { user_id: userBigId },
-          { participants: { some: { user_id: userBigId } } },
+          { user_id: userId_ },
+          { participants: { some: { user_id: userId_ } } },
         ],
       },
       select: { padlet_id: true },
@@ -260,17 +311,16 @@ export class StatsService {
       .sort((a, b) => b.count - a.count);
   }
 
-  private parseId(raw: string, errorMessage: string): bigint {
-    try {
-      return BigInt(raw);
-    } catch {
+  private parseId(raw: string, errorMessage: string): string {
+    if (!/^[0-9a-f]{24}$/i.test(raw)) {
       throw new NotFoundException(errorMessage);
     }
+    return raw;
   }
 }
 
 interface MostVisitedRawRow {
-  id: string;
+  _id: unknown;
   title: string;
   visits: number;
   unique_visitors: number;

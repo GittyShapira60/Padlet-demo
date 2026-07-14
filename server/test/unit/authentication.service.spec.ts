@@ -38,7 +38,7 @@ describe('AuthenticationService', () => {
       const passwordHash = await createPasswordHash(password);
 
       prisma.user.findUnique.mockResolvedValue({
-        id: 1n,
+        id: '1',
         username: 'alice',
         password_hash: passwordHash,
       });
@@ -64,7 +64,7 @@ describe('AuthenticationService', () => {
       const passwordHash = await createPasswordHash('real-password');
 
       prisma.user.findUnique.mockResolvedValue({
-        id: 1n,
+        id: '1',
         username: 'alice',
         password_hash: passwordHash,
       });
@@ -79,7 +79,7 @@ describe('AuthenticationService', () => {
     it('creates user and returns token when username is available', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
       prisma.user.create.mockResolvedValue({
-        id: 2n,
+        id: '2',
         username: 'bob',
       });
 
@@ -95,7 +95,7 @@ describe('AuthenticationService', () => {
 
     it('throws when username already exists', async () => {
       prisma.user.findUnique.mockResolvedValue({
-        id: 1n,
+        id: '1',
         username: 'alice',
         password_hash: 'hash',
       });

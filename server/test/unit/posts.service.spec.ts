@@ -7,13 +7,17 @@ import {
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PostsService } from '../../src/posts/posts.service';
 
+const USER_5 = '000000000000000000000005';
+const PADLET_10 = '000000000000000000000010';
+const POST_100 = '000000000000000000000100';
+
 function createPostRecord() {
   const now = new Date('2026-01-01T00:00:00.000Z');
 
   return {
-    post_id: 100n,
-    padlet_id: 10n,
-    user_id: 5n,
+    post_id: POST_100,
+    padlet_id: PADLET_10,
+    user_id: USER_5,
     content_kind: PostContentKind.none,
     post_type: 'text',
     title: null,
@@ -83,7 +87,7 @@ describe('PostsService', () => {
       const post = createPostRecord();
 
       padletAccess.assertCanCreatePost.mockResolvedValue({
-        padletId: 10n,
+        padletId: PADLET_10,
         boardType: PadletBoardType.grid,
         permission: PadletPermission.editor,
         defaultPermission: null,
@@ -104,18 +108,18 @@ describe('PostsService', () => {
       prisma.padlet.findUnique.mockResolvedValue(null);
       prisma.padlet.update.mockResolvedValue({});
 
-      const result = await service.createPost('5', 'alice', '10', {
+      const result = await service.createPost(USER_5, 'alice', PADLET_10, {
         content_kind: 'text',
         content: 'Hello',
       });
 
-      expect(padletAccess.assertCanCreatePost).toHaveBeenCalledWith(5n, 10n);
-      expect(result.id).toBe('100');
+      expect(padletAccess.assertCanCreatePost).toHaveBeenCalledWith(USER_5, PADLET_10);
+      expect(result.id).toBe(POST_100);
       expect(result.subject).toBe('Hello');
       expect(realtimeGateway.broadcastToPadlet).toHaveBeenCalledWith(
-        '10',
+        PADLET_10,
         'post:created',
-        expect.objectContaining({ id: '100' }),
+        expect.objectContaining({ id: POST_100 }),
       );
     });
 
@@ -125,7 +129,7 @@ describe('PostsService', () => {
       );
 
       await expect(
-        service.createPost('5', 'alice', '10', {
+        service.createPost(USER_5, 'alice', PADLET_10, {
           content_kind: 'text',
           content: 'Hello',
         }),
@@ -140,14 +144,14 @@ describe('PostsService', () => {
       const post = createPostRecord();
 
       padletAccess.assertCanView.mockResolvedValue({
-        padletId: 10n,
+        padletId: PADLET_10,
         boardType: PadletBoardType.grid,
         permission: PadletPermission.editor,
         defaultPermission: null,
         isOwner: true,
       });
       padletAccess.assertCanDeletePost.mockResolvedValue({
-        padletId: 10n,
+        padletId: PADLET_10,
         boardType: PadletBoardType.grid,
         permission: PadletPermission.editor,
         defaultPermission: null,
@@ -158,15 +162,15 @@ describe('PostsService', () => {
       prisma.post.findMany.mockResolvedValue([]);
       prisma.padlet.update.mockResolvedValue({});
 
-      const result = await service.deletePost('5', '10', '100');
+      const result = await service.deletePost(USER_5, PADLET_10, POST_100);
 
-      expect(padletAccess.assertCanDeletePost).toHaveBeenCalledWith(5n, 10n, 5n);
+      expect(padletAccess.assertCanDeletePost).toHaveBeenCalledWith(USER_5, PADLET_10, USER_5);
       expect(prisma.$transaction).toHaveBeenCalledOnce();
       expect(result).toEqual([]);
       expect(realtimeGateway.broadcastToPadlet).toHaveBeenCalledWith(
-        '10',
+        PADLET_10,
         'post:deleted',
-        { postId: '100' },
+        { postId: POST_100 },
       );
     });
 
@@ -174,7 +178,7 @@ describe('PostsService', () => {
       const post = createPostRecord();
 
       padletAccess.assertCanView.mockResolvedValue({
-        padletId: 10n,
+        padletId: PADLET_10,
         boardType: PadletBoardType.grid,
         permission: PadletPermission.viewer,
         defaultPermission: null,
@@ -185,7 +189,7 @@ describe('PostsService', () => {
         new ForbiddenException('אין הרשאה למחוק פוסט זה'),
       );
 
-      await expect(service.deletePost('5', '10', '100')).rejects.toThrow(
+      await expect(service.deletePost(USER_5, PADLET_10, POST_100)).rejects.toThrow(
         ForbiddenException,
       );
       expect(prisma.$transaction).not.toHaveBeenCalled();

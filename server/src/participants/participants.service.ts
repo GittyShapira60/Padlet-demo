@@ -111,8 +111,8 @@ export class ParticipantsService {
       padletId,
     });
 
-    this.realtimeGateway.emitToUser(inviteeId.toString(), 'padlet:shared', {
-      padletId: padletId.toString(),
+    this.realtimeGateway.emitToUser(inviteeId, 'padlet:shared', {
+      padletId,
     });
 
     return this.toParticipantResponse(invitee.id, participant);
@@ -161,8 +161,8 @@ export class ParticipantsService {
 
     await this.touchPadlet(padletId);
 
-    this.realtimeGateway.emitToUser(participantUserId.toString(), 'permission:changed', {
-      padletId: padletId.toString(),
+    this.realtimeGateway.emitToUser(participantUserId, 'permission:changed', {
+      padletId,
       permission: dto.permission,
     });
 
@@ -200,8 +200,8 @@ export class ParticipantsService {
       },
     });
 
-    this.realtimeGateway.emitToUser(participantUserId.toString(), 'padlet:removed', {
-      padletId: padletId.toString(),
+    this.realtimeGateway.emitToUser(participantUserId, 'padlet:removed', {
+      padletId,
     });
   }
 
@@ -252,17 +252,17 @@ export class ParticipantsService {
       },
     });
 
-    this.realtimeGateway.emitToUser(requesterId.toString(), 'padlet:removed', {
-      padletId: padletId.toString(),
+    this.realtimeGateway.emitToUser(requesterId, 'padlet:removed', {
+      padletId,
     });
   }
 
   private toParticipantResponse(
-    userId: bigint,
+    userId: string,
     participant: { user: { username: string }; permission: PadletPermission },
   ): ParticipantResponseDto {
     return {
-      id: userId.toString(),
+      id: userId,
       username: participant.user.username,
       permission: participant.permission,
     };
@@ -274,18 +274,17 @@ export class ParticipantsService {
     }
   }
 
-  private async touchPadlet(padletId: bigint): Promise<void> {
+  private async touchPadlet(padletId: string): Promise<void> {
     await this.prisma.padlet.update({
       where: { padlet_id: padletId },
       data: { updated_at: new Date() },
     });
   }
 
-  private parseId(raw: string, errorMessage: string): bigint {
-    try {
-      return BigInt(raw);
-    } catch {
+  private parseId(raw: string, errorMessage: string): string {
+    if (!/^[0-9a-f]{24}$/i.test(raw)) {
       throw new NotFoundException(errorMessage);
     }
+    return raw;
   }
 }

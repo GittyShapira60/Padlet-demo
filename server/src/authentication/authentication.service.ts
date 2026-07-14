@@ -102,19 +102,19 @@ export class AuthenticationService {
   }
 
   private buildAuthResponse(
-    userId: bigint,
+    userId: string,
     username: string,
   ): AuthResponseDto {
     const secret = this.configService.get<string>('JWT_SECRET', 'dev-secret');
     const expiresIn = this.configService.get<string>('JWT_EXPIRES_IN', '7d');
     const signOptions: SignOptions = { expiresIn: expiresIn as SignOptions['expiresIn'] };
 
-    const token = sign({ sub: userId.toString(), username }, secret, signOptions);
+    const token = sign({ sub: userId, username }, secret, signOptions);
 
     return {
       token,
       user: {
-        id: userId.toString(),
+        id: userId,
         username,
       },
     };

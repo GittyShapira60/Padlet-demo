@@ -1,22 +1,21 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: postgres:15-alpine
+  mongo:
+    image: mongo:7
     restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+    command: ["--replSet", "rs0", "--bind_ip_all"]
     ports:
-      - "5433:5432"
+      - "27018:27017"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - mongo_data:/data/db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --quiet --eval \"try { rs.status().members[0].stateStr === 'PRIMARY' ? quit(0) : quit(1) } catch (e) { rs.initiate(); quit(1) }\"",
+        ]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 20
 
   server:
     build: ./server
@@ -28,14 +27,14 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3000
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      DATABASE_URL: mongodb://mongo:27017/${MONGO_DB}?replicaSet=rs0
       CORS_ORIGIN: http://localhost:5173
       API_PREFIX: api
       SWAGGER_ENABLED: "true"
       JWT_SECRET: dev-padlet-secret
       JWT_EXPIRES_IN: 7d
     depends_on:
-      postgres:
+      mongo:
         condition: service_healthy
     healthcheck:
       test:
@@ -64,4 +63,4 @@ services:
     command: sh -c "npm install && npm run dev -- --host"
 
 volumes:
-  db_data:
+  mongo_data:

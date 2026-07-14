@@ -3,12 +3,15 @@ import { PadletBoardType } from '@prisma/client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PadletsService } from '../../src/padlets/padlets.service';
 
+const USER_5 = '000000000000000000000005';
+const PADLET_10 = '000000000000000000000010';
+
 function createPadletRecord() {
   const now = new Date('2026-01-01T00:00:00.000Z');
 
   return {
-    padlet_id: 10n,
-    user_id: 5n,
+    padlet_id: PADLET_10,
+    user_id: USER_5,
     board_type: PadletBoardType.grid,
     title: 'My Board',
     description: null,
@@ -63,14 +66,14 @@ describe('PadletsService', () => {
       const padlet = createPadletRecord();
       prisma.padlet.create.mockResolvedValue(padlet);
 
-      const result = await service.createPadlet('5', {
+      const result = await service.createPadlet(USER_5, {
         title: 'My Board',
         board_type: PadletBoardType.grid,
       });
 
       expect(prisma.padlet.create).toHaveBeenCalledOnce();
       expect(result.title).toBe('My Board');
-      expect(result.id).toBe('10');
+      expect(result.id).toBe(PADLET_10);
     });
 
     it('throws when user id is invalid', async () => {
@@ -87,17 +90,17 @@ describe('PadletsService', () => {
     it('deletes padlet when requester is owner', async () => {
       padletAccess.assertCanDeletePadlet.mockResolvedValue({
         isOwner: true,
-        padletId: 10n,
+        padletId: PADLET_10,
       });
 
-      await service.deletePadlet('5', '10');
+      await service.deletePadlet(USER_5, PADLET_10);
 
-      expect(padletAccess.assertCanDeletePadlet).toHaveBeenCalledWith(5n, 10n);
+      expect(padletAccess.assertCanDeletePadlet).toHaveBeenCalledWith(USER_5, PADLET_10);
       expect(prisma.padlet.delete).toHaveBeenCalledWith({
-        where: { padlet_id: 10n },
+        where: { padlet_id: PADLET_10 },
       });
       expect(realtimeGateway.broadcastToPadlet).toHaveBeenCalledWith(
-        '10',
+        PADLET_10,
         'padlet:deleted',
         {},
       );
@@ -108,7 +111,7 @@ describe('PadletsService', () => {
         new ForbiddenException('אין הרשאה למחוק את הלוח'),
       );
 
-      await expect(service.deletePadlet('5', '10')).rejects.toThrow(
+      await expect(service.deletePadlet(USER_5, PADLET_10)).rejects.toThrow(
         ForbiddenException,
       );
       expect(prisma.padlet.delete).not.toHaveBeenCalled();
@@ -122,7 +125,7 @@ describe('PadletsService', () => {
         .mockResolvedValueOnce([padlet])
         .mockResolvedValueOnce([]);
 
-      const result = await service.getBoards('5');
+      const result = await service.getBoards(USER_5);
 
       expect(result.mine).toHaveLength(1);
       expect(result.shared).toHaveLength(0);
