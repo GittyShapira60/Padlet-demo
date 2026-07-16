@@ -11,6 +11,7 @@ import { PostsModule } from './posts/posts.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ReactionModule } from './reaction/reaction.module';
 import { StatsModule } from './stats/stats.module';
+import { StorageModule } from './storage/storage.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -19,6 +20,7 @@ import { UsersModule } from './users/users.module';
       isGlobal: true,
     }),
     PrismaModule,
+    StorageModule,
     HealthModule,
     AuthenticationModule,
     CommentModule,

@@ -106,7 +106,7 @@ model Post {
 model PostAttachment {
   post_id         String             @id @map("_id") @db.ObjectId
   attachment_type PostAttachmentType
-  /// picture/file: base64 encoded; link: url+title; see SCHEMA.md
+  /// picture: public S3/MinIO URL (older rows may still hold a base64 data URI); file: base64 encoded; link: url+title; see SCHEMA.md
   attachment_data String
 
   post Post @relation(fields: [post_id], references: [post_id], onDelete: Cascade)

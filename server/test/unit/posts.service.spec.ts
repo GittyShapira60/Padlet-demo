@@ -70,6 +70,10 @@ describe('PostsService', () => {
     broadcastToPadlet: vi.fn(),
   };
 
+  const storageService = {
+    uploadImage: vi.fn(),
+  };
+
   let service: PostsService;
 
   beforeEach(() => {
@@ -79,6 +83,7 @@ describe('PostsService', () => {
       padletAccess as never,
       notificationService as never,
       realtimeGateway as never,
+      storageService as never,
     );
   });
 
