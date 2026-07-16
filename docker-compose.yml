@@ -2,6 +2,7 @@ services:
   mongo:
     image: mongo:7
     restart: always
+    hostname: mongo
     command: ["--replSet", "rs0", "--bind_ip_all"]
     ports:
       - "27018:27017"
@@ -11,8 +12,26 @@ services:
       test:
         [
           "CMD-SHELL",
-          "mongosh --quiet --eval \"try { rs.status().members[0].stateStr === 'PRIMARY' ? quit(0) : quit(1) } catch (e) { rs.initiate(); quit(1) }\"",
+          "mongosh --quiet --eval \"try { rs.status().members[0].stateStr === 'PRIMARY' ? quit(0) : quit(1) } catch (e) { rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'mongo:27017'}]}); quit(1) }\"",
         ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  minio:
+    image: minio/minio:latest
+    restart: always
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -33,8 +52,16 @@ services:
       SWAGGER_ENABLED: "true"
       JWT_SECRET: dev-padlet-secret
       JWT_EXPIRES_IN: 7d
+      S3_ENDPOINT: http://minio:9000
+      S3_PUBLIC_URL: http://localhost:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      S3_BUCKET: padlet-images
+      S3_REGION: us-east-1
     depends_on:
       mongo:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     healthcheck:
       test:
@@ -64,3 +91,4 @@ services:
 
 volumes:
   mongo_data:
+  minio_data:

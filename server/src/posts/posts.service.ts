@@ -16,6 +16,7 @@ import { RealtimeGateway } from '../gateway/realtime.gateway';
 import { NotificationService } from '../notification/notification.service';
 import { PadletAccessService } from '../padlet-access/padlet-access.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostContentInputDto } from './dto/post-content-input.dto';
 import { PostLayoutDto } from './dto/post-layout.dto';
@@ -83,6 +84,7 @@ export class PostsService {
     private readonly padletAccess: PadletAccessService,
     private readonly notificationService: NotificationService,
     private readonly realtimeGateway: RealtimeGateway,
+    private readonly storageService: StorageService,
   ) {}
 
   async createPost(
@@ -102,6 +104,11 @@ export class PostsService {
     const dataLayout =
       access.boardType === PadletBoardType.free_wall
         ? await this.buildFreeWallOrderForPadlet(padletId)
+        : null;
+
+    const imageUrl =
+      dto.content_kind === 'image' && dto.image_data
+        ? await this.storageService.uploadImage(dto.image_data)
         : null;
 
     const post = await this.prisma.$transaction(async (tx) => {
@@ -131,12 +138,12 @@ export class PostsService {
         },
       });
 
-      if (dto.content_kind === 'image' && dto.image_data) {
+      if (imageUrl) {
         await tx.postAttachment.create({
           data: {
             post_id: created.post_id,
             attachment_type: 'picture',
-            attachment_data: dto.image_data,
+            attachment_data: imageUrl,
           },
         });
       }
@@ -252,14 +259,15 @@ export class PostsService {
     });
 
     if (dto.content_kind === 'image' && dto.image_data) {
+      const imageUrl = await this.storageService.uploadImage(dto.image_data);
       await this.prisma.postAttachment.upsert({
         where: { post_id: postId },
         create: {
           post_id: postId,
           attachment_type: 'picture',
-          attachment_data: dto.image_data,
+          attachment_data: imageUrl,
         },
-        update: { attachment_data: dto.image_data },
+        update: { attachment_data: imageUrl },
       });
     }
 

@@ -51,6 +51,15 @@ Variables are read from `server/.env` via `@nestjs/config` (see [`.env.example`]
 | `CORS_ORIGIN` | Allowed frontend origin (default `http://localhost:5173`) |
 | `API_PREFIX` | Route prefix (default `api`) |
 | `SWAGGER_ENABLED` | `true` / `false` |
+| `S3_ENDPOINT` | S3-compatible API endpoint the server writes to (MinIO locally) |
+| `S3_PUBLIC_URL` | Base URL used to build the links returned to the client — differs from `S3_ENDPOINT` when the server reaches storage over an internal Docker hostname but the browser needs a host-reachable one |
+| `S3_ACCESS_KEY` / `S3_SECRET_KEY` | Credentials for the S3-compatible endpoint |
+| `S3_BUCKET` | Bucket for uploaded post images (auto-created on startup, set public-read) |
+| `S3_REGION` | Required by the AWS SDK; MinIO ignores the value |
+
+## Image storage
+
+Post images are uploaded to an S3-compatible bucket (`StorageService`, `src/storage/`) instead of being stored inline. The client still sends/receives a plain base64 data URI or URL — the server does the S3 upload and stores the resulting public URL in `PostAttachment.attachment_data`. Locally this is MinIO (see root `docker-compose.yml`); swap `S3_ENDPOINT`/credentials to point at real AWS S3 without code changes.
 
 ## Data access
 

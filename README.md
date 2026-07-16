@@ -1,15 +1,15 @@
 # Padlet-demo
 
-Monorepo: **client** (React) + **server** (NestJS). Optional: **Docker** for mongo + server + client.
+Monorepo: **client** (React) + **server** (NestJS). Optional: **Docker** for mongo + minio + server + client.
 
 | Directory | Stack |
 |-----------|-------|
 | [`client/`](client/) | React, Vite, TypeScript |
-| [`server/`](server/) | NestJS, Prisma, MongoDB |
+| [`server/`](server/) | NestJS, Prisma, MongoDB, S3-compatible storage (MinIO) for uploaded images |
 
 ## Quick start (local)
 
-**Prerequisites:** Node.js 20+, npm, MongoDB (running as a single-node replica set — required for transactions, e.g. `mongod --replSet rs0` then `mongosh --eval "rs.initiate()"` once).
+**Prerequisites:** Node.js 20+, npm, MongoDB (running as a single-node replica set — required for transactions, e.g. `mongod --replSet rs0` then `mongosh --eval "rs.initiate()"` once), and an S3-compatible endpoint (MinIO locally — see [`server/README.md`](server/README.md) for env vars).
 
 ```bash
 # Server
@@ -48,6 +48,8 @@ docker compose -f docker-compose up --build
 | Health | http://localhost:3001/api/health |
 | Swagger | http://localhost:3001/api/docs |
 | MongoDB (host) | `localhost:27018` |
+| MinIO S3 API | http://localhost:9000 |
+| MinIO console | http://localhost:9001 |
 
 For Docker, set in `client/.env`:
 
@@ -61,8 +63,8 @@ VITE_API_URL=http://localhost:3001/api
 Padlet-demo/
 ├── client/           # Frontend — see client/README.md
 ├── server/           # Backend — see server/README.md
-├── docker-compose    # mongo + server + client
-└── .env              # MONGO_DB (Docker only)
+├── docker-compose    # mongo + minio + server + client
+└── .env              # MONGO_DB, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD (Docker only)
 ```
 
 ## Where to add code
